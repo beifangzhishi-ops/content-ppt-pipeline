@@ -104,13 +104,6 @@ ChatGPT ZIP 上传和 repo marketplace 是两种不同分发物：
 
 不同 ChatGPT surface 对 repo marketplace 的支持可能不同。发布版本应在这里记录实际验证过的客户端。
 
-### 本地测试
-
-在本仓库根目录下，可直接把本地目录作为 marketplace source：
-
-    codex plugin marketplace add .
-
-修改插件后刷新 marketplace，并按客户端要求重新启动/刷新插件目录。
 
 ## CCM 依赖说明
 
@@ -152,44 +145,4 @@ Skill 会根据当前请求和当前工件判断正在执行的动作，只加�
 
 当前为 0.1.0 初始迁移版本。
 
-## 本机 Codex 安装验证（开发用途）
-
-本项目已在 Windows 上通过 Codex CLI 从当前正式源码目录直接注册并安装，不需要复制源码到其它插件目录。
-
-当前本地 marketplace 名称为 `content-ppt-pipeline-repo`，插件选择器为 `content-ppt-pipeline@content-ppt-pipeline-repo`。
-
-### 首次注册与安装
-
-在正式源码目录存在的前提下，先注册本地 marketplace：
-
-```powershell
-codex plugin marketplace add C:\Users\noha\Documents\AAAVitalFile\ppt-pipeline-plugin
-```
-
-然后安装插件：
-
-```powershell
-codex plugin add content-ppt-pipeline@content-ppt-pipeline-repo
-```
-
-安装后 Codex 会把一个运行副本写入自己的插件 cache；正式源码仍只维护本仓库这一份。
-
-### 每次源码更新后的刷新
-
-修改 `SKILL.md`、references、README、`plugin.json` 等插件源码后，需要再次执行：
-
-```powershell
-codex plugin add content-ppt-pipeline@content-ppt-pipeline-repo
-```
-
-已实机验证：即使版本号仍是 `0.1.0`，重复执行这条命令也会重新复制当前正式源码并刷新已安装 cache，不需要先 `remove`。
-
-刷新后重新打开/重启 ChatGPT Desktop，再用新会话验证最新插件行为。
-
-注意：
-
-- `codex plugin marketplace upgrade` 只用于刷新 Git marketplace snapshot，不是本地目录插件的更新命令。
-- 本地开发更新时，使用上面的 `codex plugin add ...` 重新刷新安装副本。
-- `plugin.json` 和 `.agents/plugins/marketplace.json` 必须保持 UTF-8 无 BOM；当前 Codex CLI 会拒绝带 BOM 的 marketplace JSON。
-
-这套 Codex CLI 流程用于本地开发和验证；面向用户的默认交付仍是“完成更新 -> 打 ZIP -> 通过 CCM `send_file` 发送 -> 在 ChatGPT 上传 ZIP”。
+当前主交付路线已经统一为：源码更新 -> 运行打包脚本 -> 通过 CCM send_file 发送 ZIP -> 在 ChatGPT 上传 ZIP。Codex 本地 cache 安装/刷新不再作为维护或交付流程。

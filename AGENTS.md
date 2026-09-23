@@ -80,6 +80,7 @@ Mode 名称统一使用：
 - `plugin.json` 和 `.agents/plugins/marketplace.json` 必须保存为 UTF-8 **无 BOM**；当前 Codex CLI 的 marketplace JSON 解析会拒绝 UTF-8 BOM。
 - 面向当前 ChatGPT “新插件 -> 上传 ZIP”界面的交付包默认使用最严格兼容布局：ZIP 根目录直接放 `plugin.json` + `skills/`，不套外层插件目录，也不包含 repo marketplace 的 `.agents/plugins/marketplace.json`、README 或 AGENTS。
 - 生成 ChatGPT 上传包时优先运行 scripts/build-chatgpt-zip.ps1，不要手工选择文件打包；脚本输出目录 dist/ 不进入 Git。
+- 不再使用 Codex local cache 安装/刷新作为发布、交付或验收路径；标准交付只走 ChatGPT ZIP。GitHub repo marketplace 仅作为可选分发渠道。
 
 ## Versioning
 
