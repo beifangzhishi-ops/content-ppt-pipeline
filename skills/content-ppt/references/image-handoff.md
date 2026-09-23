@@ -69,6 +69,22 @@ Include, as applicable:
 
 The prompt should tell Imagegen what to produce, not merely describe the source spec abstractly.
 
+Self-contained is an internal quality requirement, not prompt filler. Do not clutter the generation prompt with pipeline meta-language such as “this is a revision,” “this prompt is self-contained,” or “do not rely on previous chat” unless that instruction materially changes the expected output.
+
+Keep prohibitions focused on high-value failure prevention rather than accumulating defensive wording that competes with the actual slide task.
+
+### Image-role boundary
+
+Do not use “looks photorealistic” as the prohibition criterion.
+
+Classify each requested visual:
+
+- **Evidence / project-specific factual visual**: real experiment, apparatus, measurement, result, site, or specific factual object. Must use traceable real material or faithful reconstruction from real data; do not ask Imagegen to fabricate it.
+- **Conceptual scientific illustration**: mechanism/process/structure explanation. May be generated, including realistic rendering, provided it is not presented as an actual project record or measurement.
+- **Application / scene-setting illustration**: background/motivation/engineering application context. May be generated in a photorealistic style when it does not claim to show a specific real project/site or quantitative result.
+
+Write the prompt according to the image's role, not according to a blanket ban on realistic appearance.
+
 ## 5. Fresh-chat workflow
 
 For each slide generation:
@@ -86,10 +102,16 @@ Fresh chats reduce accidental style/content leakage between slides.
 When a returned page is rejected:
 
 - identify the minimum material defects;
-- update the canonical spec/prompt accordingly;
+- update the canonical spec accordingly;
 - keep accepted content stable;
-- resend reference images only when the new generation needs them;
+- deliver a new complete copy-ready prompt for every regeneration; do not give only delta instructions or “common prompt + patch”;
+- explicitly preserve already accepted formulas, relationships, layout constraints, and asset roles so fixing one defect does not regress another;
+- reassess whether references are actually needed for the new generation rather than resending them mechanically;
 - if references are required again, execute the full atomic handoff gate again.
+
+The rejected generated page may be inspected for diagnosis, but do not automatically reuse a structurally or scientifically wrong rejected page as an Imagegen reference. Prefer inspected real scientific/data/experimental assets or another stable visual reference.
+
+Reuse the rejected page as a reference only when preserving an already accepted visual property materially helps and the risk of propagating the defect is low.
 
 Do not push an assessable accept/regenerate decision back to the user. The PPT workflow should make the decision and give the next executable package.
 

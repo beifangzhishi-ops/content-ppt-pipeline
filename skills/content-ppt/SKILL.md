@@ -11,7 +11,7 @@ Explicit user instructions for the current task take priority over this workflow
 
 ## Production modes
 
-- Imagegen-assisted: Imagegen may be used for slide visuals or page generation. Generated pages are reviewed one by one before acceptance.
+- Imagegen-assisted: Imagegen may be used for slide visuals or page generation. Per-slide review may happen opportunistically during production; the mandatory acceptance gate is the whole-deck user review.
 - Native-editable: final delivery must be natively editable PowerPoint with no Imagegen pixel/generation residue. Use real source images and data-driven charts where appropriate.
 
 ## Global invariants
@@ -47,7 +47,7 @@ Authority: references/image-handoff.md, plus workflow context when needed.
 
 ### Returned-slide review
 
-Review a page returned by the user against the canonical production spec and directly decide accept vs regenerate. Do not push the decision back to the user when the defect is assessable.
+Review a page returned by the user against the canonical production spec and directly decide accept vs regenerate when the user has supplied a page for review. Do not push an assessable decision back to the user.
 
 Authority: references/workflow.md. If regeneration is required, the next action also needs references/image-handoff.md.
 
@@ -74,6 +74,18 @@ Authority: references/ppt-authoring.md. Add references/image-handoff.md only if 
 Review the complete candidate deck for story, terminology, facts, equations, numbers, titles, conclusions, density, images, duplicates, missing content, and mode-specific constraints; then run the mandatory user whole-deck review gate.
 
 Authority: references/workflow.md. Load technique references only for repairs actually required.
+
+### Post-generation whole-deck repair
+
+Use this action when a complete candidate deck already exists and the user identifies one or more issues during or after whole-deck review.
+
+Do not restart the full pipeline by default. Triage the affected slides, preserve accepted content, reconstruct stale/missing slide specs when needed, and repair only the affected scope plus real dependencies.
+
+Authority:
+
+- revision triage, scope, dependencies, and whole-deck follow-up: references/workflow.md;
+- regenerated pages and reference handoff: references/image-handoff.md;
+- editable PowerPoint reconstruction, native objects, equations, overlays, and compatibility validation: references/ppt-authoring.md.
 
 ## Reference availability
 
