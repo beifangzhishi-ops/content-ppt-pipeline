@@ -1,0 +1,22 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "content-ppt-pipeline",
+  "version": "0.1.0",
+  "description": "A content-first PowerPoint workflow for research, courses, engineering reports, technical briefings, and other evidence-heavy decks.",
+  "keywords": ["powerpoint", "presentation", "research", "course", "engineering", "technical-report", "content-heavy", "evidence"],
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "Content PPT Pipeline",
+        "shortDescription": "Content-first workflow for evidence-heavy PowerPoint decks.",
+        "longDescription": "Research sources, design the story and layout, build slide production specs, review generated pages, create editable PowerPoint files, and run whole-deck QA.",
+        "category": "Productivity",
+        "capabilities": ["Read", "Write"],
+        "defaultPrompt": [
+          "Use Content PPT Pipeline to turn my material into a content-heavy presentation.",
+          "Use Content PPT Pipeline to review and continue this technical PowerPoint project."
+        ]
+      }
+    }
+  }
+}

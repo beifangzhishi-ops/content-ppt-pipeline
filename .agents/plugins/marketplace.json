@@ -1,0 +1,20 @@
+{
+  "name": "content-ppt-pipeline-repo",
+  "interface": {
+    "displayName": "Content PPT Pipeline"
+  },
+  "plugins": [
+    {
+      "name": "content-ppt-pipeline",
+      "source": {
+        "source": "local",
+        "path": "./"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}
