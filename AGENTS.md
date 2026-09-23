@@ -14,6 +14,8 @@
 - skills/content-ppt/references/ppt-authoring.md：可编辑 PowerPoint 制作技巧 authority。
 - README.md：中文用户文档。
 
+An individual PPT project's README/protocol is a runtime project overlay, not a second copy of the plugin's global workflow authority. Current user instructions override that project overlay; the project overlay then supplies durable project-specific rules and context on top of the reusable skill defaults.
+
 不要把详细 CCM 文件传输步骤复制到 workflow.md；不要把 PPT 原生对象实现细节复制到 image-handoff.md。
 
 ## Scope
@@ -26,7 +28,7 @@
 
 动作是 SKILL.md 中的分类法，不是持久状态。
 
-不要创建 ppt_pipeline_state.md、operation 状态文件或其它运行状态镜像。
+不要创建独立运行状态镜像。若项目确实需要跨会话保存当前生成/审核位置，写入项目 README 的当前状态区并覆盖当前值，不另建状态文件。
 
 每轮根据最新用户要求和当前工件判断动作。一个动作可以加载多个 references，同一个 reference 可以被多个动作复用。
 
@@ -56,6 +58,14 @@ reference 可以保持稳定标题、版本或边界 marker 作为辅助，但�
 5. 检查 marketplace / manifest metadata 是否需要同步。
 6. 搜索被新结论替代的旧术语和旧规则，删除或改写，不要并列保留历史方案。
 
+对持续项目还应保持以下边界：
+
+- 长期、跨页规则和来源口径写项目 README/protocol；
+- 单页反馈和生成约束写回该页 canonical spec；
+- 若项目维护当前 prompt 派生文件，canonical 修改后同轮同步覆盖；
+- README 不记录逐页踩坑流水账；
+- 项目文本写入后注意 UTF-8 与非 ASCII 可读性。
+
 Mode 名称统一使用：
 
 - Imagegen-assisted
@@ -72,10 +82,12 @@ Mode 名称统一使用：
 - README 安装步骤与当前 OpenAI repo marketplace 文档一致；
 - SKILL.md 足够短，不塞入完整 workflow；
 - 三个 references 没有职责漂移；
-- handoff 仍要求实际查看参考图、实际发送文件、同轮完整 prompt；
+- handoff 仍要求实际查看参考图，并满足所选 delivery surface：聊天交付时实际发送文件并同轮给完整 prompt；本地交付时文件与当前 prompt 必须实际存在于约定位置；
+- GPT ImageGen 术语仍明确指 GPT / ChatGPT 原生图像生成，并推荐 `@图像生成` 作为可覆盖的 handoff 首行前缀；
 - Native-editable 仍要求最终零 Imagegen 残留；
 - authority-availability 仍是“优先复用，明确不足才重读”；
 - source / image / data 不得凭文件名或搜索摘要臆测；
+- 持续项目仍遵守“项目 README/protocol + canonical 文件作为 durable context；反馈先落盘再重新交付；不另建运行状态文件”；
 - whole-deck final review gate 没有被删掉。
 - `plugin.json` 和 `.agents/plugins/marketplace.json` 必须保存为 UTF-8 **无 BOM**；当前 Codex CLI 的 marketplace JSON 解析会拒绝 UTF-8 BOM。
 - 面向当前 ChatGPT “新插件 -> 上传 ZIP”界面的交付包默认使用最严格兼容布局：ZIP 根目录直接放 `plugin.json` + `skills/`，不套外层插件目录，也不包含 repo marketplace 的 `.agents/plugins/marketplace.json`、README 或 AGENTS。

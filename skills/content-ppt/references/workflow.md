@@ -10,10 +10,16 @@ Determine the presentation goal, audience, evidence base, desired length, availa
 
 Use one of two production modes:
 
-- Imagegen-assisted: Imagegen may participate in page visual production. Per-slide review is optional/opportunistic; the mandatory acceptance gate is the user whole-deck review.
+- Imagegen-assisted: GPT / ChatGPT native image generation may participate in page visual production. In this skill, "Imagegen" refers specifically to that native GPT / ChatGPT capability, not to arbitrary third-party image-generation providers. Per-slide review is optional/opportunistic; the mandatory acceptance gate is the user whole-deck review.
 - Native-editable: final PowerPoint must contain no Imagegen pixel/generation residue; final content is rebuilt from native PowerPoint objects, real source images, and data-derived charts.
 
-Do not create a persistent mode/stage state file. The current mode and stage should be inferable from the current task and artifacts.
+Do not create a separate persistent mode/stage state file. The current mode and action should be inferable from the current request, project README/protocol, canonical files, and current artifacts. If an existing project intentionally keeps cross-session current generation/review position, maintain those current values in the project's README current-status section rather than creating another state file.
+
+For an existing project, use this precedence unless the user explicitly says otherwise:
+
+1. the user's latest explicit instruction;
+2. the project's explicit README/protocol and canonical project files;
+3. this skill's reusable defaults.
 
 ## 2. Source understanding
 
@@ -40,6 +46,21 @@ Before deciding whether to find a real image, rebuild a figure, or generate a vi
 Photorealism itself is not the deciding factor. The deciding factor is whether the image is being used as evidence or as illustration.
 
 If a slide discusses a specific named plant, facility, experiment, or case and the identity of that object is part of the factual claim, prefer a real source image rather than a generated lookalike.
+
+### Project-local context and source registry
+
+For a long-running PPT project, treat project files as durable context rather than relying only on chat history.
+
+- Keep long-lived, cross-slide project rules, source conventions, workflow choices, and current project status in the project's existing README/protocol when that is how the project is organized.
+- Keep slide-specific content, layout, asset roles, generation constraints, and slide feedback in that slide's canonical production spec.
+- When user feedback changes a slide, write the change into the appropriate project file first, then regenerate the prompt/handoff from the updated canonical content. Do not maintain a separate chat-only version.
+- Do not turn the project README into a chronological list of per-slide mistakes or retries. Keep it as durable project description, reusable rules, source registry, and concise current status.
+- When a materially important new paper, deck, dataset, experiment record, figure source, or asset directory is discovered, register it in the project's existing source index/README when that information will matter across later slides. Record enough provenance to identify the source, its role, version/date when available, review status, and whether any working copy was made.
+- A readable source location does not imply permission to modify it. If a source tree is designated read-only, keep canonical files and derived work in the working project and leave the source untouched.
+- Do not copy a large source tree merely for convenience when a stable read-only original can remain the source of truth; copy only the production subset that is actually needed.
+- Describe required capabilities, not one hard-coded OS utility or MCP implementation. Use the available equivalent tool that satisfies the workflow gate.
+
+Project text files such as README, canonical Markdown, prompt text, and indexes should be UTF-8. After cross-tool or Windows writes involving non-ASCII text, actually read back a sample and reject corrupted text such as `????`, replacement characters, or mojibake before continuing delivery.
 
 ## 3. Visual and information-density calibration
 
@@ -118,6 +139,18 @@ When using Imagegen-assisted mode, production may proceed slide by slide, but us
 
 Formal handoff mechanics are owned by image-handoff.md.
 
+Page generation may be pipelined when the project benefits from it: hand off one complete slide at a time, allow different slides to generate concurrently in separate fresh GPT ImageGen chats, and review returned pages as they become available. Parallel generation does not require later pages to wait for the prior page's render.
+
+If the project explicitly uses ordered slide review, formal review must still advance in page order. A later slide being available does not permit skipping an earlier unresolved slide. Regeneration of an earlier slide may coexist with later slides being generated, but the ordered review position does not jump over the unresolved page.
+
+For projects that need cross-session continuity, the README current-status section may keep concise current values such as the furthest slide already handed off and the last slide consecutively accepted. Overwrite those current values; do not append a page-by-page activity log and do not create a separate runtime-state file.
+
+Treat common continuation requests as distinct actions:
+
+- A "next slide" request advances the next planned handoff from the current canonical project files. Do not implicitly scan generated outputs or start returned-page review unless the user or project protocol asks for that in the same turn.
+- A "check status", "review", or equivalent request may inspect the project's explicitly designated generated-output source, then review from the next unresolved slide according to the project's review policy. Do not guess another folder/source, and do not scan ChatGPT Library or another store merely because it was used by a different project.
+- When the project protocol defines status checking as a closed loop, finish the review decision and the resulting next executable handoff in the same turn instead of reporting status and then asking whether to continue.
+
 When the user returns a generated page:
 
 1. Actually inspect the returned image.
@@ -128,6 +161,8 @@ When the user returns a generated page:
    - regenerate when a material defect remains.
 5. If regenerating, update the canonical spec/prompt only where needed, then use the Imagegen handoff workflow again.
 6. If accepted, immediately move to the next slide handoff unless the user has changed the task.
+
+If a returned page is accepted and creates no new slide rule, no new project-wide rule, and no source/status change, do not modify the canonical spec or README merely to leave an audit trail.
 
 If no per-slide review is requested, continue production and rely on whole-deck review as the mandatory user gate.
 

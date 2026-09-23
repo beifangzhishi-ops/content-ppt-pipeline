@@ -11,21 +11,27 @@ Explicit user instructions for the current task take priority over this workflow
 
 ## Production modes
 
-- Imagegen-assisted: Imagegen may be used for slide visuals or page generation. Per-slide review may happen opportunistically during production; the mandatory acceptance gate is the whole-deck user review.
+- Imagegen-assisted: GPT / ChatGPT native image generation ("Imagegen" in this skill) may be used for slide visuals or page generation. This term does not mean arbitrary third-party image-generation providers. Per-slide review may happen opportunistically during production; the mandatory acceptance gate is the whole-deck user review.
 - Native-editable: final delivery must be natively editable PowerPoint with no Imagegen pixel/generation residue. Use real source images and data-driven charts where appropriate.
 
 ## Global invariants
 
 1. Maintain production files in the ChatGPT/agent cloud workspace by default. Do not create the PPT project on the user's local machine merely because a connected tool can access it, unless the user explicitly requests a local path.
 2. Never infer source/image contents from filenames, search snippets, or directory listings. Anything used, recommended, or sent as a reference must be actually opened/read/viewed as appropriate.
-3. If an Imagegen handoff needs reference images, paths and filenames are not delivery. The files must be actually sent to the current chat, and the complete self-contained prompt must be delivered in the same response.
+3. If an Imagegen handoff needs reference images, paths and filenames alone are not delivery. On chat-file delivery, the files must be actually sent to the current chat and the complete self-contained prompt delivered in the same response. On an explicitly selected local-file delivery surface, the required files and current prompt must instead be actually present and usable in the agreed project location.
 4. Native-editable output uses editable PowerPoint text, equations, shapes, lines, arrows, charts, and structures wherever practical. Do not rasterize equations merely for convenience.
 5. Do not silently mark a required workflow gate complete when the required capability is unavailable.
-6. Do not persist Pipeline runtime state in a separate state file. Infer the current action from the current user request and current artifact.
+6. Do not create a separate Pipeline runtime-state file. For an existing project, treat its explicit README/protocol and canonical project files as durable project context. If the project needs cross-session continuity, current generation/review position may be kept in the README's current-status section rather than in a separate state file.
 
 ## Current-action routing
 
 At the start of each turn, identify the primary action from the latest user request and current artifact. If the turn contains multiple actions, use all references actually required. Do not preload every technique just because the project is in a broad production stage.
+
+### Project continuation / status control
+
+Resume an existing PPT project, apply its project-level README/protocol, determine the current slide/action, handle "next slide" versus explicit status/review requests, and keep canonical project files synchronized with user feedback.
+
+Authority: references/workflow.md. Add references/image-handoff.md when the turn also performs GPT ImageGen handoff or changes the delivery surface.
 
 ### Content / evidence review
 
