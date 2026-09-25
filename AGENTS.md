@@ -4,100 +4,202 @@
 
 ## Authority hierarchy
 
-本插件只有一套当前有效的 workflow authority。不要在多个文件中长期保留互相冲突的旧版本规则。
+本插件只有一套当前有效 workflow authority。被新规则替代的旧流程必须删除或改写，不保留历史兼容分支、deprecated 别名或防御性旧说明。
 
-- plugin.json：包身份与 OpenAI 安装界面 metadata。
-- .agents/plugins/marketplace.json：repo marketplace 发现/安装配置。
-- skills/content-ppt/SKILL.md：发现触发、常驻动作语义、动作边界、动作 -> reference 路由、少量全局硬约束。
-- skills/content-ppt/references/workflow.md：业务流程 authority。
-- skills/content-ppt/references/image-handoff.md：图片检查与 Imagegen handoff 技巧 authority。
-- skills/content-ppt/references/ppt-authoring.md：可编辑 PowerPoint 制作技巧 authority。
+- plugin.json：插件身份与 OpenAI 安装 metadata；
+- .agents/plugins/marketplace.json：repo marketplace 发现/安装配置；
+- skills/content-ppt/SKILL.md：触发、动作语义、动作边界、动作到 reference 路由、少量全局硬约束；
+- skills/content-ppt/references/workflow.md：业务流程 authority；
+- skills/content-ppt/references/image-handoff.md：图片检查、生成材料包、交付面和 Imagegen 返工 mechanics；
+- skills/content-ppt/references/ppt-authoring.md：可编辑 PowerPoint 制作与验证 authority；
 - README.md：中文用户文档。
 
-An individual PPT project's README/protocol is a runtime project overlay, not a second copy of the plugin's global workflow authority. Current user instructions override that project overlay; the project overlay then supplies durable project-specific rules and context on top of the reusable skill defaults.
+单个 PPT 项目的 README/protocol 是项目 overlay，不是第二套插件 workflow。优先级为：
 
-不要把详细 CCM 文件传输步骤复制到 workflow.md；不要把 PPT 原生对象实现细节复制到 image-handoff.md。
+1. 用户当前明确指令；
+2. 项目 README/protocol + canonical 文件；
+3. 本插件通用默认。
 
 ## Scope
 
-插件定位是 content-first / evidence-heavy PPT workflow，覆盖科研、课程、工程、技术、项目、设计评审等。
+插件定位为 content-first / evidence-heavy PPT workflow，覆盖科研、课程、工程、技术、项目、设计评审等。
 
-不要把 skill description 扩大成“所有 PPT 请求都必须触发”。纯品牌、营销、海报式视觉美化不是主要目标。
+不要把触发范围扩大成所有 PPT 请求。纯品牌、营销、海报式视觉美化不是主要目标。
 
-## Action routing
+## 当前生产模型
 
-动作是 SKILL.md 中的分类法，不是持久状态。
+### 开始生成
 
-不要创建独立运行状态镜像。若项目确实需要跨会话保存当前生成/审核位置，写入项目 README 的当前状态区并覆盖当前值，不另建状态文件。
+所选页面范围具备生成条件后，默认一次性准备并交付完整生成材料包。
 
-每轮根据最新用户要求和当前工件判断动作。一个动作可以加载多个 references，同一个 reference 可以被多个动作复用。
+正常用户生成包只能包含：
+
+- 每页一个完整当前 TXT 提示词；
+- 提示词实际需要的参考图片。
+
+canonical Markdown 是内部 authority，不进入正常用户生成包，除非用户明确请求项目源文件。
+
+默认把整包物化为一个经过校验的 ZIP，并完成真实交付。聊天交付使用 CCM send_file 或等价能力；夸克移动端流程上传同一个 ZIP。只生成本地 ZIP 不算完成交付。
+
+### Imagegen 参考图
+
+Imagegen 参考图只能使用实际图像格式，例如 PNG、JPG/JPEG、WebP。
+
+PDF 不得直接交给 Imagegen。
+
+PDF 来源必须先：
+
+1. 提取实际需要的页/图；
+2. 转换成图像；
+3. 实际目视核对；
+4. 检查内容、裁切、分辨率、可读性和科研含义；
+5. 更新 canonical 和 prompt 中的文件名；
+6. 再进入生成包。
+
+### 可选夸克移动端交付
+
+当 CCM + 夸克能力可用时，可推荐：
+
+- TXT + 图片打 ZIP；
+- CCM 上传夸克；
+- 用户在夸克解压；
+- 图片直接下载；
+- TXT 打开后点右上角进入文档模式；
+- 全选复制提示词；
+- 到新的 GPT ImageGen 会话粘贴并上传该页图片。
+
+这是可选便利方案，不是插件硬依赖。
+
+## 持续项目状态
+
+不要创建独立运行状态文件。
+
+项目需要跨会话保存生产状态时，只允许维护两个当前值：
+
+- 已生成进度；
+- 连续已通过审核进度。
+
+生产状态必须严格只有这两个值。生成物中间缺页由实际产物判断，不额外维护第三套交付进度或发送队列。
+
+## 状态检查与审核
+
+状态检查必须：
+
+1. 读取项目明确指定的生成物来源；
+2. 判断实际已生成页与缺页；
+3. 从下一个未解决页按项目审核规则审核；
+4. 更新已生成进度；
+5. 更新连续已通过审核进度；
+6. 报告未生成页和返工页。
+
+状态检查或页面通过审核后，不自动继续发送新的页面材料。
+
+只有以下情况重新交付材料：
+
+- 用户明确要求；
+- 返工需要；
+- canonical 或素材发生变化；
+- 已交付包缺失/损坏；
+- delivery surface 发生变化；
+- 项目协议明确要求。
+
+如果页面历史上已经通过，但正式产物当前无法定位，记录为产物可用性问题；不要用 canonical 替代成品，也不要无依据撤销历史审核结论。
+
+## Canonical discipline
+
+- 长期、跨页规则和来源口径写项目 README/protocol；
+- 单页内容、布局、素材角色和返修约束写对应 canonical spec；
+- 用户反馈先写 canonical；
+- 如果项目维护当前 TXT prompt，canonical 修改后同轮同步覆盖；
+- 不保留 v2/final/revised 等平行 prompt 分叉，除非用户明确要求历史版本；
+- README 不记录逐页踩坑流水账。
 
 ## Reference availability
 
-不要为了验证 reference 还在不在上下文而主动重读。
+不要为了证明 reference 仍在上下文而机械重读。
 
-优先复用当前已经可直接执行的 authority。只有出现具体不足信号时才重读：
+只有出现具体不足时才重读，例如：
 
-- 当前只剩摘要/转述；
+- 当前只剩摘要或转述；
 - 上次读取明确被截断；
 - 当前动作需要的关键规则无法恢复；
-- 可用规则明显部分或互相冲突。
-
-“不确定是否逐字和源文件一致”不是重读理由。
-
-reference 可以保持稳定标题、版本或边界 marker 作为辅助，但不要设计成每轮强制核验 marker。
+- 当前 authority 明显部分或互相冲突。
 
 ## Change discipline
 
 修改核心规则时：
 
-1. 先确定 owning file。
-2. 修改 owning file。
-3. 检查 SKILL.md 的短版 invariant / routing 是否需要同步。
-4. 检查 README 是否存在面向用户的行为变化。
-5. 检查 marketplace / manifest metadata 是否需要同步。
-6. 搜索被新结论替代的旧术语和旧规则，删除或改写，不要并列保留历史方案。
+1. 找到 owning file；
+2. 修改 owning file；
+3. 同步检查 SKILL.md 路由；
+4. 同步检查 README 用户行为说明；
+5. 检查 manifest / marketplace metadata；
+6. 搜索被新结论替代的旧术语和旧规则；
+7. 删除旧流程，不并列保留。
 
-对持续项目还应保持以下边界：
+清理时以当前正向规则为准：整包开始生成、两项生产状态、审核不自动交付新材料、已交付未变化材料直接复用、用户包不含 canonical MD、Imagegen 参考图只使用图像文件。任何与这些规则冲突的旧语义直接删除，不保留兼容说明。
 
-- 长期、跨页规则和来源口径写项目 README/protocol；
-- 单页反馈和生成约束写回该页 canonical spec；
-- 若项目维护当前 prompt 派生文件，canonical 修改后同轮同步覆盖；
-- README 不记录逐页踩坑流水账；
-- 项目文本写入后注意 UTF-8 与非 ASCII 可读性。
+单页材料交付能力可以保留，但只用于用户明确请求单页材料或返工，不作为默认生产节奏。
 
-Mode 名称统一使用：
+## Encoding
 
-- Imagegen-assisted
-- Native-editable
+项目文本使用 UTF-8。
 
-不要重新引入 Mode A / Mode B 作为用户可见主名称。
+Windows 或跨工具写入非 ASCII 文本后，必须实际读回抽查，拒绝：
+
+- 连续问号占位
+- replacement character；
+- mojibake；
+- 文件名或 prompt 引用损坏。
+
+plugin.json 和 .agents/plugins/marketplace.json 必须 UTF-8 无 BOM。
 
 ## Release checks
 
 发布前至少检查：
 
-- plugin.json 是合法 portable manifest，根 schema 与当前 Agent Plugins 版本一致；
+- plugin.json 是合法 portable manifest；
 - skill 目录名与 SKILL.md frontmatter name 一致；
-- README 安装步骤与当前 OpenAI repo marketplace 文档一致；
-- SKILL.md 足够短，不塞入完整 workflow；
-- 三个 references 没有职责漂移；
-- handoff 仍要求实际查看参考图，并满足所选 delivery surface：聊天交付时实际发送文件并同轮给完整 prompt；本地交付时文件与当前 prompt 必须实际存在于约定位置；
-- GPT ImageGen 术语仍明确指 GPT / ChatGPT 原生图像生成，并推荐 `@图像生成` 作为可覆盖的 handoff 首行前缀；
-- Native-editable 仍要求最终零 Imagegen 残留；
-- authority-availability 仍是“优先复用，明确不足才重读”；
+- SKILL.md 保持短，详细流程仍在 references；
+- workflow.md、image-handoff.md、ppt-authoring.md 职责没有漂移；
+- 开始生成默认整包交付；
+- 正常用户生成包只有 TXT + PNG/JPG/JPEG/WebP；
+- canonical MD 不在正常用户生成包；
+- PDF 不可直接作为 Imagegen 参考图；
+- PDF 转图要求仍包含实际目视核对；
+- 只维护已生成 + 连续已通过审核两个进度；
+- 生产状态严格只有两项；
+- 页面通过或状态检查后没有自动继续发送新材料；
+- 已交付整包可在内容未变化时复用；
+- 返工仍 canonical-first，并给完整当前 prompt；
+- GPT ImageGen 术语明确指 GPT / ChatGPT 原生图像生成；
+- @图像生成 仍是可覆盖的目标会话推荐前缀；
 - source / image / data 不得凭文件名或搜索摘要臆测；
-- 持续项目仍遵守“项目 README/protocol + canonical 文件作为 durable context；反馈先落盘再重新交付；不另建运行状态文件”；
-- whole-deck final review gate 没有被删掉。
-- `plugin.json` 和 `.agents/plugins/marketplace.json` 必须保存为 UTF-8 **无 BOM**；当前 Codex CLI 的 marketplace JSON 解析会拒绝 UTF-8 BOM。
-- 面向当前 ChatGPT “新插件 -> 上传 ZIP”界面的交付包默认使用最严格兼容布局：ZIP 根目录直接放 `plugin.json` + `skills/`，不套外层插件目录，也不包含 repo marketplace 的 `.agents/plugins/marketplace.json`、README 或 AGENTS。
-- 生成 ChatGPT 上传包时优先运行 scripts/build-chatgpt-zip.ps1，不要手工选择文件打包；脚本输出目录 dist/ 不进入 Git。
-- 标准交付使用 ChatGPT ZIP；GitHub repo marketplace 仅作为可选分发渠道。
+- whole-deck final review gate 没有被删除；
+- Native-editable 仍要求最终零 Imagegen 残留；
+- authority availability 仍遵循“可复用则复用，明确不足才重读”；
+- README 与当前行为一致；
+- 仓库搜索没有残留旧流程 authority。
+
+生成材料包使用 scripts/validate-generation-package.ps1 校验。
+
+ChatGPT 插件上传包使用 scripts/build-chatgpt-zip.ps1 构建。插件 ZIP 和 PPT 生成材料 ZIP 是两类不同分发物，不要混用校验规则。
+
+ChatGPT 插件 ZIP 根目录直接放 plugin.json + skills/，不包含 repo marketplace、README、AGENTS、scripts、.git、dist。
+
+## Mode names
+
+用户可见模式名称统一使用：
+
+- Imagegen-assisted
+- Native-editable
+
+不要重新引入 Mode A / Mode B。
 
 ## Versioning
 
 使用 Semantic Versioning：
 
-- patch：文字澄清、bugfix、规则修正，不改变兼容行为；
-- minor：向后兼容的新动作、场景或 reference 能力；
-- major：触发范围、核心工作流、文件结构或关键 hard gate 的不兼容变化。
+- patch：文字澄清、bugfix、规则修正；
+- minor：向后兼容的新动作、场景或 workflow 能力；
+- major：触发范围、核心结构或关键 hard gate 的不兼容变化。

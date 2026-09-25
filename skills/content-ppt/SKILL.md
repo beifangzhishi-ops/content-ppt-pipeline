@@ -18,10 +18,12 @@ Explicit user instructions for the current task take priority over this workflow
 
 1. Maintain production files in the ChatGPT/agent cloud workspace by default. Do not create the PPT project on the user's local machine merely because a connected tool can access it, unless the user explicitly requests a local path.
 2. Never infer source/image contents from filenames, search snippets, or directory listings. Anything used, recommended, or sent as a reference must be actually opened/read/viewed as appropriate.
-3. If an Imagegen handoff needs reference images, paths and filenames alone are not delivery. On chat-file delivery, the files must be actually sent to the current chat and the complete self-contained prompt delivered in the same response. On an explicitly selected local-file delivery surface, the required files and current prompt must instead be actually present and usable in the agreed project location.
+3. If Imagegen generation needs reference images, paths and filenames alone are not delivery. On chat-file delivery, the files must be actually sent to the current chat. On an explicitly selected local-file or packaged delivery surface, the required prompt TXT files and reference images must actually be present and usable at the agreed location.
 4. Native-editable output uses editable PowerPoint text, equations, shapes, lines, arrows, charts, and structures wherever practical. Do not rasterize equations merely for convenience.
 5. Do not silently mark a required workflow gate complete when the required capability is unavailable.
-6. Do not create a separate Pipeline runtime-state file. For an existing project, treat its explicit README/protocol and canonical project files as durable project context. If the project needs cross-session continuity, current generation/review position may be kept in the README's current-status section rather than in a separate state file.
+6. Do not create a separate Pipeline runtime-state file. For an existing project, treat its explicit README/protocol and canonical project files as durable project context. If cross-session production status is needed, the README current-status section contains exactly two production values: current generated position and consecutively reviewed/approved position.
+7. At the start of Imagegen production for a selected slide range, default to one complete batch delivery for that range: complete prompt TXT files plus only the required reference images. Canonical Markdown stays in the project and is not part of the normal user generation package.
+8. GPT ImageGen reference inputs must be actual image files such as PNG, JPG/JPEG, or WebP. Never hand a PDF to Imagegen as a reference image; convert the needed PDF page/figure to an image and actually inspect the converted result first.
 
 ## Current-action routing
 
@@ -29,7 +31,7 @@ At the start of each turn, identify the primary action from the latest user requ
 
 ### Project continuation / status control
 
-Resume an existing PPT project, apply its project-level README/protocol, determine the current slide/action, handle "next slide" versus explicit status/review requests, and keep canonical project files synchronized with user feedback.
+Resume an existing PPT project, apply its project-level README/protocol, derive current production state from actual artifacts, handle status/review or explicit generation-package requests, and keep canonical project files synchronized with user feedback.
 
 Authority: references/workflow.md. Add references/image-handoff.md when the turn also performs GPT ImageGen handoff or changes the delivery surface.
 
@@ -47,7 +49,7 @@ Authority: references/workflow.md; use the asset-inspection portion of reference
 
 ### Imagegen handoff
 
-Prepare one slide for generation in a fresh Imagegen chat using a complete self-contained prompt and, when needed, delivered reference images.
+Prepare generation materials for Imagegen. At production start, default to a complete batch for the selected slide range; prepare a single-slide package only when explicitly requested or when a regeneration needs it.
 
 Authority: references/image-handoff.md, plus workflow context when needed.
 

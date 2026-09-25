@@ -13,7 +13,7 @@ Use one of two production modes:
 - Imagegen-assisted: GPT / ChatGPT native image generation may participate in page visual production. In this skill, "Imagegen" refers specifically to that native GPT / ChatGPT capability, not to arbitrary third-party image-generation providers. Per-slide review is optional/opportunistic; the mandatory acceptance gate is the user whole-deck review.
 - Native-editable: final PowerPoint must contain no Imagegen pixel/generation residue; final content is rebuilt from native PowerPoint objects, real source images, and data-derived charts.
 
-Do not create a separate persistent mode/stage state file. The current mode and action should be inferable from the current request, project README/protocol, canonical files, and current artifacts. If an existing project intentionally keeps cross-session current generation/review position, maintain those current values in the project's README current-status section rather than creating another state file.
+Do not create a separate persistent mode/stage state file. The current mode and action should be inferable from the current request, project README/protocol, canonical files, and current artifacts. If an existing project keeps cross-session production status, the project's README current-status section contains exactly two production values: generated progress and consecutively reviewed/approved progress.
 
 For an existing project, use this precedence unless the user explicitly says otherwise:
 
@@ -60,7 +60,7 @@ For a long-running PPT project, treat project files as durable context rather th
 - Do not copy a large source tree merely for convenience when a stable read-only original can remain the source of truth; copy only the production subset that is actually needed.
 - Describe required capabilities, not one hard-coded OS utility or MCP implementation. Use the available equivalent tool that satisfies the workflow gate.
 
-Project text files such as README, canonical Markdown, prompt text, and indexes should be UTF-8. After cross-tool or Windows writes involving non-ASCII text, actually read back a sample and reject corrupted text such as `????`, replacement characters, or mojibake before continuing delivery.
+Project text files such as README, canonical Markdown, prompt text, and indexes should be UTF-8. After cross-tool or Windows writes involving non-ASCII text, actually read back a sample and reject runs of placeholder question marks, replacement characters, or mojibake before continuing delivery.
 
 ## 3. Visual and information-density calibration
 
@@ -133,23 +133,62 @@ Check at least:
 
 Run more than one review pass when the deck is complex. The purpose is to make the pack production-ready before expensive page generation.
 
-## 7. Imagegen-assisted per-slide loop
+## 7. Imagegen-assisted generation and review
 
-When using Imagegen-assisted mode, production may proceed slide by slide, but user review of every slide is not a mandatory gate.
+Formal package/delivery mechanics are owned by image-handoff.md.
 
-Formal handoff mechanics are owned by image-handoff.md.
+### Start-of-generation batch
 
-Page generation may be pipelined when the project benefits from it: hand off one complete slide at a time, allow different slides to generate concurrently in separate fresh GPT ImageGen chats, and review returned pages as they become available. Parallel generation does not require later pages to wait for the prior page's render.
+Before the user starts Imagegen generation for a selected slide range, prepare the complete usable generation package for that range in one batch by default.
 
-If the project explicitly uses ordered slide review, formal review must still advance in page order. A later slide being available does not permit skipping an earlier unresolved slide. Regeneration of an earlier slide may coexist with later slides being generated, but the ordered review position does not jump over the unresolved page.
+The normal user-facing package contains only:
 
-For projects that need cross-session continuity, the README current-status section may keep concise current values such as the furthest slide already handed off and the last slide consecutively accepted. Overwrite those current values; do not append a page-by-page activity log and do not create a separate runtime-state file.
+- one complete current prompt TXT file per slide;
+- the actual reference images required by those prompts.
 
-Treat common continuation requests as distinct actions:
+Materialize the user-facing batch as one validated ZIP by default so it can be delivered as a single artifact. A different container is acceptable only when the user or selected delivery surface explicitly requires it.
 
-- A "next slide" request advances the next planned handoff from the current canonical project files. Do not implicitly scan generated outputs or start returned-page review unless the user or project protocol asks for that in the same turn.
-- A "check status", "review", or equivalent request may inspect the project's explicitly designated generated-output source, then review from the next unresolved slide according to the project's review policy. Do not guess another folder/source, and do not scan ChatGPT Library or another store merely because it was used by a different project.
-- When the project protocol defines status checking as a closed loop, finish the review decision and the resulting next executable handoff in the same turn instead of reporting status and then asking whether to continue.
+Canonical Markdown remains internal project authority and is not part of the normal user generation package unless the user explicitly requests project-source files.
+
+Validate the package before delivery:
+
+- no canonical MD files;
+- no PDF files;
+- every image filename referenced by a prompt exists in the package;
+- every included reference image has actually been inspected;
+- prompt and image filenames are current, with no stale references.
+
+Once a usable batch has been delivered on the selected surface, normal production/status/review turns reuse it. Do not repeatedly resend unchanged prompts or assets. Re-deliver only when regeneration or a canonical/material change requires new content, package contents are missing/corrupt, the delivery surface changes, or the user explicitly asks.
+
+A user may explicitly request a single-slide generation package. Regeneration may also produce a single-slide package. These are targeted actions, not the default production cadence.
+
+### Generation and ordered review
+
+Generation may proceed in parallel or out of order when useful. A later page may exist while an earlier page is missing or still unresolved.
+
+If the project uses ordered review, reviewed/approved progress advances only through consecutive resolved pages. A later accepted page may be retained, but it does not move the consecutive approved position past an earlier gap.
+
+For projects that need cross-session continuity, the README current-status section keeps only:
+
+- generated progress: the furthest generated page position, with gaps derived from actual artifacts;
+- reviewed/approved progress: the last consecutively accepted page in the ordered review sequence.
+
+Overwrite those values. Do not append a page-by-page activity log and do not create a separate runtime-state file.
+
+### Status/review request
+
+For a status/review request:
+
+1. Inspect the project's explicitly designated generated-output source. Do not guess another folder/store merely because another project used it.
+2. Determine what has actually been generated, including gaps.
+3. Review from the next unresolved page according to the project's review policy.
+4. Update generated progress and consecutively reviewed/approved progress.
+5. Report missing pages and pages that require regeneration.
+6. Do not automatically emit another generation package unless the user explicitly asks for generation materials or the project protocol explicitly requires that action.
+
+If a page was previously approved but its formal generated artifact cannot currently be located, report it as an artifact-availability problem. Do not silently revoke the historical review decision, and do not substitute canonical text for the missing generated image.
+
+### Returned-page decision
 
 When the user returns a generated page:
 
@@ -159,14 +198,11 @@ When the user returns a generated page:
 4. Decide directly:
    - accept when the page is production-usable;
    - regenerate when a material defect remains.
-5. If regenerating, update the canonical spec/prompt only where needed, then use the Imagegen handoff workflow again.
-6. If accepted, immediately move to the next slide handoff unless the user has changed the task.
+5. If regenerating, update the canonical spec first, synchronize the complete current prompt, and use the Imagegen regeneration workflow.
 
 If a returned page is accepted and creates no new slide rule, no new project-wide rule, and no source/status change, do not modify the canonical spec or README merely to leave an audit trail.
 
-If no per-slide review is requested, continue production and rely on whole-deck review as the mandatory user gate.
-
-Do not ask “continue?” after every accepted page when the planned workflow clearly calls for the next slide.
+If no per-slide review is requested, production may continue from the delivered batch and rely on whole-deck review as the mandatory user gate.
 
 ## 8. Transition to editable PowerPoint
 

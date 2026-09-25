@@ -1,70 +1,122 @@
 # Imagegen Handoff
 
-This file owns reusable image inspection, reference selection, file delivery, and Imagegen handoff/regeneration mechanics.
+This file owns reusable image inspection, reference selection, generation-package delivery, and Imagegen regeneration mechanics.
 
 In this skill, Imagegen / imggen means GPT / ChatGPT native image generation. It does not refer generically to Midjourney, Stable Diffusion, Flux, or other external image-generation providers.
 
 ## 1. Inspect before use
 
-Any image recommended for a slide or sent to Imagegen as a reference must be actually viewed.
+Any image recommended for a slide or supplied to Imagegen as a reference must be actually viewed.
 
-Do not infer visual content from:
+Do not infer visual content from filenames, folder names, search snippets, metadata, or another model's description alone.
 
-- filename;
-- folder name;
-- search thumbnail text;
-- metadata;
-- another model's description alone.
+When many assets exist, previews/contact sheets or equivalent visual inspection may narrow candidates efficiently, but every final selected reference still needs actual visual confirmation.
 
-When many assets exist, use previews/contact sheets or equivalent visual inspection to narrow candidates efficiently, but the final chosen references still need actual visual confirmation.
+Track enough provenance to know which slide uses the asset, where it came from, whether it was viewed, and whether it is selected/current.
 
-Track enough provenance to answer:
+## 2. Reference-file format
 
-- which slide uses the asset;
-- where the asset came from;
-- whether it has actually been viewed;
-- whether it has been selected, rejected, or delivered.
+GPT ImageGen reference inputs must be image files. Use image formats such as:
 
-## 2. Separate inspection from formal handoff
+- PNG;
+- JPG / JPEG;
+- WebP.
 
-Asset inspection/selection does not itself trigger file delivery.
+Do not deliver or instruct the user to upload a PDF as an Imagegen reference image.
 
-Only enter the formal handoff gate when the current task is to give the user a complete page-generation package.
+When an authoritative source visual exists only in PDF:
 
-## 3. Atomic handoff gate
+1. identify the exact page/figure needed;
+2. render or export that content to an image file;
+3. actually view the converted image;
+4. verify content, crop, resolution, readability, and scientific meaning;
+5. update the canonical spec and derived prompt to reference the converted image filename;
+6. use the converted image in the generation package.
 
-For a slide with no reference images:
+The converted image is a delivery derivative; the source PDF may remain part of the internal source registry.
 
-- deliver one complete self-contained final prompt.
+## 3. Separate authority from delivery
 
-For a slide with reference images on **chat-file delivery**, the handoff is complete only when all of the following happen in the same response:
+Keep these roles distinct:
 
-1. Every required reference image has been actually viewed.
-2. Every required reference image has been actually transferred into the current chat using CCM send_file or an equivalent real file-transfer capability.
-3. All required file transfers succeeded.
-4. The complete self-contained final prompt is provided.
-5. The response explicitly identifies which just-sent images the user should upload to the fresh Imagegen chat.
+- canonical Markdown: internal project/source-of-truth specification;
+- prompt TXT: user-facing generation instruction derived from canonical;
+- reference images: user-facing visual inputs.
 
-A path, filename, markdown mention, or workspace location does not count as chat-file delivery.
+Canonical Markdown is not part of the normal user generation package. Include it only when the user explicitly asks for project-source files.
 
-If any required send fails on chat-file delivery, the handoff is incomplete. Do not instruct the user to start generation yet.
+If a project keeps a prompt derivative per slide, keep one current TXT prompt per slide. When canonical changes, overwrite/synchronize the current prompt in the same work cycle. Avoid parallel v2, final, revised, or similar forks unless the user explicitly requests versioned history.
 
-On chat-file delivery, do not send a .md file as a substitute for the prompt. The full prompt must appear directly in the response so the user can copy it. On local-file delivery, the current prompt may live in the agreed project file as long as it is complete and directly usable.
+Prompt text must be UTF-8 and should be read back on the target platform when non-ASCII content matters.
 
-### Delivery surface
+## 4. Batch delivery is the default production handoff
 
-Use the delivery surface explicitly chosen by the user or project:
+When the user is about to start Imagegen generation for a selected slide range, default to one complete batch delivery for that range.
 
-- **Chat-file delivery**: put the complete prompt in one directly copyable block/message, and make every required reference image available as an actual downloadable/usable file in the current chat. A non-downloadable preview, pathname, or filename is not sufficient delivery.
-- **Local-file delivery**: when the user explicitly works from a local project directory, the complete current prompt and required reference assets may be maintained there instead of redundantly retransferring the same assets through chat. The files must actually exist and be usable at the agreed location. The project protocol should identify the working location; do not invent a second delivery directory without need.
+The user-facing batch contains only:
 
-If a project keeps a per-slide prompt file derived from its canonical spec, keep one current prompt derivative per slide. When the canonical spec changes, overwrite/synchronize that current prompt in the same work cycle. Avoid parallel `v2`, `final`, `revised`, or similar prompt forks unless the user explicitly requests versioned history.
+- one complete current .txt prompt per slide;
+- the image references actually required by those prompts.
 
-Local prompt text should be UTF-8 and should be read back on the target platform when non-ASCII content matters.
+Do not include canonical .md files or source PDFs in the normal generation package.
 
-## 4. Prompt completeness
+By default, materialize the complete selected-range package as one ZIP after validation. The package must actually be delivered to the user; merely creating it in a workspace does not complete the generation-start delivery.
 
-Each page prompt must be self-contained. Do not rely on “same style as previous page” or hidden context.
+Before delivery, verify package integrity:
+
+1. every selected reference image was actually viewed;
+2. every prompt is complete and current;
+3. every image filename referenced by a prompt exists in the package;
+4. no prompt references a PDF;
+5. no .md or .pdf files are present in the user generation package;
+6. no stale prompt/image filename remains.
+
+Once this batch is usable on the selected delivery surface, later normal generation/status/review turns reuse it. Do not resend unchanged files merely because the workflow advances.
+
+Re-deliver only when:
+
+- a regeneration needs a changed prompt or reference set;
+- canonical/material changes invalidate delivered content;
+- a required package file is missing/corrupt;
+- the delivery surface changes;
+- the user explicitly requests another copy.
+
+## 5. Delivery surfaces
+
+Use the surface explicitly selected by the user/project.
+
+### Chat-file delivery
+
+For the normal start-of-generation batch, transfer the validated ZIP into the current chat as a real downloadable file, using CCM send_file or an equivalent file-transfer capability.
+
+For a targeted single-slide package delivered in chat:
+
+- put the complete copy-ready prompt directly in the response or provide the current TXT when the user requested file-based delivery;
+- transfer every required reference image as a real usable file;
+- do not treat a pathname, filename, or non-downloadable preview as delivery.
+
+If a required file transfer fails, the package is incomplete.
+
+### Local-file delivery
+
+When the user explicitly works from a local project directory, current prompt TXT files and required reference images may be maintained there instead of redundantly retransferred through chat. They must actually exist and be usable at the agreed location.
+
+### Optional Quark mobile workflow
+
+When CCM and Quark upload are available, recommend this convenience path for mobile generation:
+
+1. package the selected range as a ZIP containing prompt TXT files plus required images only;
+2. upload that validated ZIP to Quark with CCM;
+3. the user unzips it in Quark;
+4. the user downloads required images directly from the extracted folder;
+5. the user opens a prompt TXT in Quark, uses the top-right document-mode control, selects all text, and copies it;
+6. the user pastes the prompt into a fresh GPT ImageGen chat and uploads the designated images.
+
+This is optional, not a mandatory dependency. Another selected delivery surface remains valid.
+
+## 6. Prompt completeness
+
+Each page prompt must be self-contained. Do not rely on "same style as previous page" or hidden context.
 
 Include, as applicable:
 
@@ -77,63 +129,61 @@ Include, as applicable:
 - real/reference image role;
 - generated illustration role;
 - visual/formality constraints;
-- explicit prohibitions;
+- high-value prohibitions;
 - any prior error that must not recur.
 
 The prompt should tell Imagegen what to produce, not merely describe the source spec abstractly.
 
-For GPT ImageGen handoff, recommend placing `@图像生成` on the first line of the copy-ready prompt to make the intended GPT image-generation route explicit. This is a recommended default, not an unoverrideable gate: the user's explicit instruction, the project's protocol, or the target GPT surface may replace or omit it.
+For GPT ImageGen handoff, recommend placing @图像生成 on the first line of the copy-ready prompt to make the intended target route explicit. This is a recommended default, not an unoverrideable gate.
 
-`@图像生成` is text for the target GPT ImageGen chat. It does not mean that the current PPT workflow assistant should itself invoke image generation. If the user asks only for the prompt or explicitly says not to generate the image here, remain at the preparation/handoff layer.
-
-Self-contained is an internal quality requirement, not prompt filler. Do not clutter the generation prompt with pipeline meta-language such as “this is a revision,” “this prompt is self-contained,” or “do not rely on previous chat” unless that instruction materially changes the expected output.
+@图像生成 is text for the target GPT ImageGen chat. It does not mean that the current PPT workflow assistant should itself invoke image generation. If the user asks only for prompts/materials or explicitly says not to generate here, remain at the preparation/delivery layer.
 
 Keep prohibitions focused on high-value failure prevention rather than accumulating defensive wording that competes with the actual slide task.
 
-### Image-role boundary
+## 7. Image-role boundary
 
-Do not use “looks photorealistic” as the prohibition criterion.
+Classify each requested visual by role:
 
-Classify each requested visual:
+- **Evidence / project-specific factual visual**: real experiment, apparatus, measurement, result, site, or specific factual object. Use traceable real material or faithful reconstruction from real data; do not ask Imagegen to fabricate it.
+- **Conceptual scientific illustration**: mechanism/process/structure explanation. It may be generated, including realistic rendering, provided it is not presented as an actual project record or measurement.
+- **Application / scene-setting illustration**: background/motivation/engineering application context. It may be generated photorealistically when it does not claim to show a specific real project/site or quantitative result.
 
-- **Evidence / project-specific factual visual**: real experiment, apparatus, measurement, result, site, or specific factual object. Must use traceable real material or faithful reconstruction from real data; do not ask Imagegen to fabricate it.
-- **Conceptual scientific illustration**: mechanism/process/structure explanation. May be generated, including realistic rendering, provided it is not presented as an actual project record or measurement.
-- **Application / scene-setting illustration**: background/motivation/engineering application context. May be generated in a photorealistic style when it does not claim to show a specific real project/site or quantitative result.
+Photorealistic appearance alone is not the prohibition criterion. The evidence role is.
 
-Write the prompt according to the image's role, not according to a blanket ban on realistic appearance.
-
-## 5. Fresh-chat workflow
+## 8. Fresh-chat workflow
 
 For each slide generation:
 
 1. Use a fresh GPT ImageGen chat unless the user explicitly chooses otherwise.
-2. Upload only the reference images designated for that slide.
-3. Paste the complete prompt.
+2. Take that slide's complete prompt TXT from the delivered batch.
+3. Upload only the reference images designated for that slide.
 4. Generate the page.
-5. Return the generated page to the PPT workflow chat for review.
+5. Return the generated page to the PPT workflow for review when review is requested.
 
 Fresh chats reduce accidental style/content leakage between slides.
 
-## 6. Regeneration
+## 9. Regeneration
 
 When a returned page is rejected:
 
 - identify the minimum material defects;
-- update the canonical spec accordingly;
+- update the canonical spec first;
+- synchronize a new complete copy-ready prompt;
 - keep accepted content stable;
-- deliver a new complete copy-ready prompt for every regeneration; do not give only delta instructions or “common prompt + patch”;
-- explicitly preserve already accepted formulas, relationships, layout constraints, and asset roles so fixing one defect does not regress another;
-- reassess whether references are actually needed for the new generation rather than resending them mechanically;
-- if references are required again, execute the full atomic handoff gate again.
+- explicitly preserve accepted formulas, relationships, layout constraints, and asset roles;
+- reassess whether references are actually needed for the new generation;
+- resend only the references required by the new generation when the previously delivered copy is no longer current/usable or the user needs them again.
+
+Do not give only delta instructions or "common prompt + patch".
 
 The rejected generated page may be inspected for diagnosis, but do not automatically reuse a structurally or scientifically wrong rejected page as an Imagegen reference. Prefer inspected real scientific/data/experimental assets or another stable visual reference.
 
 Reuse the rejected page as a reference only when preserving an already accepted visual property materially helps and the risk of propagating the defect is low.
 
-Do not push an assessable accept/regenerate decision back to the user. The PPT workflow should make the decision and give the next executable package.
+Do not push an assessable accept/regenerate decision back to the user.
 
-## 7. Capability failure
+## 10. Capability failure
 
-If the selected chat-file delivery requires real reference-image transfer and CCM/equivalent file transfer is unavailable, state that the handoff gate is not complete. If the user explicitly selected local-file delivery, satisfy that surface's file-presence gate instead.
+If the selected delivery surface requires real file transfer and that capability is unavailable, state that the delivery gate is incomplete.
 
-Do not silently degrade to “the file is at this path” or “please find this image yourself.”
+Do not silently degrade to "the file is at this path" or "please find this image yourself".

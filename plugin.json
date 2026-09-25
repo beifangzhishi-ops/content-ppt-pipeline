@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "content-ppt-pipeline",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "A content-first PowerPoint workflow for research, courses, engineering reports, technical briefings, and other evidence-heavy decks.",
   "keywords": ["powerpoint", "presentation", "research", "course", "engineering", "technical-report", "content-heavy", "evidence"],
   "extensions": {
