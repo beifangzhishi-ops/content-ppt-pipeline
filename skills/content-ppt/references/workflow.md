@@ -1,6 +1,6 @@
 # Content PPT Workflow
 
-This file owns the business workflow: intake, research, calibration, deck design, canonical slide specs, pack-level review, returned-page review, assembly transitions, post-generation revision, and whole-deck final review.
+This file owns the business workflow: intake, research, narrative/source authority, material closure, deck design, canonical slide specs, pack-level review, generation/reuse planning, returned-page review, assembly transitions, post-generation revision, and whole-deck final review.
 
 It does not own detailed file-handoff mechanics or PowerPoint object-authoring mechanics.
 
@@ -56,11 +56,24 @@ For a long-running PPT project, treat project files as durable context rather th
 - When user feedback changes a slide, write the change into the appropriate project file first, then regenerate the prompt/handoff from the updated canonical content. Do not maintain a separate chat-only version.
 - Do not turn the project README into a chronological list of per-slide mistakes or retries. Keep it as durable project description, reusable rules, source registry, and concise current status.
 - When a materially important new paper, deck, dataset, experiment record, figure source, or asset directory is discovered, register it in the project's existing source index/README when that information will matter across later slides. Record enough provenance to identify the source, its role, version/date when available, review status, and whether any working copy was made.
+- Prefer a directory/source-level entry map in README/protocol: source/path, status, and intended use. Do not turn README into a per-slide source table; keep per-slide asset/source mappings in canonical specs, an image index, material audit, or an equivalent project file.
+- Source authority is a declared project property, not something inferred from filename, folder name, modification time, or whichever working copy was seen most recently. A newer working draft may supply updated data while an older stable report/thesis still owns the narrative structure.
+- Useful source-status labels may include current, frozen, raw/traceable, historical, obsolete, or confusing. Historical/obsolete material must not silently overwrite current authority.
 - A readable source location does not imply permission to modify it. If a source tree is designated read-only, keep canonical files and derived work in the working project and leave the source untouched.
 - Do not copy a large source tree merely for convenience when a stable read-only original can remain the source of truth; copy only the production subset that is actually needed.
 - Describe required capabilities, not one hard-coded OS utility or MCP implementation. Use the available equivalent tool that satisfies the workflow gate.
 
 Project text files such as README, canonical Markdown, prompt text, and indexes should be UTF-8. After cross-tool or Windows writes involving non-ASCII text, actually read back a sample and reject runs of placeholder question marks, replacement characters, or mojibake before continuing delivery.
+
+### Narrative authority before local evidence
+
+Before a deep material audit, identify which source owns the presentation's narrative backbone and which sources only supplement it.
+
+- The narrative authority owns chapter/section order, experiment grouping, evidence roles, and the relationship from evidence to conclusion.
+- Specialized projects, newer calculations, follow-up experiments, and working drafts may update the relevant node's data, figure, method detail, or verified boundary. They must not reorganize the narrative merely because they are newer or locally more detailed.
+- Unfinished calculations, exploratory reruns, unstable definitions, or work that still needs experiments are not formal evidence until they are completed and reviewed to the project's required standard.
+- When the user explicitly designates a thesis, report, previous deck, protocol, or other source as the main reference, use that declared authority rather than automatically choosing the latest timestamp.
+- Backup/Q&A material may contain additional audits and edge cases, but it must not reverse-pollute the main narrative, upgrade exploratory evidence into a formal conclusion, or contradict the evidence roles already established in the main deck.
 
 ## 3. Visual and information-density calibration
 
@@ -91,7 +104,48 @@ Each slide should have:
 
 Use derivation/process pages when the reasoning itself matters. Split overloaded slides instead of hiding important logic in tiny text.
 
-## 5. Canonical per-slide production spec
+## 5. Material and evidence closure
+
+Before freezing the production pack, audit the current material as a system rather than only proofreading individual slides.
+
+Treat an old deck or old page count as a material index, not as an immutable table of contents. Keep, replace, merge, split, reorder, or add pages when the authoritative narrative and current evidence require it.
+
+When the user asks to "review the material" or equivalent, the default review surface is the current canonical specs, prompts, evidence/source indexes, source data, derived-figure scripts, QA/build scripts, and project current-state documents. Do not automatically review already generated slide images or invoke Imagegen unless the user asks for generated-page review or generation.
+
+Review in this order:
+
+1. narrative role: what job does each section/page perform in the authoritative story;
+2. experiment/data grouping: whether evidence really belongs to the same experiment, condition, dataset, or statistical population;
+3. evidence role: measured, calculated, estimated, fitted, predicted, verification, external validation/reference, consistency check, numerical audit, or other project-defined category;
+4. quantitative definitions: units, denominators, sample/event counts, ROI, pooled vs event-wise/trajectory-wise definitions, equations, and source values;
+5. current supplementary evidence: completed new experiments/calculations that belong at an existing narrative node;
+6. wording, indexes, formatting, and other lower-level cleanup.
+
+Do not let local audit details or a newly discovered sub-project result become the deck's main story merely because they are fresh or visually strong.
+
+Prefer real, traceable repeated evidence, parameter scans, audits, raw tables, structured CSV/JSON, and completed calculations over prose that merely claims workload or coverage.
+
+Run review in complete passes. A pass follows: find a substantive issue -> trace it to authority/source -> fix the project files directly -> synchronize dependent prompts/indexes/scripts -> run QA -> rescan. Material closure is reached only after at least one complete pass finds no new substantive issue.
+
+For long-running deep audits, use one fresh conversation per complete review pass. At the end of a pass, persist all durable state in project files; the next pass starts from the current README/AGENTS/canonical/index/QA rather than depending on an ever-growing chat transcript. README keeps current state and source/authority entry points; AGENTS keeps reusable rules, not a chronological audit log; concrete findings are fixed in the files they affect.
+
+Do not fix only generated outputs when the real source of the defect is a builder, index generator, QA rule, prompt generator, derived-figure script, or maintenance script. Update the source that would otherwise recreate the error. Remove or clearly retire obsolete one-off scripts that can rewrite superseded logic back into current canonical files.
+
+When a real error class is worth guarding, add a regression check if the project has a QA harness. Prefer semantic/evidence anchors over exact sentence locks or broad forbidden-word checks; necessary qualifiers, negations, and boundary statements must remain expressible. QA should also detect invisible control characters or equivalent text corruption that can survive superficial structure checks.
+
+### Reproducible quantitative figures
+
+When structured source data or a reliable reconstruction script exists, quantitative plots should be programmatically/reproducibly redrawn rather than fabricated by Imagegen.
+
+- Within one project and semantic category, align fonts, axes, grids, line weights, markers, legend hierarchy, number formatting, and semantic color roles.
+- Keep semantic color roles stable across pages, but do not hard-code a universal plugin palette.
+- Preserve scientific meaning when standardizing axes, units, or legend conventions.
+- Do not alter original paper figures, experimental imagery, microscopy, or unreconstructable official plots merely to make them look stylistically uniform.
+- Record enough provenance for a derived figure to identify the source data and reconstruction method/script, and actually inspect the rendered output.
+
+Conceptual or relationship diagrams may use an authoritative source as a scientific relationship reference without copying its exact arrow geometry or layout. Preserve the relationships; redesign the geometry when that improves the presentation.
+
+## 6. Canonical per-slide production spec
 
 Create one canonical, self-contained production spec for every slide before batch production.
 
@@ -111,7 +165,7 @@ Each spec should contain, as applicable:
 
 Do not write specs that depend on “same as previous slide” or other hidden cross-slide instructions. A production spec should be usable on its own.
 
-## 6. Full-pack self-audit before batch production
+## 7. Full-pack self-audit before batch production
 
 Before generating or building the full deck, audit the entire spec pack as one system.
 
@@ -130,10 +184,16 @@ Check at least:
 - unnecessary repetition;
 - conflicting terminology or numeric values;
 - broken encoding/file references.
+- narrative-authority alignment;
+- experiment/condition/dataset identity;
+- evidence-role and statistical-definition consistency;
+- source data vs derived values/plots;
+- README/canonical/prompt/index/QA/build-script synchronization;
+- absence of stale maintenance logic that can recreate superseded content.
 
 Run more than one review pass when the deck is complex. The purpose is to make the pack production-ready before expensive page generation.
 
-## 7. Imagegen-assisted generation and review
+## 8. Imagegen-assisted generation and review
 
 Formal package/delivery mechanics are owned by image-handoff.md.
 
@@ -161,6 +221,17 @@ Validate the package before delivery:
 Once a usable batch has been delivered on the selected surface, normal production/status/review turns reuse it. Do not repeatedly resend unchanged prompts or assets. Re-deliver only when regeneration or a canonical/material change requires new content, package contents are missing/corrupt, the delivery surface changes, or the user explicitly asks.
 
 A user may explicitly request a single-slide generation package. Regeneration may also produce a single-slide package. These are targeted actions, not the default production cadence.
+
+### Reuse / rebuild / new / retire planning
+
+When an existing deck is reordered, renumbered, or partially redesigned, decide page disposition before generating again. Use project terminology such as `reuse / rebuild / new / retire` in an index or plan when useful; this classification is not a third global production-progress counter.
+
+- Reuse an already approved page when its communicative role, core content, evidence roles, and visual meaning remain valid. Renumbering or moving it to another chapter is not by itself a rebuild reason.
+- Rebuild a page when its prior generated version failed and no later approved version exists, when the page has never been generated, or when its role/content/evidence materially changed.
+- A failed page does not become reusable merely because the artifact still exists in Library or the project directory.
+- A previously approved page does not automatically remain approved after material content or evidence roles change.
+- Minor page-number/text/index updates may be handled in the editable stage instead of Imagegen regeneration when the selected production mode and artifact make that safe.
+- Build the generation package from the pages currently marked new/rebuild. Do not repackage approved reusable pages merely because neighboring pages changed.
 
 ### Generation and ordered review
 
@@ -193,18 +264,20 @@ If a page was previously approved but its formal generated artifact cannot curre
 When the user returns a generated page:
 
 1. Actually inspect the returned image.
-2. Compare it with the current canonical production spec.
-3. Prioritize factual/domain errors, evidence mistakes, readability, hierarchy, structure, and obvious layout failures.
+2. Compare it with the current canonical production spec, current complete prompt, and the real reference assets/roles used for that page.
+3. Prioritize factual/domain errors, evidence mistakes, readability, hierarchy, structure, and obvious layout failures. Common blocking failures include wrong figure-to-role mapping; altered axes/units/numbers/formulas/legends; missing required evidence; conflating measured/calculated/predicted/validation roles; fabricated project-specific scientific imagery; placeholders/internal management text; or material drift from the current canonical spec.
 4. Decide directly:
    - accept when the page is production-usable;
    - regenerate when a material defect remains.
 5. If regenerating, update the canonical spec first, synchronize the complete current prompt, and use the Imagegen regeneration workflow.
 
+After regeneration, review the new generated artifact on its own merits. Prior failure reasons are regression targets, not an automatic verdict on the new version.
+
 If a returned page is accepted and creates no new slide rule, no new project-wide rule, and no source/status change, do not modify the canonical spec or README merely to leave an audit trail.
 
 If no per-slide review is requested, production may continue from the delivered batch and rely on whole-deck review as the mandatory user gate.
 
-## 8. Transition to editable PowerPoint
+## 9. Transition to editable PowerPoint
 
 Transition based on the selected production mode and the current delivery goal.
 
@@ -214,7 +287,7 @@ Imagegen-assisted mode may assemble accepted generated page visuals directly whe
 
 Native-editable mode must rebuild the final deck with no Imagegen pixel/generation residue.
 
-## 9. Whole-deck QA
+## 10. Whole-deck QA
 
 Before asking the user for the final review, inspect the whole candidate deck.
 
@@ -238,7 +311,7 @@ Repairs transition into the appropriate current action:
 - regenerated page -> Imagegen regeneration;
 - editable object/layout fix -> editable PPT revision.
 
-## 10. Mandatory user whole-deck review
+## 11. Mandatory user whole-deck review
 
 After internal whole-deck QA, the user must have a chance to review the complete deck as a whole.
 
@@ -248,7 +321,7 @@ If the user requests targeted changes, enter the post-generation revision round 
 
 After repairs, repeat the relevant QA checks before final delivery.
 
-## 11. Post-generation revision round
+## 12. Post-generation revision round
 
 Use this phase when a complete candidate deck already exists and the user identifies problems after whole-deck generation/assembly.
 

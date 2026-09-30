@@ -20,6 +20,8 @@
 2. 项目 README/protocol + canonical 文件；
 3. 本插件通用默认。
 
+具体版式 example 不是 authority。`skills/content-ppt/references/examples/` 下的文件只在用户明确要求参考该案例/风格，或项目 README/protocol 明确选用时加载；其中的比例、配色、密度、小图并排和其它局部视觉规则不得反向升级成通用 hard rule。
+
 ## Scope
 
 插件定位为 content-first / evidence-heavy PPT workflow，覆盖科研、课程、工程、技术、项目、设计评审等。
@@ -114,6 +116,70 @@ PDF 来源必须先：
 - 不保留 v2/final/revised 等平行 prompt 分叉，除非用户明确要求历史版本；
 - README 不记录逐页踩坑流水账。
 
+## Material audit / evidence closure discipline
+
+长项目的材料审核必须先锁定 narrative authority，再审局部新证据。
+
+- narrative authority 负责章节/页面主线、实验分组、证据角色和“证据 → 结论”关系；
+- 专项项目、新计算、补充实验、工作稿只在对应节点补充已完成并核实的数据、图、方法细节和边界；
+- 更新时间更新不等于 authority 更高；用户明确指定的论文、报告、旧 deck 或 protocol 可以继续负责主线；
+- 未完成计算、探索性重跑、仍需补实验的工作稿不得仅凭“更新”身份覆盖稳定主线；
+- 正文与答疑/附录分角色：答疑可详细审计，但不得反向污染正文主线或把探索性结果升级成正式结论。
+
+用户说“审材料”时，默认审核当前 canonical、prompt、证据/来源索引、源数据、派生图脚本、QA/生成脚本和当前状态文件；除非用户明确要求，不自动审核已生成页面图片，也不自动进入 Imagegen。
+
+审核顺序固定为：
+
+1. 页面/章节在 authoritative narrative 中的论证角色；
+2. 实验、工况、数据集和证据—结论对应；
+3. 实测 / 计算 / 拟合 / 预测 / verification / external validation / consistency check 等证据身份；
+4. 单位、分母、样本数、事件数、统计定义、公式和关键数字；
+5. 已完成的新证据如何补到既有主线；
+6. 最后才是措辞、索引和低层整理。
+
+“继续审 / 循环审”表示执行完整闭环：发现问题 → 回源核对 → 直接修项目文件 → 同步依赖 → QA → 再完整扫描。至少一整轮不再发现新的实质问题，才算材料收口。
+
+### 一轮一个新会话
+
+持续深审时，一个完整审核回合使用一个会话。该回合结束前把 durable state 全部写回项目文件；下一轮使用新会话，从 README / AGENTS / canonical / index / QA 重新进入。
+
+- 不把长聊天当项目状态；
+- README 只维护当前状态、authority/来源入口和必要项目说明；
+- AGENTS 只维护可复用长期规则，不记本轮逐条发现或修复日志；
+- 具体问题直接修进 canonical / prompt / index / source / script；
+- 下一轮不要求回放上一轮聊天。
+
+### 修生成源，不只修输出
+
+如果错误会由 QA、索引生成器、prompt builder、派生图脚本或维护脚本重新产生，必须修改真正的生成源并重新生成依赖输出。失效的一次性/历史脚本如果还能把旧口径写回当前 canonical，应从当前维护面删除或明确退役，不能只靠“不要运行”维持安全。
+
+QA 回归规则优先检查语义实质和证据锚点，不锁死固定句式，也不使用会误伤否定句、限定词或必要边界说明的机械禁词。QA 还应检查不可见控制字符、乱码、引用损坏等会逃过结构校验的文本问题。
+
+## Data-figure discipline
+
+- 有结构化原始数据或可靠 reconstruction chain 的 quantitative plot，优先程序化/可复现重绘；
+- 同一项目、同一语义类别统一字体、轴、网格、线宽、marker、图例层级、数字格式和语义配色；
+- 颜色保持语义稳定，但插件不硬编码全局 palette；
+- 原始论文图、实验/显微图、不可可靠重建的正式图不为“统一画风”而篡改；
+- quantitative plot 属于 evidence，不交给 Imagegen 伪造；
+- 派生图记录来源数据和重建脚本/方法，并实际目视核对输出；
+- 概念/关系图可以保留权威来源的科学关系而重新组织几何，不要求复制原图连线布局。
+
+## Reuse / rebuild discipline
+
+对已有 deck 做重排、顺延或局部改版时，先做逐页 disposition，再决定生成范围：
+
+- 已通过且页面角色、核心内容、证据角色不变：reuse；
+- 仅页码/章节位置变化：不自动 rebuild；
+- 首版/当前生成未通过且没有后续通过版本：rebuild；
+- 从未生成：new/generate；
+- 页面角色、核心内容或证据发生实质变化：rebuild；
+- 不再使用：retire。
+
+`reuse / rebuild / new / retire` 可放项目 plan/index，但不是第三套全局生产进度。生成材料包只包含当前需要 new/rebuild 的页；可复用页不重复生成。
+
+生成后审核必须实际看生成物，并同时对照当前 canonical、完整当前 prompt 和真实参考素材角色。失败后先修 authority，再生成下一版；新版本独立重新审核，旧失败原因只作为回归重点。
+
 ## Reference availability
 
 不要为了证明 reference 仍在上下文而机械重读。
@@ -137,7 +203,7 @@ PDF 来源必须先：
 6. 搜索被新结论替代的旧术语和旧规则；
 7. 删除旧流程，不并列保留。
 
-清理时以当前正向规则为准：整包开始生成、两项生产状态、审核不自动交付新材料、已交付未变化材料直接复用、用户包不含 canonical MD、Imagegen 参考图只使用图像文件。任何与这些规则冲突的旧语义直接删除，不保留兼容说明。
+清理时以当前正向规则为准：整包开始生成、两项生产状态、审核不自动交付新材料、已交付未变化材料直接复用、用户包不含 canonical MD、Imagegen 参考图只使用图像文件、材料审核先锁 narrative authority、每个完整深审回合使用新会话、已有 deck 先做 reuse/rebuild 判定、quantitative plots 优先可复现重绘。任何与这些规则冲突的旧语义直接删除，不保留兼容说明。
 
 单页材料交付能力可以保留，但只用于用户明确请求单页材料或返工，不作为默认生产节奏。
 
@@ -179,6 +245,17 @@ plugin.json 和 .agents/plugins/marketplace.json 必须 UTF-8 无 BOM。
 - Native-editable 仍要求最终零 Imagegen 残留；
 - authority availability 仍遵循“可复用则复用，明确不足才重读”；
 - README 与当前行为一致；
+- material audit 明确区分 narrative authority 与补充证据源；
+- “审材料”不自动审核生成图或触发 Imagegen；
+- 深度循环审核明确一个完整回合一个新会话，跨轮状态落项目文件；
+- AGENTS 不记录逐轮审核日志，README 不记录逐页踩坑流水账；
+- QA / prompt builder / index / plotting / maintenance scripts 不会把废弃口径重新写回 current canonical；
+- QA 语义检查不依赖固定句式或机械禁词，并覆盖不可见控制字符；
+- quantitative plots 有数据时优先可复现重绘，不由 Imagegen 伪造；
+- 原始科研图不为风格统一而篡改；
+- 已有 deck 的 reuse/rebuild/new/retire 判定不会新增第三套 production progress；
+- generation package 只包含当前需要生成/重建的页，不重复打包可复用页；
+- 中期答辩具体版式只存在于非权威 example，不进入通用 workflow hard rule；
 - 仓库搜索没有残留旧流程 authority。
 
 生成材料包使用 scripts/validate-generation-package.ps1 校验。

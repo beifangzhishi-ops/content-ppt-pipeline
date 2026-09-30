@@ -53,6 +53,8 @@ Prompt text must be UTF-8 and should be read back on the target platform when no
 
 When the user is about to start Imagegen generation for a selected slide range, default to one complete batch delivery for that range.
 
+For an existing deck with mixed page dispositions, the selected generation range means the pages currently marked new/rebuild. Do not repackage approved reusable pages merely because the deck was renumbered or neighboring pages changed.
+
 The user-facing batch contains only:
 
 - one complete current .txt prompt per slide;
@@ -148,6 +150,10 @@ Classify each requested visual by role:
 - **Conceptual scientific illustration**: mechanism/process/structure explanation. It may be generated, including realistic rendering, provided it is not presented as an actual project record or measurement.
 - **Application / scene-setting illustration**: background/motivation/engineering application context. It may be generated photorealistically when it does not claim to show a specific real project/site or quantitative result.
 
+Quantitative plots are evidence, not decorative illustrations. When structured data or a reliable reconstruction path exists, redraw them reproducibly with code or an equivalent deterministic charting workflow instead of asking Imagegen to invent/re-render the data. Keep source-data and reconstruction provenance with the derived figure.
+
+An authoritative conceptual/relationship diagram may constrain scientific relationships without constraining exact geometry. A generated or redrawn version may reorganize arrows, spacing, and layout as long as it preserves the intended relationships and does not add unsupported ones.
+
 Photorealistic appearance alone is not the prohibition criterion. The evidence role is.
 
 ## 8. Fresh-chat workflow
@@ -173,6 +179,8 @@ When a returned page is rejected:
 - explicitly preserve accepted formulas, relationships, layout constraints, and asset roles;
 - reassess whether references are actually needed for the new generation;
 - resend only the references required by the new generation when the previously delivered copy is no longer current/usable or the user needs them again.
+
+If the rejection exposes a real content/evidence error, first correct the authoritative canonical/prompt/source mapping that caused it. Do not treat a chat-only retry instruction as the durable fix.
 
 Do not give only delta instructions or "common prompt + patch".
 

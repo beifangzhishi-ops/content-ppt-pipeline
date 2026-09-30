@@ -41,6 +41,16 @@ Check facts/domain logic, evidence, wording, equations, numbers, titles, conclus
 
 Authority: references/workflow.md.
 
+### Material audit / evidence closure
+
+Deep-review a long-running deck project across canonical specs, prompts, source/evidence indexes, data, derived-figure scripts, and QA/build logic. Lock the project-declared narrative authority before using newer or more local sources to update details. Fix findings directly in project files and continue complete review passes until one full pass finds no new substantive issue.
+
+For repeated deep-audit cycles, complete one review pass per conversation, persist current state/rules in project files, then use a fresh conversation for the next pass. Do not rely on an ever-growing chat as project state.
+
+This action does not automatically review generated slide images or invoke Imagegen unless the user explicitly asks for generated-page review or generation.
+
+Authority: references/workflow.md.
+
 ### Asset inspection / selection
 
 Find, open, view, and select real images or other assets for a slide, without yet performing the formal Imagegen handoff.
@@ -53,9 +63,15 @@ Prepare generation materials for Imagegen. At production start, default to a com
 
 Authority: references/image-handoff.md, plus workflow context when needed.
 
+### Deck regeneration / reuse planning
+
+When an existing deck has been renumbered, reordered, or partially redesigned, classify pages as reusable, rebuild, new, or retired before generation. Reuse approved pages whose role/content/evidence remain valid; rebuild failed, never-generated, or materially changed pages. Then prepare generation materials only for the pages that actually need generation.
+
+Authority: references/workflow.md. Add references/image-handoff.md only when the turn also prepares/delivers generation materials.
+
 ### Returned-slide review
 
-Review a page returned by the user against the canonical production spec and directly decide accept vs regenerate when the user has supplied a page for review. Do not push an assessable decision back to the user.
+Review a page returned by the user against the canonical production spec, current complete prompt, and relevant real reference assets/roles, then directly decide accept vs regenerate. Do not push an assessable decision back to the user.
 
 Authority: references/workflow.md. If regeneration is required, the next action also needs references/image-handoff.md.
 
@@ -82,6 +98,10 @@ Authority: references/ppt-authoring.md. Add references/image-handoff.md only if 
 Review the complete candidate deck for story, terminology, facts, equations, numbers, titles, conclusions, density, images, duplicates, missing content, and mode-specific constraints; then run the mandatory user whole-deck review gate.
 
 Authority: references/workflow.md. Load technique references only for repairs actually required.
+
+### Optional layout-example lookup
+
+Use non-authoritative files under references/examples/ only when the user explicitly asks for a concrete layout/style example or the current project README/protocol selects one. Do not preload example-specific proportions, colors, density patterns, or composition rules into unrelated projects.
 
 ### Post-generation whole-deck repair
 
