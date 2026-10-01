@@ -10,7 +10,7 @@ Determine the presentation goal, audience, evidence base, desired length, availa
 
 Use one of two production modes:
 
-- Imagegen-assisted: a user-authorized image-generation capability may participate in page visual production. Direct generation into the CCM/local project is the preferred path when available; manual handoff is fallback.
+- Imagegen-assisted: CPA ImageGen performs page visual production and returns output directly to the CCM/local project.
 - Native-editable: final PowerPoint must contain no Imagegen pixel/generation residue; final content is rebuilt from native PowerPoint objects, real source images, and data-derived charts.
 
 Do not create a separate persistent mode/stage state file. The current mode and action should be inferable from the current request, project README/protocol, canonical files, and actual local artifacts. Cross-session page state is maintained as approved / rework-unreviewed / not-generated sets, not as scalar progress counters.
@@ -241,7 +241,7 @@ When an existing deck is reordered, renumbered, or partially redesigned, decide 
 - A failed page does not become reusable merely because the artifact still exists in a local output directory.
 - A previously approved page does not automatically remain approved after material content or evidence roles change.
 - Minor page-number/text/index updates may be handled in the editable stage instead of Imagegen regeneration when the selected production mode and artifact make that safe.
-- Direct generation should submit only pages that actually need generation. Manual handoff packages should likewise contain only current new/rebuild pages.
+- CPA generation should submit only pages that actually need generation.
 
 ### Generation and asynchronous review
 
@@ -255,7 +255,7 @@ Page status is independent of page order:
 
 A gap or failed earlier page never blocks review or approval of a later page. Fresh generated output enters rework/unreviewed until it is visually accepted.
 
-Direct generation may use a bounded parallel queue. Review outputs as they return, and pause queue expansion when repeated pages show the same common failure.
+CPA generation may use a bounded parallel queue. Review outputs as they return, and pause queue expansion when repeated pages show the same common failure.
 
 ### Status/review request
 
@@ -266,7 +266,6 @@ For a status/review request:
 3. Review newly available unreviewed artifacts when review was requested.
 4. Update the page-state sets and local approved-current artifact view.
 5. Report meaningful missing/rework/approved deltas rather than a consecutive progress number.
-6. Do not automatically emit a manual generation package unless direct generation is unavailable/declined or the user explicitly requests handoff materials.
 
 If a page is marked approved but its current approved artifact cannot be located, report an artifact-availability/state inconsistency and reconcile it before reuse.
 
@@ -280,12 +279,7 @@ When a generated page becomes available:
 4. Decide directly:
    - accept when the page is production-usable;
    - regenerate when a material defect remains.
-5. Before changing canonical, classify the failure:
-   - canonical/evidence/prompt defect;
-   - generation execution/input mismatch;
-   - model rendering defect;
-   - infrastructure/provider failure.
-6. Only a true owning-source defect requires a canonical/source fix. Wrong prompt/reference selection or other execution mismatch should be regenerated with correct inputs without rewriting valid canonical content.
+5. Change canonical or prompt only when the review reveals a real source/instruction defect. Otherwise regenerate the page through CPA.
 
 After regeneration, review the new generated artifact on its own merits. Prior failure reasons are regression targets, not an automatic verdict on the new version.
 

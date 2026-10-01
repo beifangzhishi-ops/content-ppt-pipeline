@@ -89,7 +89,7 @@ When the active Imagegen backend writes results locally:
 3. classify it as rework/unreviewed;
 4. inspect it;
 5. on approval, place/rename/copy it into the approved-current artifact view and update project status;
-6. on failure, keep it out of approved-current and route it through generation failure triage.
+6. on review failure, keep it out of approved-current and route it back to CPA regeneration.
 
 Do not route local direct-generation output through ChatGPT Library merely for bookkeeping.
 
@@ -106,18 +106,13 @@ For requests such as "status", "progress", "review what is done", or "continue":
 
 Do not assume that every image in an output directory is a valid slide artifact. Verify page identity and actual content when needed.
 
-## 7. Failure and root-cause persistence
+## 7. Regeneration and runtime failure
 
-Page state stays simple; failure diagnosis may be richer.
+Keep page-state semantics simple:
 
-Classify failures as:
-
-- canonical/evidence/prompt defect;
-- generation execution/input mismatch;
-- model rendering defect;
-- infrastructure/provider failure.
-
-Only the first category necessarily requires correcting an owning source. Execution mismatch must not pollute correct canonical content. Infrastructure failure is not a content-review failure and should not change page status to rework unless an actual generated page needs rework.
+- if an actual returned page fails visual review, keep it in rework/unreviewed and regenerate through CPA;
+- change canonical or prompt only when review identifies a real source/instruction defect;
+- CPA authorization, quota, timeout, network, or backend failures are runtime blockers, not page-review conclusions.
 
 ## 8. Git and tracked project maintenance
 
@@ -134,7 +129,7 @@ Do not retain obsolete compatibility rules or stale workflow names unless the us
 
 ## 9. Secrets and provider configuration
 
-Image-generation API keys, tokens, endpoint configuration, provider model discovery, and local execution credentials belong to the local runtime.
+CPA API keys, tokens, endpoint configuration, model discovery, and local execution credentials belong to the local runtime.
 
 They must not appear in:
 

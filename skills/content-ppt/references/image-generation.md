@@ -1,37 +1,34 @@
-# Imagegen Production
+# CPA ImageGen Production
 
-This file owns image inspection, reference eligibility, pre-generation checks, direct generation, bounded parallel production, generated-page review, regeneration, and manual handoff fallback.
+This file owns image/reference inspection, reference eligibility, pre-generation checks, CPA submission, bounded parallel production, generated-page review, regeneration, and local output handling.
 
-For ChatGPT Plus users, the recommended stack is:
+The Imagegen-assisted production stack is:
 
-`Content PPT Pipeline + CCM workspace + CPA ImageGen`
+`ChatGPT Plus / GPT -> CCM workspace -> CPA ImageGen -> local candidate -> review -> approved-current`
 
-CPA is the recommended direct-generation backend for this workflow when available and authorized. The workflow itself is capability-based: do not hard-code an endpoint, model name, quota, or secret into project authority.
+There is no manual generation/handoff branch in the normal workflow.
 
-## 1. Execution priority
+## 1. CPA is the production backend
 
-Use this order:
+Use CPA ImageGen for Imagegen-assisted page production.
 
-1. **Direct generation — default** when an authorized project-allowed backend can submit the current prompt/reference set and return results to the local CCM workspace.
-2. **Manual handoff — fallback** when direct generation is unavailable/degraded or the user explicitly wants manual generation.
+CPA-specific endpoint/model discovery, authorization, quota, and credentials belong to the local execution environment. Do not place secrets or provider configuration in canonical specs, prompt TXT files, README state, or Git-tracked skill authority.
 
-Do not require a ZIP or user file搬运 before direct generation.
-
-Manual handoff remains supported but is not the primary production route.
+If CPA is unavailable, report the generation action as blocked. Do not silently switch to a manual upload/download workflow.
 
 ## 2. Inspect before use
 
-Any image used as evidence or supplied as an Imagegen reference must be actually viewed.
+Any image used as evidence or supplied to CPA as an ImageGen reference must be actually viewed.
 
 Do not infer content from filenames, directory names, metadata, search snippets, or another model's description alone.
 
-When many assets exist, contact sheets or previews may narrow candidates, but every final selected reference still needs actual inspection.
+When many assets exist, previews/contact sheets may narrow candidates, but every final selected reference still requires actual inspection.
 
 Track enough provenance to know:
 
-- where the asset came from;
-- what slide uses it;
-- its evidence/structural/style role;
+- source;
+- target page;
+- evidence/structural/style role;
 - whether it was actually viewed;
 - whether it is current and eligible.
 
@@ -39,47 +36,58 @@ Track enough provenance to know:
 
 ### Eligible factual references
 
-Real, traceable, inspected source images may be supplied when project policy allows it, including:
+Real, traceable, inspected source images may be supplied when project policy allows it, such as:
 
-- experiment/apparatus images;
-- measurement/result figures;
-- paper figures;
+- experiment/apparatus photographs;
 - real site/object images;
-- traceable numerical-result images.
+- paper/source figures used for qualitative factual content;
+- traceable numerical/measurement imagery when CPA only needs qualitative physical context.
 
-They provide factual content, not an instruction to copy the source visual style.
+They provide factual content, not permission to copy the source visual style.
 
-### Not eligible as the next Imagegen reference by default
+### Keep quantitative evidence out of ImageGen when exact values matter
 
-Do not upload these as reference images:
+If a figure's scientific role depends on preserving exact:
+
+- axes;
+- values;
+- legends;
+- color bars;
+- uncertainty;
+- category/series mapping;
+- numeric annotations;
+
+do not send it to CPA for reinterpretation.
+
+Instead:
+
+- reproduce it deterministically from data/code when possible;
+- retain the real source figure when reconstruction is not appropriate;
+- place/composite it directly in the final PPT or editable assembly layer.
+
+### Not eligible as CPA reference inputs by default
+
+Do not upload:
 
 - old generated slide pages;
-- Imagegen/AI outputs;
+- ImageGen/AI outputs;
 - rejected generations;
 - Content PPT Pipeline-generated diagrams;
 - project-script-generated presentation schematics;
 - temporary defense/report redraws;
 - internal relationship/layout calibration images.
 
-These may be inspected internally for diagnosis or factual/logic comparison, but they do not enter the next generation input unless the user explicitly overrides the rule for the current task.
-
-### Quantitative figures
-
-Quantitative plots are evidence. When structured data or a reliable reconstruction path exists:
-
-- generate them deterministically from data/code;
-- preserve provenance;
-- place them directly in the final PPT or composite them through an editable/native assembly path;
-- do not ask Imagegen to redraw numeric axes, labels, legends, or values;
-- do not use the quantitative plot as a style reference for unrelated generated illustration.
+These may be inspected internally for diagnosis or factual/logic comparison, but they do not enter the next CPA generation input unless the user explicitly overrides this rule for the current task.
 
 ### Independent style/layout references
 
-A style/layout reference may be used only when the user/project explicitly selects it and it is not a generated artifact from the current deck. Example files are non-authoritative.
+A style/layout reference may be used only when explicitly selected by the user/project and it is not a generated artifact from the current deck.
+
+Example files are non-authoritative.
 
 ## 4. Reference file format
 
-Imagegen reference inputs must be actual images such as:
+CPA ImageGen reference inputs must be actual images such as:
 
 - PNG;
 - JPG / JPEG;
@@ -87,43 +95,41 @@ Imagegen reference inputs must be actual images such as:
 
 Do not pass PDFs directly as image references.
 
-When the authoritative source exists only in PDF:
+When an authoritative source exists only in PDF:
 
-1. locate the exact needed page/figure;
+1. locate the exact page/figure;
 2. render/export it to an image;
 3. inspect the converted image;
-4. verify crop, readability, resolution, and scientific meaning;
-5. use the converted image filename in the current prompt/reference mapping.
+4. verify crop, readability, resolution, and meaning;
+5. use the converted image in the current reference mapping.
 
-## 5. Canonical, prompt, and generation-input separation
+## 5. Canonical, prompt, reference, and output separation
 
 Keep these roles distinct:
 
-- canonical Markdown/spec: source of truth;
+- canonical spec: source of truth;
 - current prompt TXT: derived generation instruction;
-- eligible reference images: factual visual inputs;
-- generated candidate: output awaiting review;
-- approved current artifact: accepted output.
+- eligible references: factual visual inputs;
+- candidate output: CPA result awaiting review;
+- approved-current artifact: accepted current page.
 
-When canonical changes, overwrite/synchronize the one current prompt in the same work cycle. Avoid v2/final/revised forks unless the user explicitly requests version history.
+When canonical changes, overwrite/synchronize the one current prompt in the same work cycle.
 
-## 6. Pre-generation production gate
+## 6. Pre-generation gate
 
-Before submitting a page, check:
+Before CPA submission, check:
 
 - canonical and current prompt are synchronized;
-- the prompt is self-contained;
+- prompt is self-contained;
 - no stale experiment/condition/title/conclusion/layout language remains;
 - no "same as previous slide" or hidden cross-slide dependency remains;
 - composition instructions do not materially conflict;
-- the prompt does not ask Imagegen to fabricate project-specific evidence or quantitative plots;
+- prompt does not ask ImageGen to fabricate project-specific evidence or quantitative plots;
 - every referenced asset is current, inspected, eligible, and available;
 - no stale/forbidden reference filename remains;
-- PDF references have been converted to inspected image files;
-- conceptual diagrams communicate relationships/facts rather than inheriting an old generated geometry;
-- current output state is known so the new result will not overwrite an approved artifact ambiguously.
-
-Structural package validation does not prove provenance or reference eligibility.
+- PDF-derived references were converted and inspected;
+- conceptual diagrams communicate relationships/facts rather than inheriting old generated geometry;
+- current output state is known so a new candidate cannot ambiguously overwrite approved-current.
 
 ## 7. Prompt completeness
 
@@ -132,52 +138,48 @@ Include, as applicable:
 - slide title and role;
 - purpose/takeaway;
 - facts, numbers, equations, and terminology that must be preserved;
-- visual evidence roles;
+- evidence roles;
 - conceptual illustration role;
 - reading order and density;
 - layout/composition constraints;
 - high-value prohibitions;
-- prior reproducible failure that must not recur.
+- prior reproducible rendering problem that must not recur.
 
 The prompt should specify the page to produce, not merely summarize the canonical spec.
 
-## 8. Direct-generation loop
+## 8. CPA production loop
 
-Default closed loop:
+Default loop:
 
-`select page -> pre-generation gate -> submit prompt/references -> receive local output -> mark unreviewed -> inspect -> approve or triage -> regenerate if needed -> archive approved current artifact`
+`select page -> pre-generation gate -> CPA submit -> local candidate -> mark unreviewed -> inspect -> approve or regenerate -> approved-current`
 
-The agent should absorb mechanical work that would otherwise require the user to copy prompts, upload files, download results, and resubmit failed pages.
+The agent owns the mechanical loop. User involvement is needed only for:
 
-Only interrupt the loop for:
-
-- a real scientific/content decision requiring user judgment;
+- a scientific/content decision requiring judgment;
 - a material design choice the user has not delegated;
-- authorization/credential action;
-- a persistent infrastructure failure.
+- CPA authorization/configuration action;
+- persistent CPA unavailability.
 
 ## 9. Bounded parallel queue
 
-Direct production may be asynchronous.
+CPA production may be asynchronous.
 
-Use a small bounded queue when generation wait time would otherwise idle the workflow:
+Use a small bounded queue when useful:
 
 - multiple pages may be in flight;
-- while one page is generating, prepare another eligible page;
+- prepare another eligible page while one job waits;
 - review returned outputs as they arrive;
-- repair failed prompts while other jobs continue;
+- revise prompts for reproducible rendering failures while other jobs continue;
 - archive approved pages immediately;
 - keep page-state sets independent of return order.
 
-The concurrency limit is provider/project specific. Do not hard-code a universal value in the skill.
+The concurrency limit is project/provider specific. Do not hard-code a universal value in the generic skill.
 
-If repeated pages show the same visual failure, stop expanding the queue and fix the common cause before producing more failures.
-
-If the project explicitly requires serial review, use one-at-a-time production.
+If repeated pages show the same visual failure, stop expanding the queue and fix the common instruction/style cause first.
 
 ## 10. Generated-page review
 
-Every returned page starts as rework/unreviewed.
+Every CPA result starts as rework/unreviewed.
 
 Actually inspect it against:
 
@@ -186,7 +188,7 @@ Actually inspect it against:
 - eligible real references and their declared roles;
 - required numbers/equations/labels;
 - visual hierarchy and page role;
-- neighboring approved pages when whole-deck consistency is relevant.
+- neighboring approved pages when whole-deck consistency matters.
 
 Check for:
 
@@ -199,100 +201,39 @@ Check for:
 - layout/density/style failure;
 - accidental cross-page contamination.
 
-Decide approve vs rework directly when the available evidence supports that judgment.
+Decide approved vs rework directly.
 
-## 11. Failure triage
+**Page approved means pipeline-reviewed and usable as the current artifact. It does not mean the user has completed final whole-deck approval.**
 
-Before editing canonical, classify the failure.
+## 11. Regeneration
 
-### Canonical/evidence/prompt defect
+When a CPA page fails review:
 
-The owning source is wrong or underspecified.
+- if canonical and prompt remain correct, regenerate;
+- if review reveals a real source/instruction defect, fix the owning source, synchronize the complete current prompt, then regenerate;
+- do not infer a canonical defect merely from a poor render.
 
-Action: fix canonical/source mapping first, synchronize the current prompt, then regenerate.
+Use the complete current prompt/reference set for regeneration rather than a chat-only delta instruction.
 
-### Generation execution/input mismatch
+Rejected generations may be inspected diagnostically but are not fed back into CPA as references by default.
 
-Examples:
+CPA authorization, quota, timeout, network, or backend failures block generation execution; they are not page-review conclusions and do not justify canonical changes.
 
-- wrong page prompt used;
-- wrong reference image selected;
-- required reference omitted;
-- page/job result associated with the wrong slide.
+## 12. Local output handling
 
-Action: regenerate with the correct inputs. Do **not** modify correct canonical content merely because the execution was wrong.
-
-### Model rendering defect
-
-Inputs are correct but the output violates them.
-
-Action: regenerate; strengthen the prompt only when a reproducible ambiguity or missing constraint is identified. Do not automatically reinterpret a random generation failure as a content defect.
-
-### Infrastructure/provider failure
-
-Examples:
-
-- auth failure;
-- timeout;
-- EOF/5xx;
-- quota/rate limit;
-- network failure;
-- backend cannot accept references.
-
-Action: retry/degrade according to backend capability. This is not a page-content rejection and does not justify canonical changes.
-
-## 12. Regeneration
-
-For a true content/prompt defect:
-
-1. fix the owning source;
-2. synchronize the complete current prompt;
-3. reassess references;
-4. submit the full current prompt/reference set again;
-5. review the new output.
-
-Do not provide only delta retry instructions as the durable fix.
-
-Rejected generations may be inspected for diagnosis, but do not send them back as references by default.
-
-## 13. Local output handling
-
-Direct-generation output should remain local to the CCM project.
+CPA output stays local to the CCM project.
 
 Use project-declared candidate and approved-current locations.
 
 - fresh outputs -> candidate/rework;
 - accepted outputs -> approved-current;
-- failed outputs -> remove from current view; archive/delete per project policy;
+- failed outputs -> remove from current view; archive/delete according to project policy;
 - never infer approval from file presence.
 
-ChatGPT Library is not part of the default generated-artifact path.
+ChatGPT Library is not part of the generated-artifact path.
 
-## 14. Manual handoff fallback
+## 13. Secrets and provider configuration
 
-When direct generation is unavailable or explicitly declined:
-
-Prepare only:
-
-- one complete current prompt TXT per required slide;
-- the eligible reference images required by those prompts.
-
-Do not include canonical Markdown or source PDFs in the user generation package.
-
-Before handoff:
-
-1. inspect every reference;
-2. verify prompt/reference filenames;
-3. verify no PDF reference remains;
-4. verify no generated/internal-ineligible image leaked into the package;
-5. validate package structure.
-
-The repository validator may confirm file structure and missing references, but it does not prove provenance eligibility.
-
-ZIP/chat-file/Quark are fallback delivery surfaces, not the default direct-production architecture.
-
-## 15. Provider secrets and configuration
-
-Keep API keys, tokens, endpoint configuration, model discovery, and provider-specific setup outside canonical/prompt/plugin authority.
+Keep CPA API keys, tokens, endpoint configuration, model discovery, and provider-specific setup outside canonical/prompt/plugin authority.
 
 Use ignored local configuration or secure runtime mechanisms. Never commit secrets.

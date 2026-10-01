@@ -97,7 +97,7 @@ When reconstructing a screenshot, generated page, or existing artifact into edit
 - redraw elements individually with native text, equations, shapes, connectors, tables, charts, and real images;
 - preserve geometry, alignment, hierarchy, and accepted visual relationships unless a verified scientific error or explicit user request requires change;
 - do not redesign from an old prompt when the user has said the current artifact is the base;
-- if the user explicitly says not to reference the old generated page, use it only diagnostically and do not use it as the visual generation/reconstruction reference.
+- a generated artifact may be used as an **editable reconstruction target** when the user explicitly designates it; this does not make it an eligible CPA/ImageGen reference input.
 
 Use connectors for logical relationships when editability matters, rather than baking arrows/lines into a raster layer.
 
@@ -158,7 +158,7 @@ Rebuild generated content using:
 - data-derived charts;
 - native diagrams or other editable structures.
 
-Use an Imagegen page only as a temporary visual reference during reconstruction, never as final embedded generated pixels.
+Use an Imagegen page only as a temporary editable-reconstruction target, never as final embedded generated pixels and never as a CPA reference merely because it is the reconstruction target.
 
 ## 9. Revision
 
@@ -170,7 +170,7 @@ When revising an existing editable deck:
 - do not replace an editable page with a raster image as a shortcut;
 - re-run page-level checks after the edit.
 
-When the user designates a current screenshot/PPT artifact as the base, that artifact controls the reconstruction. When the user says not to reference an old generated page, do not use it as the visual base.
+When the user designates a current screenshot/PPT artifact as the editable reconstruction base, that artifact controls the reconstruction. This authoring rule does not override CPA reference-eligibility rules.
 
 ## 10. PowerPoint application-level compatibility validation
 
