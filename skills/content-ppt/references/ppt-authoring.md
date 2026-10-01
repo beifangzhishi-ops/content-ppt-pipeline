@@ -4,13 +4,13 @@ This file owns reusable rules and implementation cautions for creating, reconstr
 
 ## 1. Authoring environment
 
-Create and maintain the PPT project in the ChatGPT/agent cloud workspace by default.
+For persistent Content PPT projects, author inside the selected CCM workspace or the project-declared working directory. The project runtime owns the current canonical files, approved artifacts, scripts, and final PPT work.
 
-Do not place the working project on the user's local desktop/Documents path merely because a connected tool can access that machine.
+Do not create a second cloud/local project copy merely because another tool surface is available.
 
-Use user-local storage only when the user explicitly requests a local path or when a source asset must be read from there. Source access does not imply project-location ownership.
+If the user explicitly selects another working location, follow that project decision and keep one authoritative working copy.
 
-Do not open or modify the user's local PPT merely for validation unless the user explicitly requested that local file to be used.
+Do not open or modify unrelated local PPT files merely for validation.
 
 ## 2. Native editability requirements
 

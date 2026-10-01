@@ -1,15 +1,15 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "content-ppt-pipeline",
-  "version": "0.4.0",
-  "description": "A content-first PowerPoint workflow for research, courses, engineering reports, technical briefings, and other evidence-heavy decks.",
+  "version": "0.5.0",
+  "description": "A ChatGPT Plus, CCM-first PowerPoint workflow for evidence-heavy research, engineering, course, and technical decks.",
   "keywords": ["powerpoint", "presentation", "research", "course", "engineering", "technical-report", "content-heavy", "evidence"],
   "extensions": {
     "com.openai": {
       "interface": {
         "displayName": "Content PPT Pipeline",
-        "shortDescription": "Content-first workflow for evidence-heavy PowerPoint decks.",
-        "longDescription": "Research sources, close evidence and narrative gaps, plan slide reuse or regeneration, normalize reproducible data figures, build slide production specs, review generated pages, create editable PowerPoint files, and run whole-deck QA.",
+        "shortDescription": "CCM-first workflow for evidence-heavy PowerPoint decks.",
+        "longDescription": "Run persistent PowerPoint projects with CCM, close narrative and evidence gaps, manage canonical slide specs and discrete page states, use direct image generation when available, review and regenerate rendered pages, build editable PowerPoint files, and run whole-deck QA.",
         "category": "Productivity",
         "capabilities": ["Read", "Write"],
         "defaultPrompt": [

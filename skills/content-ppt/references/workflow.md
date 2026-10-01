@@ -1,8 +1,8 @@
 # Content PPT Workflow
 
-This file owns the business workflow: intake, research, narrative/source authority, material closure, deck design, canonical slide specs, pack-level review, generation/reuse planning, returned-page review, assembly transitions, post-generation revision, and whole-deck final review.
+This file owns the business workflow: intake, research, narrative/source authority, material closure, deck design, canonical slide specs, pre-generation review, generation/reuse planning, rendered-page review, assembly transitions, post-generation revision, and whole-deck final review.
 
-It does not own detailed file-handoff mechanics or PowerPoint object-authoring mechanics.
+It does not own CCM runtime mechanics, detailed image-generation execution, or PowerPoint object-authoring mechanics.
 
 ## 1. Intake and mode
 
@@ -10,10 +10,10 @@ Determine the presentation goal, audience, evidence base, desired length, availa
 
 Use one of two production modes:
 
-- Imagegen-assisted: GPT / ChatGPT native image generation may participate in page visual production. In this skill, "Imagegen" refers specifically to that native GPT / ChatGPT capability, not to arbitrary third-party image-generation providers. Per-slide review is optional/opportunistic; the mandatory acceptance gate is the user whole-deck review.
+- Imagegen-assisted: a user-authorized image-generation capability may participate in page visual production. Direct generation into the CCM/local project is the preferred path when available; manual handoff is fallback.
 - Native-editable: final PowerPoint must contain no Imagegen pixel/generation residue; final content is rebuilt from native PowerPoint objects, real source images, and data-derived charts.
 
-Do not create a separate persistent mode/stage state file. The current mode and action should be inferable from the current request, project README/protocol, canonical files, and current artifacts. If an existing project keeps cross-session production status, the project's README current-status section contains exactly two production values: generated progress and consecutively reviewed/approved progress.
+Do not create a separate persistent mode/stage state file. The current mode and action should be inferable from the current request, project README/protocol, canonical files, and actual local artifacts. Cross-session page state is maintained as approved / rework-unreviewed / not-generated sets, not as scalar progress counters.
 
 For an existing project, use this precedence unless the user explicitly says otherwise:
 
@@ -53,7 +53,7 @@ For a long-running PPT project, treat project files as durable context rather th
 
 - Keep long-lived, cross-slide project rules, source conventions, workflow choices, and current project status in the project's existing README/protocol when that is how the project is organized.
 - Keep slide-specific content, layout, asset roles, generation constraints, and slide feedback in that slide's canonical production spec.
-- When user feedback changes a slide, write the change into the appropriate project file first, then regenerate the prompt/handoff from the updated canonical content. Do not maintain a separate chat-only version.
+- When user feedback changes a slide, write the change into the appropriate project file first, then regenerate the current prompt/production inputs from the updated canonical content. Do not maintain a separate chat-only version.
 - Do not turn the project README into a chronological list of per-slide mistakes or retries. Keep it as durable project description, reusable rules, source registry, and concise current status.
 - When a materially important new paper, deck, dataset, experiment record, figure source, or asset directory is discovered, register it in the project's existing source index/README when that information will matter across later slides. Record enough provenance to identify the source, its role, version/date when available, review status, and whether any working copy was made.
 - Prefer a directory/source-level entry map in README/protocol: source/path, status, and intended use. Do not turn README into a per-slide source table; keep per-slide asset/source mappings in canonical specs, an image index, material audit, or an equivalent project file.
@@ -94,6 +94,14 @@ For a content-heavy deck, visual quality means disciplined hierarchy and readabl
 
 Design the story and page order autonomously from the content. Avoid simply mirroring source document headings.
 
+Default review priority is:
+
+1. narrative continuity and scientific/domain correctness;
+2. evidence source, role, identity, and independence;
+3. traceable workload/coverage evidence;
+4. whole-deck visual consistency;
+5. single-slide decorative polish.
+
 Each slide should have:
 
 - a clear role in the story;
@@ -101,6 +109,12 @@ Each slide should have:
 - a title that states the slide's purpose or conclusion;
 - enough evidence to support its takeaway;
 - a deliberate relationship to the previous and next slide.
+
+The title, primary evidence, and closing takeaway should answer the same primary question. Secondary audits, sensitivity checks, or boundary tests must not steal the main evidence role.
+
+Main-talk pages carry the main narrative. Q&A/appendix pages carry advanced evidence that the audience may ask for but that the main talk does not need to expand. They must not reverse-pollute the main narrative or upgrade exploratory results into primary conclusions.
+
+Workload should be communicated with real, traceable evidence such as events, trajectories, frames, samples, scans, grids, windows, repetitions, or calculation coverage. If workload display competes with story continuity, preserve the story and compress/restructure the workload display.
 
 Use derivation/process pages when the reasoning itself matters. Split overloaded slides instead of hiding important logic in tiny text.
 
@@ -120,6 +134,17 @@ Review in this order:
 4. quantitative definitions: units, denominators, sample/event counts, ROI, pooled vs event-wise/trajectory-wise definitions, equations, and source values;
 5. current supplementary evidence: completed new experiments/calculations that belong at an existing narrative node;
 6. wording, indexes, formatting, and other lower-level cleanup.
+
+Evidence-strength guardrails:
+
+- model comparison or candidate selection on the same dataset is not independent validation;
+- repeated/continuous events from one experimental chain do not automatically become independent repeat experiments;
+- a parameter scan or sensitivity study is not automatically an independent calibration from upstream state to parameter;
+- a supplied boundary/input history is not a model output that was predicted and validated;
+- a derived quantity is not a direct measurement;
+- verification, external validation, external reference, consistency check, numerical audit, sensitivity analysis, and model discrimination are distinct roles and must not be rhetorically upgraded into one another.
+
+Titles and summary statements must use evidence strength consistent with the body. Prefer accurate terms such as support, show, agree with, discriminate, or audit when independent validation/proof has not actually occurred.
 
 Do not let local audit details or a newly discovered sub-project result become the deck's main story merely because they are fresh or visually strong.
 
@@ -143,11 +168,11 @@ When structured source data or a reliable reconstruction script exists, quantita
 - Do not alter original paper figures, experimental imagery, microscopy, or unreconstructable official plots merely to make them look stylistically uniform.
 - Record enough provenance for a derived figure to identify the source data and reconstruction method/script, and actually inspect the rendered output.
 
-Conceptual or relationship diagrams may use an authoritative source as a scientific relationship reference without copying its exact arrow geometry or layout. Preserve the relationships; redesign the geometry when that improves the presentation.
+Conceptual or relationship diagrams may use an authoritative source as a scientific relationship reference without copying its exact arrow geometry or layout. Preserve the relationships; redesign the geometry when that improves the presentation. Prefer short, clear horizontal/vertical/90-degree connectors over unnecessary long diagonal arrows, cross-module diagonal links, or crossings.
 
 ## 6. Canonical per-slide production spec
 
-Create one canonical, self-contained production spec for every slide before batch production.
+Create one canonical, self-contained production spec for every slide before generation or editable build.
 
 Each spec should contain, as applicable:
 
@@ -165,7 +190,7 @@ Each spec should contain, as applicable:
 
 Do not write specs that depend on “same as previous slide” or other hidden cross-slide instructions. A production spec should be usable on its own.
 
-## 7. Full-pack self-audit before batch production
+## 7. Full-pack self-audit before production
 
 Before generating or building the full deck, audit the entire spec pack as one system.
 
@@ -195,73 +220,59 @@ Run more than one review pass when the deck is complex. The purpose is to make t
 
 ## 8. Imagegen-assisted generation and review
 
-Formal package/delivery mechanics are owned by image-handoff.md.
+Detailed execution mechanics are owned by image-generation.md. Persistent local state and artifact lifecycle are owned by ccm-runtime.md.
 
-### Start-of-generation batch
+### Three distinct production gates
 
-Before the user starts Imagegen generation for a selected slide range, prepare the complete usable generation package for that range in one batch by default.
+Do not collapse these into one:
 
-The normal user-facing package contains only:
+1. **Material closure**: narrative authority, dataset/experiment identity, evidence role, definitions, page duty, and workload hierarchy are resolved.
+2. **Pre-generation gate**: current prompt is executable and synchronized; reference eligibility/provenance is valid; stale or conflicting instructions are removed.
+3. **Rendered-page/deck review**: the actual generated visual or assembled candidate deck is inspected.
 
-- one complete current prompt TXT file per slide;
-- the actual reference images required by those prompts.
-
-Materialize the user-facing batch as one validated ZIP by default so it can be delivered as a single artifact. A different container is acceptable only when the user or selected delivery surface explicitly requires it.
-
-Canonical Markdown remains internal project authority and is not part of the normal user generation package unless the user explicitly requests project-source files.
-
-Validate the package before delivery:
-
-- no canonical MD files;
-- no PDF files;
-- every image filename referenced by a prompt exists in the package;
-- every included reference image has actually been inspected;
-- prompt and image filenames are current, with no stale references.
-
-Once a usable batch has been delivered on the selected surface, normal production/status/review turns reuse it. Do not repeatedly resend unchanged prompts or assets. Re-deliver only when regeneration or a canonical/material change requires new content, package contents are missing/corrupt, the delivery surface changes, or the user explicitly asks.
-
-A user may explicitly request a single-slide generation package. Regeneration may also produce a single-slide package. These are targeted actions, not the default production cadence.
+`QA PASSED`, canonical/prompt synchronization, package validation, or material closure never substitute for visual review of the actual rendered artifact.
 
 ### Reuse / rebuild / new / retire planning
 
-When an existing deck is reordered, renumbered, or partially redesigned, decide page disposition before generating again. Use project terminology such as `reuse / rebuild / new / retire` in an index or plan when useful; this classification is not a third global production-progress counter.
+When an existing deck is reordered, renumbered, or partially redesigned, decide page disposition before generating again. Use project terminology such as `reuse / rebuild / new / retire` in an index or plan when useful.
 
 - Reuse an already approved page when its communicative role, core content, evidence roles, and visual meaning remain valid. Renumbering or moving it to another chapter is not by itself a rebuild reason.
 - Rebuild a page when its prior generated version failed and no later approved version exists, when the page has never been generated, or when its role/content/evidence materially changed.
-- A failed page does not become reusable merely because the artifact still exists in Library or the project directory.
+- A failed page does not become reusable merely because the artifact still exists in a local output directory.
 - A previously approved page does not automatically remain approved after material content or evidence roles change.
 - Minor page-number/text/index updates may be handled in the editable stage instead of Imagegen regeneration when the selected production mode and artifact make that safe.
-- Build the generation package from the pages currently marked new/rebuild. Do not repackage approved reusable pages merely because neighboring pages changed.
+- Direct generation should submit only pages that actually need generation. Manual handoff packages should likewise contain only current new/rebuild pages.
 
-### Generation and ordered review
+### Generation and asynchronous review
 
 Generation may proceed in parallel or out of order when useful. A later page may exist while an earlier page is missing or still unresolved.
 
-If the project uses ordered review, reviewed/approved progress advances only through consecutive resolved pages. A later accepted page may be retained, but it does not move the consecutive approved position past an earlier gap.
+Page status is independent of page order:
 
-For projects that need cross-session continuity, the README current-status section keeps only:
+- approved;
+- rework/unreviewed;
+- not-generated.
 
-- generated progress: the furthest generated page position, with gaps derived from actual artifacts;
-- reviewed/approved progress: the last consecutively accepted page in the ordered review sequence.
+A gap or failed earlier page never blocks review or approval of a later page. Fresh generated output enters rework/unreviewed until it is visually accepted.
 
-Overwrite those values. Do not append a page-by-page activity log and do not create a separate runtime-state file.
+Direct generation may use a bounded parallel queue. Review outputs as they return, and pause queue expansion when repeated pages show the same common failure.
 
 ### Status/review request
 
 For a status/review request:
 
-1. Inspect the project's explicitly designated generated-output source. Do not guess another folder/store merely because another project used it.
-2. Determine what has actually been generated, including gaps.
-3. Review from the next unresolved page according to the project's review policy.
-4. Update generated progress and consecutively reviewed/approved progress.
-5. Report missing pages and pages that require regeneration.
-6. Do not automatically emit another generation package unless the user explicitly asks for generation materials or the project protocol explicitly requires that action.
+1. Inspect the project's local status and designated candidate/approved artifact locations.
+2. Reconcile actual artifacts with approved / rework-unreviewed / not-generated page sets.
+3. Review newly available unreviewed artifacts when review was requested.
+4. Update the page-state sets and local approved-current artifact view.
+5. Report meaningful missing/rework/approved deltas rather than a consecutive progress number.
+6. Do not automatically emit a manual generation package unless direct generation is unavailable/declined or the user explicitly requests handoff materials.
 
-If a page was previously approved but its formal generated artifact cannot currently be located, report it as an artifact-availability problem. Do not silently revoke the historical review decision, and do not substitute canonical text for the missing generated image.
+If a page is marked approved but its current approved artifact cannot be located, report an artifact-availability/state inconsistency and reconcile it before reuse.
 
 ### Returned-page decision
 
-When the user returns a generated page:
+When a generated page becomes available:
 
 1. Actually inspect the returned image.
 2. Compare it with the current canonical production spec, current complete prompt, and the real reference assets/roles used for that page.
@@ -269,13 +280,16 @@ When the user returns a generated page:
 4. Decide directly:
    - accept when the page is production-usable;
    - regenerate when a material defect remains.
-5. If regenerating, update the canonical spec first, synchronize the complete current prompt, and use the Imagegen regeneration workflow.
+5. Before changing canonical, classify the failure:
+   - canonical/evidence/prompt defect;
+   - generation execution/input mismatch;
+   - model rendering defect;
+   - infrastructure/provider failure.
+6. Only a true owning-source defect requires a canonical/source fix. Wrong prompt/reference selection or other execution mismatch should be regenerated with correct inputs without rewriting valid canonical content.
 
 After regeneration, review the new generated artifact on its own merits. Prior failure reasons are regression targets, not an automatic verdict on the new version.
 
-If a returned page is accepted and creates no new slide rule, no new project-wide rule, and no source/status change, do not modify the canonical spec or README merely to leave an audit trail.
-
-If no per-slide review is requested, production may continue from the delivered batch and rely on whole-deck review as the mandatory user gate.
+If a returned page is accepted and creates no new slide rule, no new project-wide rule, and no source change, do not modify canonical merely to leave an audit trail; update only the required project state/artifact mapping.
 
 ## 9. Transition to editable PowerPoint
 
@@ -289,7 +303,7 @@ Native-editable mode must rebuild the final deck with no Imagegen pixel/generati
 
 ## 10. Whole-deck QA
 
-Before asking the user for the final review, inspect the whole candidate deck.
+Before asking the user for the final review, actually render/open and inspect the whole candidate deck. A successful build, valid file structure, or canonical/prompt QA is not enough.
 
 Check:
 
@@ -300,6 +314,9 @@ Check:
 - evidence/source correctness;
 - readability and density;
 - image quality and image-to-claim fit;
+- whether each evidence image is large/readable enough to perform its stated role;
+- whether generated illustration has fabricated project-specific apparatus, data, or results;
+- whether decorative content has displaced the main evidence;
 - duplicated/missing slides;
 - broken/cropped content;
 - master/layout consistency;

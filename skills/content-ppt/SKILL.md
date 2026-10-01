@@ -1,131 +1,132 @@
 ---
 name: content-ppt
-description: Build, continue, review, or revise content-heavy PowerPoint presentations for research, courses, engineering, technical reports, project reviews, and other evidence-heavy decks that need source research, story design, layout/density calibration, slide production specs, image review, editable PPT construction, or whole-deck QA. Do not use as the primary workflow for purely decorative, marketing, brand, or poster-style beautification.
+description: Build, continue, review, generate, or revise evidence-heavy PowerPoint presentations in ChatGPT Plus, with CCM as the preferred persistent project runtime and direct image generation as the preferred Imagegen-assisted production path when an authorized backend is available.
 ---
 
 # Content PPT Pipeline
 
-Use this skill for content-first presentation work where correctness, evidence, structure, information density, traceable assets, and editable delivery matter more than decorative styling.
+Use this skill for content-first presentation work where correctness, evidence, structure, information density, traceable assets, generation review, and editable delivery matter more than decorative styling.
 
-Explicit user instructions for the current task take priority over this workflow. Do not invent facts, sources, image contents, or tool results.
+This skill is designed primarily for ChatGPT Plus users running persistent PPT projects with CCM. Explicit user instructions for the current task always take priority.
 
-## Production modes
+## Product model
 
-- Imagegen-assisted: GPT / ChatGPT native image generation ("Imagegen" in this skill) may be used for slide visuals or page generation. This term does not mean arbitrary third-party image-generation providers. Per-slide review may happen opportunistically during production; the mandatory acceptance gate is the whole-deck user review.
-- Native-editable: final delivery must be natively editable PowerPoint with no Imagegen pixel/generation residue. Use real source images and data-driven charts where appropriate.
+- **ChatGPT Plus / GPT**: interaction, reasoning, research, review, and orchestration.
+- **CCM workspace**: preferred durable project runtime for canonical files, prompts, references, status, scripts, generated candidates, approved artifacts, and Git.
+- **Direct image-generation backend**: preferred Imagegen-assisted execution path when the current environment has a user-authorized, project-allowed capability that can submit prompts/references and return results to the local workspace.
+- **Manual handoff**: fallback when direct generation is unavailable or explicitly requested.
+- **Native-editable PowerPoint**: formal editable output path when required.
+
+Recommended deployment for Plus users: **ChatGPT Plus + Content PPT Pipeline + CCM + CPA ImageGen**. CPA is a recommended direct-generation backend, not a hard dependency; Plus does not itself imply CPA/API authorization.
+
+ChatGPT Library is not a production-state or artifact-registry dependency. Treat a Library file as an ordinary external input only when the user explicitly supplies or selects it.
 
 ## Global invariants
 
-1. Maintain production files in the ChatGPT/agent cloud workspace by default. Do not create the PPT project on the user's local machine merely because a connected tool can access it, unless the user explicitly requests a local path.
-2. Never infer source/image contents from filenames, search snippets, or directory listings. Anything used, recommended, or sent as a reference must be actually opened/read/viewed as appropriate.
-3. If Imagegen generation needs reference images, paths and filenames alone are not delivery. On chat-file delivery, the files must be actually sent to the current chat. On an explicitly selected local-file or packaged delivery surface, the required prompt TXT files and reference images must actually be present and usable at the agreed location.
-4. Native-editable output uses editable PowerPoint text, equations, shapes, lines, arrows, charts, and structures wherever practical. Do not rasterize equations merely for convenience.
-5. Do not silently mark a required workflow gate complete when the required capability is unavailable.
-6. Do not create a separate Pipeline runtime-state file. For an existing project, treat its explicit README/protocol and canonical project files as durable project context. If cross-session production status is needed, the README current-status section contains exactly two production values: current generated position and consecutively reviewed/approved position.
-7. At the start of Imagegen production for a selected slide range, default to one complete batch delivery for that range: complete prompt TXT files plus only the required reference images. Canonical Markdown stays in the project and is not part of the normal user generation package.
-8. GPT ImageGen reference inputs must be actual image files such as PNG, JPG/JPEG, or WebP. Never hand a PDF to Imagegen as a reference image; convert the needed PDF page/figure to an image and actually inspect the converted result first.
+1. For a persistent project, prefer the selected CCM workspace as the durable runtime. Do not create a parallel cloud/local project copy merely for convenience.
+2. At project entry or resume, read the project README/protocol and AGENTS/agent rules before changing tracked files.
+3. Never infer source/image contents from filenames, listings, snippets, or another model's description. Anything used as evidence or an Imagegen reference must be actually inspected.
+4. Keep one canonical slide spec and, when used, one current derived prompt per slide. Do not create v2/final/revised forks unless the user explicitly requests version history.
+5. Do not create a separate Pipeline runtime-state file. Persist project status in the existing README/protocol and actual local artifacts.
+6. Cross-session page state is a **set model**, not a scalar progress counter:
+   - approved;
+   - rework/unreviewed;
+   - not-generated.
+   Pages may be generated and reviewed out of order. A gap never blocks later page review.
+7. A generated file is not reusable merely because it exists. Reuse requires current canonical compatibility and a clearly approved current artifact.
+8. New generation results always enter rework/unreviewed first. Move them to approved only after actual visual review.
+9. Before changing canonical after a bad result, classify the failure:
+   - canonical/evidence/prompt defect;
+   - generation execution/input mismatch;
+   - model rendering defect;
+   - infrastructure/provider failure.
+   Wrong prompt/reference upload or other execution mismatch must not be used to justify changing correct canonical content.
+10. Imagegen reference inputs must be actual image files such as PNG, JPG/JPEG, or WebP. Do not pass PDFs directly; convert the exact needed page/figure and inspect the converted image first.
+11. Do not recursively use old generated pages, rejected generations, Pipeline-generated diagrams, or presentation-specific derived visuals as new Imagegen references unless the user explicitly overrides this rule for the current task.
+12. Quantitative plots are evidence. Reproduce them deterministically from data/code when possible; do not ask Imagegen to reinterpret numeric axes, legends, or data values.
+13. Native-editable output uses editable PowerPoint objects wherever practical.
+14. Do not silently mark a workflow gate complete when a required capability is unavailable.
 
 ## Current-action routing
 
-At the start of each turn, identify the primary action from the latest user request and current artifact. If the turn contains multiple actions, use all references actually required. Do not preload every technique just because the project is in a broad production stage.
+At each turn, identify the current action and load only the authority required for that action.
 
-### Project continuation / status control
+### Start / resume / status
 
-Resume an existing PPT project, apply its project-level README/protocol, derive current production state from actual artifacts, handle status/review or explicit generation-package requests, and keep canonical project files synchronized with user feedback.
+Resume an existing CCM project, restore state from README/protocol, canonical files, and local artifacts, or initialize a durable project structure.
 
-Authority: references/workflow.md. Add references/image-handoff.md when the turn also performs GPT ImageGen handoff or changes the delivery surface.
+Authority: references/ccm-runtime.md + references/workflow.md.
 
 ### Content / evidence review
 
-Check facts/domain logic, evidence, wording, equations, numbers, titles, conclusions, page order, slide specs, or the full spec pack. This does not hand off Imagegen references and does not create/edit a PPTX.
+Review scientific/domain logic, narrative, evidence, wording, equations, numbers, titles, conclusions, page roles, source identity, or the full spec pack.
 
 Authority: references/workflow.md.
 
 ### Material audit / evidence closure
 
-Deep-review a long-running deck project across canonical specs, prompts, source/evidence indexes, data, derived-figure scripts, and QA/build logic. Lock the project-declared narrative authority before using newer or more local sources to update details. Fix findings directly in project files and continue complete review passes until one full pass finds no new substantive issue.
+Deep-review a long-running deck across canonical specs, prompts, source/evidence indexes, data, derived-figure scripts, and QA/build logic. Lock the project-declared narrative authority first. Fix findings directly in owning project files and continue complete passes until one full pass finds no new substantive issue.
 
-For repeated deep-audit cycles, complete one review pass per conversation, persist current state/rules in project files, then use a fresh conversation for the next pass. Do not rely on an ever-growing chat as project state.
+Material closure does **not** mean generated pages or the final deck have passed visual review.
 
-This action does not automatically review generated slide images or invoke Imagegen unless the user explicitly asks for generated-page review or generation.
-
-Authority: references/workflow.md.
+Authority: references/workflow.md + references/ccm-runtime.md for persistence.
 
 ### Asset inspection / selection
 
-Find, open, view, and select real images or other assets for a slide, without yet performing the formal Imagegen handoff.
+Find, open, inspect, and select real source images or other visual inputs.
 
-Authority: references/workflow.md; use the asset-inspection portion of references/image-handoff.md when actual visual selection is involved.
+Authority: references/workflow.md + references/image-generation.md.
 
-### Imagegen handoff
+### Pre-generation production gate
 
-Prepare generation materials for Imagegen. At production start, default to a complete batch for the selected slide range; prepare a single-slide package only when explicitly requested or when a regeneration needs it.
+Before any generation, validate current canonical/prompt synchronization, prompt executability, reference eligibility, and the selected page's local output status.
 
-Authority: references/image-handoff.md, plus workflow context when needed.
+Authority: references/workflow.md + references/image-generation.md + references/ccm-runtime.md.
 
-### Deck regeneration / reuse planning
+### Direct Imagegen production
 
-When an existing deck has been renumbered, reordered, or partially redesigned, classify pages as reusable, rebuild, new, or retired before generation. Reuse approved pages whose role/content/evidence remain valid; rebuild failed, never-generated, or materially changed pages. Then prepare generation materials only for the pages that actually need generation.
+When an authorized direct-generation capability is available and project policy allows it, use it as the default Imagegen-assisted path. Generate to the local CCM workspace, review returned outputs, update page state, regenerate failures, and archive approved current artifacts.
 
-Authority: references/workflow.md. Add references/image-handoff.md only when the turn also prepares/delivers generation materials.
+Use a bounded parallel queue when useful; do not hard-code a universal concurrency value.
 
-### Returned-slide review
+Authority: references/image-generation.md + references/ccm-runtime.md + workflow context.
 
-Review a page returned by the user against the canonical production spec, current complete prompt, and relevant real reference assets/roles, then directly decide accept vs regenerate. Do not push an assessable decision back to the user.
+### Manual Imagegen handoff
 
-Authority: references/workflow.md. If regeneration is required, the next action also needs references/image-handoff.md.
+Use only when direct generation is unavailable, degraded, or explicitly requested. Prepare complete current prompt TXT files plus eligible image references for the required pages and deliver them on the selected surface.
 
-### Image regeneration
+Authority: references/image-generation.md.
 
-Revise a rejected slide's canonical spec/prompt and, if needed, resend reference assets.
+### Deck reuse / regeneration planning
 
-Authority: references/workflow.md + references/image-handoff.md.
+Classify existing pages as reuse / rebuild / new / retire based on current canonical compatibility and approved-artifact status.
 
-### Editable PPT build
+Authority: references/workflow.md + references/ccm-runtime.md.
 
-Build the formal editable PPTX from accepted pages, specs, data, and real assets.
+### Returned/generated page review
 
-Authority: references/ppt-authoring.md, plus workflow context when needed.
+Actually view the current generated page, compare it with canonical, prompt, and eligible real references, decide approve vs rework, classify the failure cause, and update local state.
 
-### Editable PPT revision
+Authority: references/workflow.md + references/image-generation.md + references/ccm-runtime.md.
 
-Modify an existing editable PPTX: objects, equations, layout, real images, charts, or page structure.
+### Editable PPT build or revision
 
-Authority: references/ppt-authoring.md. Add references/image-handoff.md only if the repair also requires image regeneration.
+Build or modify the formal editable PPTX from approved pages, canonical specs, real assets, data, and native objects.
+
+Authority: references/ppt-authoring.md + references/ccm-runtime.md.
 
 ### Whole-deck QA / final review
 
-Review the complete candidate deck for story, terminology, facts, equations, numbers, titles, conclusions, density, images, duplicates, missing content, and mode-specific constraints; then run the mandatory user whole-deck review gate.
+Actually review the complete rendered deck for narrative, terminology, facts, equations, numbers, titles, density, evidence readability, visual consistency, duplicates, omissions, and mode-specific constraints.
 
-Authority: references/workflow.md. Load technique references only for repairs actually required.
+Material QA, prompt QA, or page-state bookkeeping cannot substitute for rendered-deck review.
 
-### Optional layout-example lookup
+Authority: references/workflow.md + references/ppt-authoring.md.
 
-Use non-authoritative files under references/examples/ only when the user explicitly asks for a concrete layout/style example or the current project README/protocol selects one. Do not preload example-specific proportions, colors, density patterns, or composition rules into unrelated projects.
+### Optional layout example
 
-### Post-generation whole-deck repair
-
-Use this action when a complete candidate deck already exists and the user identifies one or more issues during or after whole-deck review.
-
-Do not restart the full pipeline by default. Triage the affected slides, preserve accepted content, reconstruct stale/missing slide specs when needed, and repair only the affected scope plus real dependencies.
-
-Authority:
-
-- revision triage, scope, dependencies, and whole-deck follow-up: references/workflow.md;
-- regenerated pages and reference handoff: references/image-handoff.md;
-- editable PowerPoint reconstruction, native objects, equations, overlays, and compatibility validation: references/ppt-authoring.md.
+Use references/examples/ only when the user explicitly selects an example or the current project protocol selects one. Examples are not authority.
 
 ## Reference availability
 
-Reuse authority already present and usable in the active context.
-
-Do not reread a reference merely to prove that it is still present or to compare the context word-for-word against the source file.
-
-Reread only when a concrete insufficiency becomes apparent, such as:
-
-- only a summary or retelling remains;
-- the prior read was explicitly truncated;
-- a required rule for the current action cannot be recovered;
-- the available authority is clearly partial or conflicting.
-
-When the required authority is usable, proceed without rereading.
+Reuse authority already present and usable in the active context. Reread a reference only when the available context is truncated, partial, conflicting, or insufficient for the current action.
