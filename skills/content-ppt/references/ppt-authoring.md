@@ -4,9 +4,9 @@ This file owns reusable rules and implementation cautions for creating, reconstr
 
 ## 1. Authoring environment
 
-For persistent Content PPT projects, author inside the selected CCM workspace or the project-declared working directory. The project runtime owns the current canonical files, approved artifacts, scripts, and final PPT work.
+For persistent Content PPT projects, author inside the active project runtime or the project-declared working directory. The project runtime owns the current canonical files, approved artifacts, scripts, and final PPT work.
 
-Do not create a second cloud/local project copy merely because another tool surface is available.
+Do not create a second project copy merely because another tool surface is available.
 
 If the user explicitly selects another working location, follow that project decision and keep one authoritative working copy.
 
@@ -46,7 +46,7 @@ Examples include:
 - CFD/DNS/simulation result figures carrying specific numeric conclusions;
 - visuals used to demonstrate actual project work or a specific named real-world facility.
 
-Do not recreate these with Imagegen and present them as evidence.
+Do not recreate these with CPA-generated lookalikes and present them as evidence.
 
 Faithful redraw from real data using code/PowerPoint is allowed. Fabricating plausible values or a plausible-looking result image is not.
 
@@ -63,7 +63,7 @@ For apparatus visuals:
 
 ### Application / scene-setting illustration
 
-Introduction, background, motivation, and engineering-application pages may use photorealistic Imagegen visuals for generic scenes such as power plants, factories, chemical facilities, pipelines, energy systems, offshore platforms, heat-transfer systems, or industrial environments.
+Introduction, background, motivation, and engineering-application pages may use photorealistic CPA-generated visuals for generic scenes such as power plants, factories, chemical facilities, pipelines, energy systems, offshore platforms, heat-transfer systems, or industrial environments.
 
 These generated scenes are allowed when they:
 
@@ -97,13 +97,13 @@ When reconstructing a screenshot, generated page, or existing artifact into edit
 - redraw elements individually with native text, equations, shapes, connectors, tables, charts, and real images;
 - preserve geometry, alignment, hierarchy, and accepted visual relationships unless a verified scientific error or explicit user request requires change;
 - do not redesign from an old prompt when the user has said the current artifact is the base;
-- a generated artifact may be used as an **editable reconstruction target** when the user explicitly designates it; this does not make it an eligible CPA/ImageGen reference input.
+- a generated artifact may be used as an **editable reconstruction target** when the user explicitly designates it; this does not make it an eligible CPA reference input.
 
 Use connectors for logical relationships when editability matters, rather than baking arrows/lines into a raster layer.
 
 ## 6. Image base + editable overlay
 
-Imagegen-assisted or transitional reconstruction may intentionally use a base image plus editable overlays.
+CPA-generated or transitional reconstruction may intentionally use a base image plus editable overlays.
 
 In that case, explicitly decide which layer provides the visible final content and which objects provide editability.
 
@@ -118,7 +118,7 @@ Check for:
 
 Do not use a hidden edit-layer pattern by default. Use hidden objects only when the user explicitly wants that behavior and the compatibility risk is acceptable.
 
-If editable overlays sit on top of a retained Imagegen base, use fills/transparency/layering deliberately so the visual result is clean rather than simply stacking duplicate content.
+If editable overlays sit on top of a retained generated base, use fills/transparency/layering deliberately so the visual result is clean rather than simply stacking duplicate content.
 
 ## 7. Charts, tables, and diagrams
 
@@ -140,7 +140,7 @@ For complex scientific figures that cannot be faithfully reconstructed without l
 
 ## 8. Mode-specific authoring
 
-### Imagegen-assisted mode
+### CPA generation path
 
 Accepted generated slide visuals may remain when the selected final mode allows them.
 
@@ -148,7 +148,7 @@ Keep overlays native where practical: titles, labels, equations, callouts, arrow
 
 ### Native-editable mode
 
-The final deck must contain zero Imagegen pixel/generation residue.
+The final deck must contain zero generated-page pixel residue.
 
 Rebuild generated content using:
 
@@ -158,7 +158,7 @@ Rebuild generated content using:
 - data-derived charts;
 - native diagrams or other editable structures.
 
-Use an Imagegen page only as a temporary editable-reconstruction target, never as final embedded generated pixels and never as a CPA reference merely because it is the reconstruction target.
+Use a CPA-generated page only as a temporary editable-reconstruction target, never as final embedded generated pixels and never as a CPA reference merely because it is the reconstruction target.
 
 ## 9. Revision
 

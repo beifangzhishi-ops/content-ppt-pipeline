@@ -2,16 +2,16 @@
 
 This file owns the business workflow: intake, research, narrative/source authority, material closure, deck design, canonical slide specs, pre-generation review, generation/reuse planning, rendered-page review, assembly transitions, post-generation revision, and whole-deck final review.
 
-It does not own CCM runtime mechanics, detailed image-generation execution, or PowerPoint object-authoring mechanics.
+It does not own host/runtime mechanics, detailed CPA-generation execution, or PowerPoint object-authoring mechanics.
 
 ## 1. Intake and mode
 
 Determine the presentation goal, audience, evidence base, desired length, available source materials, and delivery expectations from the current request and artifacts.
 
-Use one of two production modes:
+Use one of two production paths:
 
-- Imagegen-assisted: CPA ImageGen performs page visual production and returns output directly to the CCM/local project.
-- Native-editable: final PowerPoint must contain no Imagegen pixel/generation residue; final content is rebuilt from native PowerPoint objects, real source images, and data-derived charts.
+- CPA generation: CPA performs page visual production and returns output directly to the active project runtime.
+- Native-editable: final PowerPoint must contain no generated-page pixel residue; final content is rebuilt from native PowerPoint objects, real source images, and data-derived charts.
 
 Do not create a separate persistent mode/stage state file. The current mode and action should be inferable from the current request, project README/protocol, canonical files, and actual local artifacts. Cross-session page state is maintained as approved / rework-unreviewed / not-generated sets, not as scalar progress counters.
 
@@ -39,9 +39,9 @@ When searching external references, favor sources suitable for the deck's level 
 
 Before deciding whether to find a real image, rebuild a figure, or generate a visual, classify what role the image plays:
 
-- **Evidence / project-specific factual visual**: proves or depicts an actual experiment, actual apparatus, actual measurement, actual project result, actual site, or specific named real-world object. Use traceable real sources or faithful reconstruction from real data; do not substitute Imagegen.
-- **Conceptual scientific illustration**: explains a mechanism, structure, process, physical relationship, or generic experimental concept. Imagegen may be used when it does not imply that the result is an actual measurement or actual project record.
-- **Application / scene-setting illustration**: establishes engineering context, motivation, industry environment, or application background. Imagegen may be photorealistic here when it does not claim to depict a specific real project/site or carry quantitative evidence.
+- **Evidence / project-specific factual visual**: proves or depicts an actual experiment, actual apparatus, actual measurement, actual project result, actual site, or specific named real-world object. Use traceable real sources or faithful reconstruction from real data; do not substitute a generated realistic-looking version.
+- **Conceptual scientific illustration**: explains a mechanism, structure, process, physical relationship, or generic experimental concept. CPA generation may be used when it does not imply that the result is an actual measurement or actual project record.
+- **Application / scene-setting illustration**: establishes engineering context, motivation, industry environment, or application background. CPA-generated visuals may be photorealistic here when they do not claim to depict a specific real project/site or carry the page's factual proof burden.
 
 Photorealism itself is not the deciding factor. The deciding factor is whether the image is being used as evidence or as illustration.
 
@@ -124,7 +124,7 @@ Before freezing the production pack, audit the current material as a system rath
 
 Treat an old deck or old page count as a material index, not as an immutable table of contents. Keep, replace, merge, split, reorder, or add pages when the authoritative narrative and current evidence require it.
 
-When the user asks to "review the material" or equivalent, the default review surface is the current canonical specs, prompts, evidence/source indexes, source data, derived-figure scripts, QA/build scripts, and project current-state documents. Do not automatically review already generated slide images or invoke Imagegen unless the user asks for generated-page review or generation.
+When the user asks to "review the material" or equivalent, the default review surface is the current canonical specs, prompts, evidence/source indexes, source data, derived-figure scripts, QA/build scripts, and project current-state documents. Do not automatically review already generated slide images or invoke CPA generation unless the user asks for generated-page review or generation.
 
 Review in this order:
 
@@ -160,7 +160,7 @@ When a real error class is worth guarding, add a regression check if the project
 
 ### Reproducible quantitative figures
 
-When structured source data or a reliable reconstruction script exists, quantitative plots should be programmatically/reproducibly redrawn rather than fabricated by Imagegen.
+When structured source data or a reliable reconstruction script exists, quantitative plots should be programmatically/reproducibly redrawn rather than fabricated by a generation model.
 
 - Within one project and semantic category, align fonts, axes, grids, line weights, markers, legend hierarchy, number formatting, and semantic color roles.
 - Keep semantic color roles stable across pages, but do not hard-code a universal plugin palette.
@@ -218,9 +218,9 @@ Check at least:
 
 Run more than one review pass when the deck is complex. The purpose is to make the pack production-ready before expensive page generation.
 
-## 8. Imagegen-assisted generation and review
+## 8. CPA generation and review
 
-Detailed execution mechanics are owned by image-generation.md. Persistent local state and artifact lifecycle are owned by ccm-runtime.md.
+Detailed execution mechanics are owned by cpa-generation.md. Persistent local state and artifact lifecycle are owned by runtime.md.
 
 ### Three distinct production gates
 
@@ -240,7 +240,7 @@ When an existing deck is reordered, renumbered, or partially redesigned, decide 
 - Rebuild a page when its prior generated version failed and no later approved version exists, when the page has never been generated, or when its role/content/evidence materially changed.
 - A failed page does not become reusable merely because the artifact still exists in a local output directory.
 - A previously approved page does not automatically remain approved after material content or evidence roles change.
-- Minor page-number/text/index updates may be handled in the editable stage instead of Imagegen regeneration when the selected production mode and artifact make that safe.
+- Minor page-number/text/index updates may be handled in the editable stage instead of CPA regeneration when the selected production path and artifact make that safe.
 - CPA generation should submit only pages that actually need generation.
 
 ### Generation and asynchronous review
@@ -291,9 +291,9 @@ Transition based on the selected production mode and the current delivery goal.
 
 Detailed native PowerPoint construction is owned by ppt-authoring.md.
 
-Imagegen-assisted mode may assemble accepted generated page visuals directly when that is part of the chosen final mode.
+The CPA generation path may assemble accepted generated page visuals directly when that is part of the chosen final delivery.
 
-Native-editable mode must rebuild the final deck with no Imagegen pixel/generation residue.
+Native-editable mode must rebuild the final deck with no generated-page pixel residue.
 
 ## 10. Whole-deck QA
 
@@ -314,12 +314,12 @@ Check:
 - duplicated/missing slides;
 - broken/cropped content;
 - master/layout consistency;
-- Native-editable mode: no Imagegen residue remains.
+- Native-editable mode: no generated-page pixel residue remains.
 
 Repairs transition into the appropriate current action:
 
 - content/story fix -> content/evidence review;
-- regenerated page -> Imagegen regeneration;
+- regenerated page -> CPA regeneration;
 - editable object/layout fix -> editable PPT revision.
 
 ## 11. Mandatory user whole-deck review

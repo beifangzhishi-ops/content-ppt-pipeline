@@ -5,59 +5,74 @@ This file is for maintainers and agents working on the Content PPT Pipeline repo
 ## Authority
 
 - `plugin.json`: install metadata and version.
-- `skills/content-ppt/SKILL.md`: model-facing core contract and action routing.
-- `skills/content-ppt/references/ccm-runtime.md`: CCM persistent runtime.
+- `skills/content-ppt/SKILL.md`: model-facing runtime/backend contract, core contract, and action routing.
+- `skills/content-ppt/references/runtime.md`: host/runtime routing, persistent state, local artifacts, Git.
 - `skills/content-ppt/references/workflow.md`: content/evidence/deck lifecycle.
-- `skills/content-ppt/references/image-generation.md`: CPA production, reference eligibility, queue/review/regeneration.
+- `skills/content-ppt/references/cpa-generation.md`: CPA production, fresh requests, reference eligibility, queue/review/regeneration.
 - `skills/content-ppt/references/ppt-authoring.md`: editable/native PowerPoint construction.
 - `README.md`: user-facing current product model.
 
-Do not preserve obsolete workflow branches for compatibility unless the user explicitly requests it.
+Do not preserve obsolete workflow branches or aliases for compatibility unless the user explicitly requests it.
 
-## Product scope
+## Product scope and dependencies
 
-The skill targets:
+Primary practice:
 
-`ChatGPT Plus + Content PPT Pipeline + CCM + CPA ImageGen`
+`ChatGPT Plus -> Content PPT Pipeline -> CCM -> project -> CPA when generation is required`
 
-Product assumptions:
+Secondary compatible host:
 
-- GPT is the reasoning/review/orchestration layer.
-- CCM is the durable runtime for long-running projects.
-- CPA ImageGen is the Imagegen-assisted production backend.
-- CPA output returns to the local CCM project.
-- ChatGPT Library is not a runtime/state/artifact layer.
-- there is no manual Imagegen handoff branch.
+`Codex -> Content PPT Pipeline -> native Codex runtime -> CPA when generation is required`
 
-If CPA is unavailable, generation is blocked until the runtime is restored. Do not silently introduce a manual upload/download workflow.
+Roles:
+
+- the host model owns reasoning, research, review, and orchestration;
+- CCM is the durable project runtime for the ChatGPT Plus practice;
+- Codex uses its own native workspace/execution environment instead of CCM;
+- CPA is an independent visual-generation backend, not a project runtime or bundled plugin dependency;
+- Content PPT Pipeline owns orchestration policy.
+
+Do not add a fake manifest dependency on CPA. Do not imply CCM is bundled into Content PPT Pipeline.
 
 ## Model-readable design
 
 The skill is intentionally layered:
 
-1. `SKILL.md` contains the small core contract and action routing that the model should rarely miss.
+1. `SKILL.md` contains the small runtime/backend contract, core contract, and action routing that the model should rarely miss.
 2. Each reference file owns one concern.
 3. Detailed rules should not be duplicated across multiple reference files unless needed to prevent a known dangerous ambiguity.
 4. When a lower-level rule conflicts with the core contract, the core contract wins unless the user explicitly overrides that rule for the current task.
 
-Keep `SKILL.md` short enough to read in full. Move mechanics downward rather than adding more top-level bullets.
+Keep `SKILL.md` short enough to read in full. Move mechanics downward rather than adding incidental detail to the top level.
 
-## CCM runtime
+## Runtime
 
 For persistent projects:
 
-1. enter the selected CCM workspace;
+1. enter the active runtime/workspace;
 2. read project README/protocol;
 3. read project AGENTS/AGENT;
 4. inspect Git status;
 5. restore state from canonical/current project files and local artifacts;
 6. update README/AGENTS when current state or durable project rules change.
 
+Use CCM on ChatGPT Plus. Use native Codex execution in Codex.
+
 Do not use chat history as the project database.
 
-Do not create a parallel cloud/local working copy.
+## CPA fresh-request invariant
 
-Library may be used only when the user explicitly supplies/selects a Library file as an external source.
+**One slide = one fresh CPA HTTP request.**
+
+For every page:
+
+- create a new request;
+- send that page's current prompt;
+- attach only that page's selected eligible references;
+- send no reference when the page has none;
+- do not forward any previous page generation/session/conversation identifier or prior-page request context.
+
+Parallel production is allowed only as multiple independent fresh requests.
 
 ## Page state
 
@@ -88,7 +103,7 @@ Maintain one current canonical spec and one current prompt per page.
 
 When a CPA render fails:
 
-- if canonical/prompt is still correct, regenerate;
+- if canonical/prompt is still correct, regenerate with another fresh request;
 - if review identifies a real source/instruction defect, fix the owning source and synchronize prompt;
 - CPA runtime failures do not justify canonical edits.
 
@@ -122,12 +137,34 @@ Run complete review passes. Material closure requires at least one pass with no 
 
 Material closure is not rendered approval.
 
+## Evidence vs generated illustration
+
+Do not let terminology cleanup weaken this boundary.
+
+### Proof-chain/project/practice evidence
+
+Actual project work, apparatus, experiments, measurements, simulation results, sites, or other factual records must use traceable real sources or faithful deterministic reconstruction from real data.
+
+Do not use CPA to fabricate a realistic-looking substitute and present it as actual evidence.
+
+If a named real facility/site/case is itself part of the factual claim, use a real source image rather than a generated lookalike.
+
+### Conceptual illustration
+
+CPA-generated visuals may explain mechanisms, relationships, processes, structures, or generic apparatus concepts when they are not presented as actual project records or measured results.
+
+### Engineering application / scene-setting
+
+CPA-generated visuals, including photorealistic scenes, are allowed for background, motivation, application context, or generic engineering environments when they do not carry the factual proof burden.
+
+Titles/captions/copy must not misrepresent generated illustration as actual evidence.
+
 ## Three production gates
 
 Keep separate:
 
 1. material closure;
-2. pre-generation prompt/reference gate;
+2. pre-generation prompt/reference/fresh-request gate;
 3. rendered-page/deck review.
 
 No text/package/build validation substitutes for actual visual review.
@@ -136,14 +173,14 @@ No text/package/build validation substitutes for actual visual review.
 
 Every final selected reference must be actually viewed.
 
-Eligible factual inputs are real, traceable, inspected source images that provide qualitative factual context.
+Eligible factual inputs are real, traceable, inspected source images that provide appropriate factual context.
 
 If exact axes/values/legend/colorbar/uncertainty/series mapping matter, keep the figure out of CPA reinterpretation and place/rebuild it directly in the PPT assembly layer.
 
 Do not use as CPA references by default:
 
 - old generated slides;
-- AI/ImageGen output;
+- AI/generated output;
 - rejected output;
 - Pipeline-generated diagrams;
 - presentation-specific script redraws;
@@ -155,15 +192,16 @@ PDF is not a direct CPA image reference. Convert the exact needed page/figure to
 
 ## CPA production
 
-Use CPA ImageGen for Imagegen-assisted production.
+Use CPA for generation/regeneration.
 
 Loop:
 
-`pre-generation gate -> CPA submit -> local candidate -> unreviewed -> visual review -> approved/rework -> regenerate -> approved-current`
+`pre-generation gate -> fresh CPA request -> local candidate -> unreviewed -> visual review -> approved/rework -> regenerate -> approved-current`
 
 Parallel production is allowed:
 
 - bounded in-flight queue;
+- each page remains an independent fresh request;
 - asynchronous review;
 - page state independent of return order;
 - stop queue expansion when a common visual failure appears.
@@ -188,8 +226,8 @@ For quantitative evidence:
 - preserve provenance;
 - actually inspect rendered output;
 - maintain semantic axis/color/legend consistency;
-- retain real source figure if faithful reconstruction is not appropriate;
-- do not ask ImageGen to reinterpret exact values.
+- retain the real source figure if faithful reconstruction is not appropriate;
+- do not ask a generation model to reinterpret exact values.
 
 ## Reuse / rebuild
 
@@ -236,21 +274,28 @@ Before release:
 1. `git diff --check`;
 2. parse `plugin.json` and marketplace JSON;
 3. confirm README and plugin versions match;
-4. search for retired generation branches, scalar review progress, Library state/artifact authority, generated-page-as-CPA-reference permission, or cloud-workspace defaults conflicting with CCM-first;
-5. verify action routing for CCM resume, material audit, pre-generation, CPA production, generated-page review, editable build, whole-deck QA;
-6. build ChatGPT ZIP;
-7. confirm ZIP root is only `plugin.json + skills/`;
-8. confirm no secrets/provider config are tracked;
-9. inspect final Git status.
+4. search for retired workflow, authority-name, and routing residue;
+5. confirm only current authority files and production-path names remain;
+6. verify runtime routing: ChatGPT Plus -> CCM; Codex -> native runtime; CPA -> generation backend;
+7. verify fresh-request wording in SKILL + cpa-generation + AGENTS;
+8. verify evidence boundary still allows non-proof conceptual/application visuals but forbids generated lookalikes as actual project/practice evidence;
+9. build ChatGPT ZIP;
+10. confirm ZIP root is only `plugin.json + skills/`;
+11. confirm retired authority files are absent from the ZIP;
+12. confirm no secrets/provider config are tracked;
+13. inspect final Git status.
+
+After installation, inspect the installed skill in a fresh ChatGPT conversation. The installed release must match the repository contract and contain only current runtime and CPA routing.
 
 ## Versioning
 
 Use semver.
 
-0.5.1 establishes:
+0.6.0 establishes:
 
-- CPA-only Imagegen-assisted production;
-- simplified regeneration semantics;
-- model-readable core contract + action routing;
-- clearer quantitative-reference boundary;
-- clearer generated-page reconstruction vs CPA-reference boundary.
+- ChatGPT Plus + CCM as the primary practice with native Codex runtime compatibility;
+- explicit runtime vs CPA backend dependency roles;
+- one-slide/one-fresh-CPA-request behavior;
+- removal of retired workflow and authority-name residue;
+- preserved evidence-vs-generated-illustration boundary;
+- discrete page state and approved-current artifact semantics.

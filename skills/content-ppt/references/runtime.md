@@ -1,48 +1,64 @@
-# CCM Runtime
+# Project Runtime
 
-This file owns persistent project execution for Content PPT Pipeline.
+This file owns persistent project execution, durable state, local artifact lifecycle, Git, and host-specific runtime routing.
 
-The preferred architecture for long-running work is:
+## 1. Runtime routing
 
-`ChatGPT Plus / GPT -> CCM workspace -> canonical/project state -> direct generation / PPT authoring`
+The project runtime and the generation backend are separate roles.
 
-CCM is not merely a file-access convenience. For persistent projects, it is the preferred durable runtime.
+### ChatGPT Plus
 
-## 1. Enter or resume a project
+Use CCM as the persistent project runtime:
+
+`ChatGPT Plus -> Content PPT Pipeline -> CCM workspace -> project files/artifacts/Git`
+
+CCM supplies the durable workspace, filesystem/process execution, image reads, and Git surface while the ChatGPT model remains the reasoning/review/orchestration layer.
+
+### Codex
+
+When the skill runs in Codex, use the native Codex workspace/execution environment:
+
+`Codex -> Content PPT Pipeline -> native Codex workspace -> project files/artifacts/Git`
+
+Do not instantiate CCM merely for compatibility when Codex already supplies the required execution environment.
+
+### CPA
+
+CPA is not the project runtime. It is invoked from the active runtime only for CPA generation/regeneration actions.
+
+## 2. Enter or resume a project
 
 When the user refers to an existing project:
 
-1. enter the selected CCM workspace;
+1. enter the selected runtime/workspace;
 2. read the project README/protocol;
 3. read AGENTS.md / AGENT.md or equivalent project rules;
-4. inspect current Git status;
+4. inspect current Git status when applicable;
 5. inspect only the canonical/source/artifact files needed for the current action;
 6. restore page state from project files and actual local artifacts;
 7. continue from current state rather than reconstructing the project from chat history.
 
-Do not ask the user to repeat information that is already present in the workspace.
+Do not ask the user to repeat information already present in the project.
 
 Do not create a parallel project directory merely to make the current task easier.
 
-## 2. Durable authority
+## 3. Durable authority
 
 Use this default hierarchy unless the project declares another one:
 
 1. current user instruction;
-2. project README/protocol for current project state and entry points;
+2. project README/protocol for current state and entry points;
 3. AGENTS/AGENT for durable project rules;
 4. canonical per-slide specs and source/evidence indexes;
 5. current derived prompts;
 6. local candidate and approved artifacts;
 7. chat history as transient interaction context.
 
-Conversation memory is not the project database.
+Conversation history is not the project database.
 
-ChatGPT Library is not a project-state authority. A Library file is an ordinary external input only when the user explicitly provides or selects it.
+## 4. Page-state model
 
-## 3. Page-state model
-
-Do not maintain scalar progress such as:
+Do not maintain scalar durable progress such as:
 
 - generated through Pxx;
 - reviewed through Pxx;
@@ -51,21 +67,19 @@ Do not maintain scalar progress such as:
 Persist page status as disjoint sets:
 
 - **approved**: the current generated artifact has been visually reviewed and accepted;
-- **rework/unreviewed**: a generated artifact exists but is not currently accepted, including fresh unreviewed output;
+- **rework/unreviewed**: a generated artifact exists but is not currently accepted, including every fresh unreviewed output;
 - **not-generated**: no current generation exists for that page.
 
 Pages may advance out of order. An earlier missing/rework page never invalidates a later approved page.
 
 Counts and percentages may be shown as temporary summaries but are not durable state.
 
-Whenever a new generation lands, place that page in rework/unreviewed first. Move it to approved only after actual review.
-
-## 4. Local artifact lifecycle
+## 5. Local artifact lifecycle
 
 Projects should distinguish:
 
 - **candidate outputs**: fresh, unreviewed, or failed generations;
-- **approved current artifacts**: the accepted current visual for each page.
+- **approved-current artifacts**: the accepted current visual for each page.
 
 Use project-declared directories when available. Otherwise establish clear local directories or indexes rather than mixing both classes.
 
@@ -80,46 +94,42 @@ Rules:
 
 If the project already maintains an artifact index, update it in the same work cycle as README/protocol status. Do not invent a second persistent index without need.
 
-## 5. Direct-generation outputs
+## 6. CPA output handling
 
-When the active Imagegen backend writes results locally:
+When CPA returns a page:
 
-1. write or receive the generated output inside the CCM project runtime or a project-declared local output directory;
-2. associate it with the correct page/job before review;
+1. write/receive the output inside the active project runtime or project-declared output directory;
+2. associate it with the correct page/job;
 3. classify it as rework/unreviewed;
 4. inspect it;
 5. on approval, place/rename/copy it into the approved-current artifact view and update project status;
 6. on review failure, keep it out of approved-current and route it back to CPA regeneration.
 
-Do not route local direct-generation output through ChatGPT Library merely for bookkeeping.
+## 7. State checks
 
-## 6. State checks
-
-For requests such as "status", "progress", "review what is done", or "continue":
+For requests such as status, progress, review what is done, or continue:
 
 1. read current project status;
-2. scan relevant local candidate/approved artifact locations;
+2. scan relevant candidate/approved artifact locations;
 3. reconcile actual files with approved / rework / not-generated sets;
-4. review newly appeared unreviewed artifacts when the user asked for review;
+4. review newly appeared unreviewed artifacts when review was requested;
 5. update project status in the same work cycle;
 6. report page sets or the meaningful delta, not a consecutive progress number.
 
 Do not assume that every image in an output directory is a valid slide artifact. Verify page identity and actual content when needed.
 
-## 7. Regeneration and runtime failure
-
-Keep page-state semantics simple:
+## 8. Regeneration and runtime failure
 
 - if an actual returned page fails visual review, keep it in rework/unreviewed and regenerate through CPA;
 - change canonical or prompt only when review identifies a real source/instruction defect;
 - CPA authorization, quota, timeout, network, or backend failures are runtime blockers, not page-review conclusions.
 
-## 8. Git and tracked project maintenance
+## 9. Git and tracked project maintenance
 
 When the project uses Git:
 
 - inspect status before tracked edits;
-- update README and AGENTS when current state or durable rules change;
+- update README and AGENTS when current state or durable project rules change;
 - keep transient scripts, caches, API keys, tokens, and provider scratch output ignored;
 - never commit secrets;
 - validate expected tracked changes before commit;
@@ -127,24 +137,23 @@ When the project uses Git:
 
 Do not retain obsolete compatibility rules or stale workflow names unless the user explicitly requests historical compatibility.
 
-## 9. Secrets and provider configuration
+## 10. Secrets and provider configuration
 
-CPA API keys, tokens, endpoint configuration, model discovery, and local execution credentials belong to the local runtime.
+CPA API keys, tokens, endpoint configuration, model discovery, and local execution credentials belong to the active runtime.
 
 They must not appear in:
 
 - canonical slide specs;
 - prompt TXT files;
 - project README status;
-- generation packages;
 - Git-tracked plugin authority.
 
-Use ignored local files, environment variables, or the provider's secure configuration mechanism.
+Use ignored local files, environment variables, or secure provider/runtime mechanisms.
 
-## 10. New-chat recovery acceptance
+## 11. Fresh-conversation recovery
 
-A healthy persistent project should be resumable in a fresh ChatGPT conversation by using CCM alone:
+A healthy project should be recoverable in a fresh host conversation from:
 
 `workspace -> README/AGENTS -> canonical/current prompts -> local artifacts -> current action`
 
-No Library synchronization and no prior-chat replay should be required for normal recovery.
+Normal recovery must not require replaying prior chat history.
