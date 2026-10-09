@@ -10,25 +10,26 @@ This file is for maintainers and agents working on the Content PPT Pipeline repo
 - `skills/content-ppt/references/workflow.md`: content/evidence/deck lifecycle.
 - `skills/content-ppt/references/cpa-generation.md`: CPA production, fresh requests, reference eligibility, queue/review/regeneration.
 - `skills/content-ppt/references/ppt-authoring.md`: editable/native PowerPoint construction.
+- `skills/content-ppt/references/research-defense.md`: optional defense-specific narrative and evidence safeguards.
 - `README.md`: user-facing current product model.
 
 Do not preserve obsolete workflow branches or aliases for compatibility unless the user explicitly requests it.
 
 ## Product scope and dependencies
 
-Primary practice:
+Peer execution route A:
 
 `ChatGPT Plus -> Content PPT Pipeline -> CCM -> project -> CPA when generation is required`
 
-Secondary compatible host:
+Peer execution route B:
 
 `Codex -> Content PPT Pipeline -> native Codex runtime -> CPA when generation is required`
 
 Roles:
 
 - the host model owns reasoning, research, review, and orchestration;
-- CCM is the durable project runtime for the ChatGPT Plus practice;
-- Codex uses its own native workspace/execution environment instead of CCM;
+- CCM is the durable project runtime for the ChatGPT route;
+- Codex uses its own equally supported native workspace/execution environment instead of CCM;
 - CPA is an independent visual-generation backend, not a project runtime or bundled plugin dependency;
 - Content PPT Pipeline owns orchestration policy.
 
@@ -58,6 +59,8 @@ For persistent projects:
 
 Use CCM on ChatGPT Plus. Use native Codex execution in Codex.
 
+Before every actual modification round, reread project README/protocol, AGENTS, the established layout/master authority, and the specific primary sources for the pages being changed. Keep source reading bounded by natural paper/chapter/experiment units; do not trust chat recall as a replacement for current authority.
+
 Do not use chat history as the project database.
 
 ## CPA fresh-request invariant
@@ -78,7 +81,7 @@ Parallel production is allowed only as multiple independent fresh requests.
 
 Do not use scalar durable progress.
 
-Maintain:
+Maintain within the **explicitly named current production stage**:
 
 - approved;
 - rework/unreviewed;
@@ -90,7 +93,7 @@ Every fresh CPA output enters rework/unreviewed first.
 
 Candidate output and approved-current artifacts remain separate.
 
-Page approved means pipeline-reviewed current artifact, not user final whole-deck approval.
+Generation-stage approved means the current **visual composition** is usable downstream; it is not final editable/final user acceptance. A reliably editable typo, formula label, local arrow, or page number may be logged for downstream correction after visual approval, but a scientific, evidence, explanation, or structural defect still blocks it. All deferred fixes must be closed at the editable/delivery gate; keep fix records in the existing project files, not a new database.
 
 ## Canonical discipline
 
@@ -123,6 +126,8 @@ Default review priority:
 8. decorative polish.
 
 Each slide should have one primary question. Title, primary evidence, and takeaway align to that question.
+
+Visible copy must address the audience, not internal project shorthand. Prefer direct claim + evidence + necessary qualifier instead of defense-oriented disclaimers and gratuitous hedging. Use real inspected apparatus / engineering evidence when it is available, rather than fabricating a more photogenic substitute.
 
 Evidence-strength guardrails:
 
@@ -169,6 +174,8 @@ Keep separate:
 
 No text/package/build validation substitutes for actual visual review.
 
+CPA generation review can pass reusable composition with explicitly logged downstream edits; final editable and final whole-deck checks are distinct. Normal three-column layouts, formula boxes, and arrows are not automatically "code-like"; inspect instead for broken equations, text overflow, unjustified voids, font substitutions, and failure to explain the page's scientific question.
+
 ## CPA reference discipline
 
 Every final selected reference must be actually viewed.
@@ -193,6 +200,8 @@ PDF is not a direct CPA image reference. Convert the exact needed page/figure to
 ## CPA production
 
 Use CPA for generation/regeneration.
+
+Prompts must distinguish required page-visible content from visual duty/instructions and non-displayed provenance/source/QA notes. Do not allow internal construction instructions to leak into rendered page copy. Never use code to retouch or pixel-patch an authoritative CPA PNG; repair relevant instructions when needed and regenerate with a fresh request.
 
 Loop:
 
@@ -244,6 +253,8 @@ Material/evidence changes invalidate prior approval until reassessed.
 
 Preserve relationships, not old generated geometry.
 
+Every meaningful edge must be explainable as source -> action/relationship -> target. Do not fabricate feedback arrows merely for an attractive closed loop. Visual QA judges explanatory power, not just correctness or geometry.
+
 Prefer short horizontal/vertical/90-degree connectors. Avoid unnecessary long diagonals and crossings.
 
 Do not encode one project's palette/proportions as universal rules.
@@ -251,6 +262,10 @@ Do not encode one project's palette/proportions as universal rules.
 ## Editable PowerPoint
 
 Native-editable mode uses PowerPoint-native text, equations, shapes, connectors, charts, tables, and simple diagrams wherever practical.
+
+For ImgGen-to-editable construction, keep the approved page as a **temporary, removable bottom-layer alignment guide**; recreate editable objects visibly above it. The user fine-tunes them against the guide and later deletes the guide. Temporary double images/text are acceptable, hidden editable objects are not. Native objects should remain understandable with the guide hidden. Genuine scientific figures must preserve aspect ratio; redraw reproducible plots from data/code or revise layout rather than stretching axes to fit.
+
+Pilot a genuinely representative complex slide before mass conversion. Open/save/reopen in target PowerPoint, confirm editability, and inspect guide-hidden content. QA tools must be read-only: fixes belong in separate build steps. Compare non-target slide parts on localized edits when feasible so validators and stale helper scripts cannot silently rewrite unrelated pages.
 
 Generated screenshots are not a substitute for editable delivery.
 
@@ -279,11 +294,13 @@ Before release:
 6. verify runtime routing: ChatGPT Plus -> CCM; Codex -> native runtime; CPA -> generation backend;
 7. verify fresh-request wording in SKILL + cpa-generation + AGENTS;
 8. verify evidence boundary still allows non-proof conceptual/application visuals but forbids generated lookalikes as actual project/practice evidence;
-9. build ChatGPT ZIP;
-10. confirm ZIP root is only `plugin.json + skills/`;
-11. confirm retired authority files are absent from the ZIP;
-12. confirm no secrets/provider config are tracked;
-13. inspect final Git status.
+9. verify stage-scoped approval, downstream-fix tracking, three prompt-content roles, and editable bottom-guide behavior (including aspect-ratio protection);
+10. verify research-defense.md is routed only for defense-like tasks and that QA remains non-mutating;
+11. build ChatGPT ZIP;
+12. confirm ZIP root is only `plugin.json + skills/`;
+13. confirm retired authority files are absent from the ZIP;
+14. confirm no secrets/provider config are tracked;
+15. inspect final Git status.
 
 After installation, inspect the installed skill in a fresh ChatGPT conversation. The installed release must match the repository contract and contain only current runtime and CPA routing.
 
@@ -291,11 +308,12 @@ After installation, inspect the installed skill in a fresh ChatGPT conversation.
 
 Use semver.
 
-0.6.0 establishes:
+0.7.0 establishes:
 
-- ChatGPT Plus + CCM as the primary practice with native Codex runtime compatibility;
+- ChatGPT + CCM and Codex native as peer execution routes;
 - explicit runtime vs CPA backend dependency roles;
 - one-slide/one-fresh-CPA-request behavior;
-- removal of retired workflow and authority-name residue;
-- preserved evidence-vs-generated-illustration boundary;
-- discrete page state and approved-current artifact semantics.
+- stage-scoped visual approval and logged downstream fixes;
+- editable reconstruction with a removable ImgGen bottom guide and preserved scientific figure aspect ratios;
+- prompt role separation, non-mutating validation, and defense-specific research narrative guidance;
+- preserved evidence-vs-generated-illustration boundary and discrete page-state semantics.

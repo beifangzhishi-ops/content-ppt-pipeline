@@ -77,6 +77,8 @@ Page titles, captions, and surrounding text must not mislabel generated illustra
 
 Before placing any real source image, actually view it and match it to the slide's claim. Preserve aspect ratio and avoid misleading crops.
 
+For genuine scientific plots, experiment photos, microscopy and other geometry- or evidence-bearing images, **never non-uniformly stretch to match a generated layout**. Preserve aspect ratio. If the reserved space is incompatible, revise the layout or (for reproducible data-derived figures) change the plotting script's canvas, axes, legend, and typography, render anew from the authoritative data, then place proportionally. Never distort data curves or measurements to satisfy a screenshot's geometry.
+
 ## 4. Native equation authoring
 
 “Looks like an equation” is not the same as a native editable equation.
@@ -89,36 +91,29 @@ When the requirement is a PowerPoint-native equation:
 
 If an Office-native path is used to create equations, validate the resulting object in the target PowerPoint application when that capability is available.
 
-## 5. Editable reconstruction from a visual base
+## 5. Default ImgGen-to-editable reconstruction
 
-When reconstructing a screenshot, generated page, or existing artifact into editable PowerPoint:
+When reconstructing an approved or user-designated ImgGen/CPA slide into editable PowerPoint:
 
 - treat the user-designated artifact as the visual source of truth when the user explicitly says to reproduce it;
-- redraw elements individually with native text, equations, shapes, connectors, tables, charts, and real images;
-- preserve geometry, alignment, hierarchy, and accepted visual relationships unless a verified scientific error or explicit user request requires change;
+- **place the original generated slide as a temporary bottom-layer image on the same slide** to serve as a visible alignment template;
+- above that guide, rebuild the intended editable text, equations, labels, scientific figures, tables, shapes, connectors, and arrows using actual editable PowerPoint objects or faithful real assets;
+- preserve approximate geometry, alignment, hierarchy, and accepted visual relationships unless a verified scientific error or explicit user request requires change;
 - do not redesign from an old prompt when the user has said the current artifact is the base;
-- a generated artifact may be used as an **editable reconstruction target** when the user explicitly designates it; this does not make it an eligible CPA reference input.
+- aim for **editable and approximately positioned**, not a complete one-pass pixel-perfect clone; the user will visually align and modify objects with the guide in place, then delete it;
+- **temporary doubled text, equations, or graphics are acceptable** because the underlying guide is deliberately visible during reconstruction; do not hide editable objects or distort geometry to suppress this double image;
+- when the user requests the **clean final deck**, remove the temporary guide and verify that native content remains complete and legible; a guide-bearing working draft is a valid intermediate deliverable;
+- a generated artifact can serve as this **reconstruction target/visual guide** but is not thereby an eligible CPA reference input or scientific evidence.
 
 Use connectors for logical relationships when editability matters, rather than baking arrows/lines into a raster layer.
 
-## 6. Image base + editable overlay
+### Reconstruction pilot and verification
 
-CPA-generated or transitional reconstruction may intentionally use a base image plus editable overlays.
+Before rolling out a new reconstruction method to a large deck, choose a representative complex page containing several of the actual object types: mathematical equations, charts/real scientific figures, tables, and connectors as appropriate. Open, save, close, reopen, and edit it in the intended PowerPoint application. Correct the underlying authoring method before bulk conversion.
 
-In that case, explicitly decide which layer provides the visible final content and which objects provide editability.
+The generated guide may be visually noisy while editing; judge the reconstruction on its editability and its **guide-hidden / guide-deleted** content, not the double appearance of the working view. Avoid a hidden-edit-layer workaround: editable objects must be selectable, visible in the clean view, and genuinely modifiable.
 
-Check for:
-
-- double-shadow or doubled text;
-- duplicate formulas;
-- duplicate arrows/connectors;
-- duplicate labels/tables;
-- hidden objects unexpectedly rendered by another application;
-- editable objects that technically exist but are invisible or impractical to find/edit.
-
-Do not use a hidden edit-layer pattern by default. Use hidden objects only when the user explicitly wants that behavior and the compatibility risk is acceptable.
-
-If editable overlays sit on top of a retained generated base, use fills/transparency/layering deliberately so the visual result is clean rather than simply stacking duplicate content.
+Check for missing objects, inaccessible overlays, wrong object order, and content that vanishes when the guide is hidden. Do not mistake guide duplicates for actual overlapping native objects. The guide must remain easy for the user to select/remove without deleting the objects above it.
 
 ## 7. Charts, tables, and diagrams
 
@@ -148,7 +143,7 @@ Keep overlays native where practical: titles, labels, equations, callouts, arrow
 
 ### Native-editable mode
 
-The final deck must contain zero generated-page pixel residue.
+The **cleaned final deck**, after guide removal, must contain no generated **full-page** image pretending to be editable content. A working reconstruction PPTX may intentionally retain its temporary full-page ImgGen guide. Ordinary non-evidence generated conceptual illustrations may remain when expressly part of the selected final visual design.
 
 Rebuild generated content using:
 
@@ -158,7 +153,7 @@ Rebuild generated content using:
 - data-derived charts;
 - native diagrams or other editable structures.
 
-Use a CPA-generated page only as a temporary editable-reconstruction target, never as final embedded generated pixels and never as a CPA reference merely because it is the reconstruction target.
+Use a CPA-generated page as the temporary bottom-layer reconstruction target, never as a substitute for independently editable content and never as a CPA reference merely because it is the reconstruction target.
 
 ## 9. Revision
 
@@ -169,6 +164,8 @@ When revising an existing editable deck:
 - keep object editability;
 - do not replace an editable page with a raster image as a shortcut;
 - re-run page-level checks after the edit.
+
+Run QA/validation in read-only mode. Never hide a corrective write operation inside a validator. For local changes, compare **non-target pages** and their PPTX slide parts/objects to the baseline when feasible and reject accidental changes outside the intended pages; repairs must be separate explicit authoring steps.
 
 When the user designates a current screenshot/PPT artifact as the editable reconstruction base, that artifact controls the reconstruction. This authoring rule does not override CPA reference-eligibility rules.
 
@@ -210,6 +207,8 @@ Before returning a candidate PPTX to whole-deck QA, verify:
 - real images are the intended source assets;
 - generated illustrations are used only in permitted non-evidence roles;
 - no unintended duplicate/hidden layers remain;
+- temporary guide remains removable, and guide-hidden content stands alone; overlapping guide and editable objects during construction are expected, not final-layout defects;
+- evidence-bearing images preserve their true aspect ratios (redraw data figures from source code rather than non-uniformly stretching them);
 - page size/master/layout are consistent;
 - complex outputs have completed the available PowerPoint compatibility check;
-- Native-editable mode has no generated-pixel residue.
+- clean native-editable delivery has no residual full-page generated guide unless the user explicitly requested the working alignment draft.

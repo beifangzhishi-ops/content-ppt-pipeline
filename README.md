@@ -1,245 +1,97 @@
 # Content PPT Pipeline
 
-面向 **ChatGPT Plus** 用户的内容型 PowerPoint 工作流 Skill，重点服务科研汇报、课程、工程报告、技术评审和项目答辩等证据密集型 PPT。
+面向 ChatGPT 和 Codex 用户的**证据驱动、内容优先** PowerPoint 工作流 Skill。用于科研答辩、工程报告、课程、技术评审等内容密集型 PPT，强调科研准确性、叙事连贯、真实素材、图表溯源、可编辑施工及逐页和整套审核。
 
-## 当前架构
-
-主实践：
+## 当前架构：两个并列的正式运行入口
 
 ```text
-ChatGPT Plus
-    -> Content PPT Pipeline
-    -> CCM
-       -> README / AGENTS
-       -> canonical slide specs
-       -> current prompts
-       -> source / evidence indexes
-       -> candidate outputs
-       -> approved-current artifacts
-       -> scripts / QA
-       -> Git
-    -> CPA（仅在需要页面视觉生成/重生时）
-    -> local candidate -> review -> approved-current
+ChatGPT + CCM ──┐
+                ├─> Content PPT Pipeline
+Codex native ───┘        │
+                         ├─ README / AGENTS / canonical / source index
+                         ├─ local scripts / artifacts / Git / QA
+                         ├─ optional CPA: one fresh HTTP request per generated slide
+                         └─ editable PPTX / rendered review / whole-deck QA
 ```
 
-兼容路径：
+- **ChatGPT + CCM**：CCM 提供项目持久工作区、文件、工具执行和 Git；ChatGPT 负责研究、编排与审核。
+- **Codex native**：直接使用 Codex 的原生工作区、会话和工具执行能力。与 ChatGPT+CCM 是**并列的一等入口**，不是兼容备选。
+- **Content PPT Pipeline**：统一规定内容叙事、证据边界、页面状态、生成门禁、可编辑重建和验收流程。两个宿主使用相同业务规则。
+- **CPA**：按需使用的页面视觉生成/重生成后端，不是项目运行时，也不随本 Skill 打包。
 
-```text
-Codex
-    -> Content PPT Pipeline
-    -> Codex native workspace / execution
-    -> CPA（需要生成时）
-    -> local candidate -> review -> approved-current
-```
+## 项目入口与权威材料
 
-角色划分：
+每轮开始**实际修改**前：
 
-- **Content PPT Pipeline**：编排规则、证据规则、页面生命周期、审核门和 PPT 交付规则。
-- **CCM**：ChatGPT Plus 主实践中的 durable project runtime，负责 workspace、文件、进程、图片读取和 Git。
-- **Codex native runtime**：在 Codex 中直接承担项目运行时，不需要再套 CCM；这条路径会消耗 Codex 使用额度。
-- **CPA**：独立的页面视觉生成后端，不是项目 runtime，也不是 Content PPT Pipeline 内置模块。
+1. 进入当前 runtime 和既有项目，不另建平行项目目录。
+2. 重读当前 README/protocol、AGENTS/AGENT.md。
+3. 重新确认项目的**版式/母版 authority**，单页返工默认继承该基准。
+4. 打开本轮直接相关的权威材料：博论/论文对应部分、原始科研图、实验记录或现有设计稿。
+5. 核对 canonical、唯一 current prompt、来源索引、产物目录、Git 状态。
+6. 基于当前项目状态继续，而不是只依赖聊天记录。
 
-## 核心运行方式
+长材料按论文、论文章节、实验链或研究模块进行局部深读，并把状态持久化在项目文件中，再做全局审查。单次深读范围是经验性工作方法，不是模型 token 上限。
 
-长期项目默认：
+## 两类生产输出
 
-1. 进入当前 runtime / workspace；
-2. 读取项目 README / protocol；
-3. 读取 AGENTS.md / AGENT.md；
-4. 检查 Git 状态；
-5. 恢复 canonical、current prompt、source/index 和本地产物状态；
-6. 从当前 action 继续，而不是靠旧聊天重建项目。
+### CPA 页面视觉生成
 
-项目状态由项目文件和实际产物承担。聊天历史只作为交互上下文。
+`canonical -> synchronized prompt / eligible reference gate -> independent fresh CPA request -> candidate -> visual-stage review -> approved-current 或 rework`
 
-## 两条生产路径
+**一页 = 一个独立的 fresh CPA HTTP request。** 每页只传入该页 current prompt 与已实际查看、确属该页的 eligible references。没有参考图时不传；不继承上一页 generation/session/conversation identifier 或请求上下文。可用 bounded parallel queue，但并发请求之间仍完全独立。
 
-### CPA generation
+生成提示词要分清：
 
-需要视觉生成的页面走：
+- **必须显示**：标题、正文、公式、数值、引用、标签。
+- **视觉职责**：关系、构图、阅读顺序与设计约束——这些不是幻灯片正文。
+- **仅核查/施工、不得显示**：内部来源路径、原始网址、溯源备注、审核说明与非显示禁止项，除非 canonical 明确要求可见引用。
 
-`canonical -> prompt/reference gate -> fresh CPA request -> local candidate -> 目视审核 -> approved-current / regeneration`
+正式生成 PNG 不通过脚本擦除、拼接或像素补丁伪造过审；需要结构返工时修正来源/提示词（若确有指令缺陷）并重新走 fresh request。
 
-CPA 不可用时，生成 action 处于 blocked，直到 CPA 恢复。
+### ImgGen → 可编辑 PowerPoint
 
-### Native-editable
+1. 将过审的 ImgGen 成图放在对应幻灯片**最底层，作为临时定位底图**。
+2. 在底图上方重建 PowerPoint 原生可编辑文字、公式、表格、科研图、标签、形状和箭头。
+3. 模型负责**关键对象可编辑 + 大致定位**；用户依据底图人工调整位置、尺寸和样式，完成后删除底图。
+4. 施工阶段底图与对象形成双影**不是缺陷**；不采用隐藏可编辑对象来冒充 editable 的方案。
+5. 删除/隐藏底图后，上层对象仍应完整、可读、可选、可修改。真正净稿不能把整页生成位图当作可编辑页面。
+6. **真实科研图禁止非等比拉伸**。如果生成布局要求与图像长宽比冲突，调整布局，或回到原数据/绘图代码修改 canvas、axes、legend、字号等后重画，再等比放置；不能扭曲科研证据。
 
-最终 PPT 由 PowerPoint 原生可编辑对象、真实图像和数据驱动图表构成，不保留生成页像素作为正式可编辑内容。
+新建或替换重要的 PPT authoring 方法，应先选择有代表性的复杂页面做 end-to-end pilot，实际在目标 PowerPoint 中打开、保存、关闭、重开并检查编辑性，再批量展开。
 
-## Fresh request
+## 阶段化审核与状态
 
-**一页 = 一个 fresh CPA HTTP request。**
+继续采用集合式页面状态，不使用“审核到 Pxx”或百分比作为持久化进度：
 
-每个页面请求只包含：
+- **approved**：在**明确命名的当前阶段**通过审核；
+- **rework / unreviewed**：生成产物存在但尚未通过当前阶段审核；所有新 CPA 结果先进入此集合；
+- **not-generated**：此阶段没有当前有效产物。
 
-- 该页自己的 current prompt；
-- 该页明确选中的 references；
-- 如果该页没有 reference，则不传 reference。
+**CPA/ImageGen 过审 ≠ 可编辑 PPT 过审 ≠ 用户整套终审。** 生成阶段重点审核主体构图、阅读路径、信息层级、核心证据配置和科学关系。错字、局部标签/公式/页码/箭头等若能在下游可靠修复，可记录到现有项目 fix list 后让视觉阶段通过；结构错误、科学关系错误、核心证据错误不能如此延期。所有 deferred fixes 必须在最终 editable 交付前关闭。
 
-不得向下一页携带：
+candidate 与 approved-current 必须分开；一个文件“存在”不代表“过审”。页面可跳号完成，也可以重排，但已过审页发生关键证据/页面职责变化后必须重新确认适用性。
 
-- 上一页 generation/session/conversation identifier；
-- 上一页 request context。
+## 内容、证据与叙事
 
-即：
+- **实际项目/科研证据**：真实装置、实验、现场、测量图、模拟结果、定量曲线和特定工程对象，必须来自可追溯的真实来源或从真实数据忠实重建；不能用 CPA 生成貌似真实的替代品。
+- **概念示意**：可使用 CPA 解释机制、物理关系、流程、结构和通用设备概念，但不应冒充真实实验记录。
+- **背景场景**：无证据职责的通用工程/应用场景允许生成，包括写实风格；但特定已命名设施/事件的事实说明优先真实图片。
+- **真实素材优先**：有合适的真实实物图、装置照片、原始结构图时优先采用，不必为了统一视觉而生成仿制品。
+- **定量图**：若坐标、数值、色标、误差棒、曲线身份重要，从数据或代码确定性重画，或直接放入真实科研图，不交给 CPA 重解释。
+- **观众语言**：正文解释科学/工程含义，不直接展示内部文件夹、人名简称、任务编号。术语首次出现时按听众需要简短解释。
+- **直接论证**：优先“明确论点 → 对应证据 → 必要范围边界”，避免无信息的防御性免责声明和过度 hedge。
+- **图示语义**：重要箭头必须说明 source → action/relationship → target；不为“画出闭环”加无意义连接。
+- **解释力 QA**：不只查事实与版式是否正确，还要问“图说明什么、为什么在这页、支撑什么结论”。三栏、公式框、规则箭头本身不是“代码感”；无功能留白、错字乱码、字体替换、公式出框和异常比例才是实际缺陷。
 
-```text
-P41 = fresh request
-P42 = fresh request
-P43 = fresh request
-```
+科研答辩、论文开题/中期/学位答辩还应读取 `skills/content-ppt/references/research-defense.md`，区分研究动机、科学问题、方法、模型比较和证据强度。
 
-并行队列只是同时存在多个独立 fresh request，不改变这个规则。
+## 审核与维护安全
 
-## 页面状态
+正式生产前完成材料核查与 prompt/reference gate；生成后**实际查看**每张候选图，整套装配后**实际渲染/连读**，不能以文件结构正常或程序测试通过代替视觉审核。
 
-不维护“生成到第几页”“连续审核到第几页”或百分比作为 durable state。
+QA/validator **默认只读**：不得在“检查”时暗中修复文件。修复要在明确的 authoring/build 步骤中进行。局部编辑时使用 PPTX/XML 或等价结构检查，防止非目标页面被旧脚本意外改写。只有完成 PowerPoint 应用内打开/保存/重开与对象编辑检查，才能声称已通过目标 PowerPoint 验证。
 
-页面只维护三个互斥集合：
-
-- **approved**：当前版本已实际目视审核通过；
-- **rework / unreviewed**：已有生成物但当前未通过；所有新 CPA 结果先进入这里；
-- **not-generated**：当前没有有效生成物。
-
-页面可以乱序生成、乱序审核。前面缺页不阻塞后页 approved。
-
-**page approved 只表示 pipeline-reviewed/current-approved，不等于用户完成最终整套确认。**
-
-## Candidate 与 approved-current
-
-本地产物分两层：
-
-- **candidate**：新生成、待审核、失败或返工中的视觉稿；
-- **approved-current**：明确审核通过且仍与当前 canonical/evidence role 一致的版本。
-
-文件存在不等于 approved。
-
-reuse 必须同时满足：
-
-1. 当前页面职责、核心内容和 evidence role 仍有效；
-2. 存在明确的 approved-current artifact。
-
-## 证据与生成图边界
-
-### 负责证明链的实践/项目证据
-
-如果图像承担实际项目、实验、装置、测量、仿真结果、现场或其他事实记录的证明职责，**不能用 CPA 生成一个“看起来像真图”的替代品**。
-
-应使用：
-
-- 可追溯的真实来源图；或
-- 基于真实数据的忠实、确定性重建。
-
-如果具体命名的真实工厂、现场、实验或案例本身就是事实的一部分，应使用真实来源图，而不是生成相似场景。
-
-### 概念/机理图
-
-可以使用 CPA generation 解释机制、关系、流程、结构或通用装置概念，只要不把生成图表述成真实实验记录或测量结果。
-
-### 工程应用/场景背景图
-
-可以使用生成图，包括写实/摄影感视觉，用于背景、动机、工程应用环境和通用工业场景；前提是它不承担页面事实证明链。
-
-标题、图注和正文不得把生成的场景图包装成真实项目/实验记录。
-
-## CPA reference eligibility
-
-任何给 CPA 的 reference 必须实际查看过。
-
-可以作为事实参考的，是来源可追溯、项目允许且已经目视核验的真实图片。
-
-如果图的证据作用依赖精确保留：
-
-- 坐标；
-- 数值；
-- 图例；
-- 色标；
-- 误差；
-- series mapping；
-- 数字标注；
-
-则不要让 CPA 重新解释。应从真实数据/脚本重建，或保留真实来源图并在 PPT 中直接放置/组合。
-
-默认不作为 CPA reference：
-
-- 旧生成页；
-- AI / 生成输出；
-- 被拒绝生成页；
-- Content PPT Pipeline 生成的示意图；
-- 项目脚本生成的演示结构图；
-- 临时答辩/报告重绘；
-- 内部结构、关系或版式校核图。
-
-用户明确指定的 generated artifact 可以作为 editable reconstruction target，但这不自动使它成为 CPA reference。
-
-PDF 不是直接的 CPA 图片 reference。应把需要的页/图转换成 PNG/JPG/WebP，并实际检查转换结果。
-
-## CPA 生成与返工
-
-默认循环：
-
-`pre-generation gate -> fresh CPA request -> local candidate -> unreviewed -> visual review -> approved/rework -> regenerate -> approved-current`
-
-返工规则：
-
-- 页面渲染不好，但 canonical/prompt 仍正确：直接用完整当前 prompt/reference 做另一个 fresh request；
-- 审核发现 canonical、证据映射或 prompt 有真实问题：先修改 owning source，同步完整 current prompt，再重生；
-- CPA 鉴权、额度、超时、网络或后端故障：generation blocked，不据此修改 canonical。
-
-CPA 可以使用 bounded parallel queue。每个 in-flight 页面仍是独立 fresh request。
-
-## 三阶段审核
-
-### 1. Material closure
-
-先收口：
-
-- narrative authority；
-- 实验 / 工况 / 数据集身份；
-- evidence role；
-- 数字、单位、分母、样本口径；
-- 页面职责；
-- 工作量层级。
-
-### 2. Pre-generation gate
-
-CPA 生成前检查：
-
-- canonical 与 current prompt 同步；
-- prompt 自包含且可执行；
-- 无旧实验名、旧结论、旧版式残留；
-- 无隐藏跨页依赖；
-- reference 实际看过且 eligible；
-- 不要求 CPA 伪造真实科研/工程实践证据或精确定量图；
-- PDF reference 已转换为实际图像并检查；
-- 每页请求满足 fresh-request 规则。
-
-### 3. Rendered review
-
-实际查看 CPA 返回页和最终 candidate deck：
-
-- 图文是否属于同一实验 / 工况；
-- 数字、公式、表格、图例是否正确；
-- 是否幻觉新增数据、装置或科研结果；
-- 主证据是否足够大、足够可读；
-- 装饰是否抢主证据；
-- 页面密度和跨页视觉语言是否一致。
-
-材料 QA 和 prompt QA 都不能替代成品目视审核。
-
-## Native-editable PowerPoint
-
-正式可编辑路径优先使用 PowerPoint-native：
-
-- 文本；
-- 公式；
-- 形状；
-- 连接线 / 箭头；
-- 图表；
-- 表格；
-- 简单结构图。
-
-具体规则见 `skills/content-ppt/references/ppt-authoring.md`。
+重要边界、配色/版式规范、页面职责与源索引应在项目 canonical/README/AGENTS 中持久化，不创建重复权威文件；架构切换后清理过时规则和脚本。
 
 ## Skill 结构
 
@@ -247,33 +99,22 @@ CPA 生成前检查：
 plugin.json
 README.md
 AGENTS.md
-.agents/
-  plugins/
-    marketplace.json
-scripts/
-  build-chatgpt-zip.ps1
-skills/
-  content-ppt/
-    SKILL.md
-    references/
-      runtime.md
-      workflow.md
-      cpa-generation.md
-      ppt-authoring.md
-      examples/
-        midterm-defense-layout-example.md
+.agents/plugins/marketplace.json
+scripts/build-chatgpt-zip.ps1
+skills/content-ppt/
+  SKILL.md
+  references/
+    runtime.md
+    workflow.md
+    cpa-generation.md
+    ppt-authoring.md
+    research-defense.md
+    examples/midterm-defense-layout-example.md
 ```
 
-职责：
+`SKILL.md` 是模型首先读取的简短核心合同；`references/` 各文件分别负责 runtime、通用内容 workflow、CPA 生成、可编辑 PowerPoint 施工和科研答辩特殊规则。examples 只是按需使用的非权威示例。
 
-- `SKILL.md`：模型首先读取的 runtime/backend contract、core contract 和 action routing；
-- `runtime.md`：ChatGPT+CCM / Codex runtime routing、离散状态、本地产物、Git；
-- `workflow.md`：内容、证据、页面职责和 deck 生命周期；
-- `cpa-generation.md`：CPA generation、fresh request、reference gate、并行队列、审核和重生；
-- `ppt-authoring.md`：native / editable PPT 构建；
-- `examples/`：非权威示例。
-
-## ChatGPT 安装 ZIP
+## 打包与版本
 
 在仓库根目录运行：
 
@@ -281,25 +122,6 @@ skills/
 .\scripts\build-chatgpt-zip.ps1
 ```
 
-生成：
+生成 `dist/content-ppt-pipeline-chatgpt-upload-<version>.zip`；ZIP 根目录仅包含 `plugin.json` 与 `skills/`。不得包含 API keys、provider 配置或本地缓存。
 
-`dist/content-ppt-pipeline-chatgpt-upload-<version>.zip`
-
-ZIP 根目录只包含：
-
-- `plugin.json`
-- `skills/`
-
-## 当前版本
-
-**0.6.0**
-
-当前版本重点：
-
-- ChatGPT Plus + CCM 作为主实践，Codex native runtime 作为兼容路径；
-- CCM runtime 与 CPA generation backend 的依赖关系明确分离；
-- 每页 CPA generation 强制 fresh HTTP request；
-- 清理已退役工作流和旧 authority naming 残留；
-- 保留并强化真实实践证据与可生成概念/工程场景图的边界；
-- 使用离散 page state 和 approved-current artifact；
-- native-editable 与 CPA reference 边界明确。
+**当前版本：0.7.0。** ChatGPT+CCM / Codex native 并列，CPA fresh-request，阶段化过审，ImgGen 底图可编辑施工，科研图比例保护，以及科研答辩专属 reference。

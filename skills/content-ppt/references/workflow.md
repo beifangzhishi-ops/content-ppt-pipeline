@@ -11,7 +11,7 @@ Determine the presentation goal, audience, evidence base, desired length, availa
 Use one of two production paths:
 
 - CPA generation: CPA performs page visual production and returns output directly to the active project runtime.
-- Native-editable: final PowerPoint must contain no generated-page pixel residue; final content is rebuilt from native PowerPoint objects, real source images, and data-derived charts.
+- Native-editable reconstruction: use an approved/generated visual as a **temporary bottom-layer alignment guide**, rebuild the intended editable content above it, and let the user refine and remove the guide before declaring a clean final deliverable. The working PPTX may contain the temporary generated-page guide; do not mistake it for native editable content.
 
 Do not create a separate persistent mode/stage state file. The current mode and action should be inferable from the current request, project README/protocol, canonical files, and actual local artifacts. Cross-session page state is maintained as approved / rework-unreviewed / not-generated sets, not as scalar progress counters.
 
@@ -46,6 +46,8 @@ Before deciding whether to find a real image, rebuild a figure, or generate a vi
 Photorealism itself is not the deciding factor. The deciding factor is whether the image is being used as evidence or as illustration.
 
 If a slide discusses a specific named plant, facility, experiment, or case and the identity of that object is part of the factual claim, prefer a real source image rather than a generated lookalike.
+
+When suitable real photographs, apparatus images, or faithful object diagrams already exist, **prefer those** over generating replacements, even if the generated alternative looks cleaner. Use CPA for genuinely conceptual or illustrative needs not met by real material.
 
 ### Project-local context and source registry
 
@@ -86,6 +88,10 @@ Before producing the full deck, calibrate:
 - representative page patterns;
 - master anchors and density range.
 
+Establish a concrete layout/master authority before designing or revising slides. Page-level repairs inherit that authority. A change to the design system must be an explicit deck-level decision, never accidental drift during local regeneration.
+
+When introducing a materially different production technique (new editable reconstruction code, math/chart/Office objects, or another authoring route), first complete an **end-to-end pilot on a genuinely representative complex page**. Test editing in the intended PowerPoint application, not just generation of the simplest possible page, before scaling up.
+
 Do not enforce a universal fixed text-to-image ratio. The correct density depends on the material and slide role.
 
 For a content-heavy deck, visual quality means disciplined hierarchy and readable evidence, not decorative emptiness.
@@ -111,6 +117,10 @@ Each slide should have:
 - a deliberate relationship to the previous and next slide.
 
 The title, primary evidence, and closing takeaway should answer the same primary question. Secondary audits, sensitivity checks, or boundary tests must not steal the main evidence role.
+
+Visible presentation copy is for the **audience**, not the internal project team. Translate opaque task codes, nicknames, folder names, and working-file labels into domain terminology or formal citations; retain internal identifiers only in provenance/notes where useful. On first use, define unfamiliar technical sources or abbreviations when comprehension requires it.
+
+Use direct **claim -> supporting evidence -> necessary boundary** language. Avoid defensive disclaimers, speculative rebuttals, and redundant hedging that add no scope or precision. Preserve necessary limitations exactly where they matter; do not mechanically delete scientific uncertainty or qualifying conditions.
 
 Main-talk pages carry the main narrative. Q&A/appendix pages carry advanced evidence that the audience may ask for but that the main talk does not need to expand. They must not reverse-pollute the main narrative or upgrade exploratory results into primary conclusions.
 
@@ -169,6 +179,8 @@ When structured source data or a reliable reconstruction script exists, quantita
 - Record enough provenance for a derived figure to identify the source data and reconstruction method/script, and actually inspect the rendered output.
 
 Conceptual or relationship diagrams may use an authoritative source as a scientific relationship reference without copying its exact arrow geometry or layout. Preserve the relationships; redesign the geometry when that improves the presentation. Prefer short, clear horizontal/vertical/90-degree connectors over unnecessary long diagonal arrows, cross-module diagonal links, or crossings.
+
+Every meaningful arrow, loop, feedback edge, or cross-module link must express a describable **source -> verb/action -> target** relation (e.g., drives, constrains, transfers, predicts, or checks). Delete, relabel, or redesign connections whose meaning cannot be explained. Geometry and tidy connectors do not substitute for semantic clarity.
 
 ## 6. Canonical per-slide production spec
 
@@ -232,6 +244,8 @@ Do not collapse these into one:
 
 `QA PASSED`, canonical/prompt synchronization, package validation, or material closure never substitute for visual review of the actual rendered artifact.
 
+Approval is **stage-scoped**: a CPA visual can pass its composition/reading-path/major-evidence gate even when specific reliably editable local fixes have been registered. It is **not** a claim that those errors are gone or that a final editable deck has passed. Do not defer structural flaws, weak or wrong evidence, erroneous scientific relations, or missing essential message content.
+
 ### Reuse / rebuild / new / retire planning
 
 When an existing deck is reordered, renumbered, or partially redesigned, decide page disposition before generating again. Use project terminology such as `reuse / rebuild / new / retire` in an index or plan when useful.
@@ -277,8 +291,8 @@ When a generated page becomes available:
 2. Compare it with the current canonical production spec, current complete prompt, and the real reference assets/roles used for that page.
 3. Prioritize factual/domain errors, evidence mistakes, readability, hierarchy, structure, and obvious layout failures. Common blocking failures include wrong figure-to-role mapping; altered axes/units/numbers/formulas/legends; missing required evidence; conflating measured/calculated/predicted/validation roles; fabricated project-specific scientific imagery; placeholders/internal management text; or material drift from the current canonical spec.
 4. Decide directly:
-   - accept when the page is production-usable;
-   - regenerate when a material defect remains.
+   - accept the **visual-production stage** when composition, reading path, scientific relationships, primary evidence configuration and explanation are reusable; record precise downstream fixes for safely editable typos, labels, formulas, page numbers, or local arrows;
+   - regenerate when a structural, scientific, evidence, or explanatory defect cannot reliably be repaired in the downstream editable stage.
 5. Change canonical or prompt only when the review reveals a real source/instruction defect. Otherwise regenerate the page through CPA.
 
 After regeneration, review the new generated artifact on its own merits. Prior failure reasons are regression targets, not an automatic verdict on the new version.
@@ -293,7 +307,7 @@ Detailed native PowerPoint construction is owned by ppt-authoring.md.
 
 The CPA generation path may assemble accepted generated page visuals directly when that is part of the chosen final delivery.
 
-Native-editable mode must rebuild the final deck with no generated-page pixel residue.
+For editable reconstruction, retain the generated page as a **temporary bottom-layer visual guide** and rebuild key objects above it. Temporary double text/figures are acceptable during alignment. When the user finishes fine-tuning, remove the guide; then verify that the remaining editable content stands on its own. Do not require the working reconstruction file to be visually clean before the guide is removed.
 
 ## 10. Whole-deck QA
 
@@ -314,7 +328,13 @@ Check:
 - duplicated/missing slides;
 - broken/cropped content;
 - master/layout consistency;
-- Native-editable mode: no generated-page pixel residue remains.
+- whether every diagram and image explains its intended physical/information relation and directly supports the page takeaway;
+- unintended empty space, font substitutions, formula-rendering defects, overflow, misplaced labels, or inconsistent visual scaling; regular columns, formula boxes, and arrows themselves are legitimate technical-slide grammar;
+- clean native-editable final delivery: the temporary generated-page guide is removed and the editable content remains independently complete (unless the user specifically requests a guide-bearing working draft).
+
+Review explanatory value separately from factual correctness: if a diagram is true but leaves the audience unable to say what it demonstrates or why it is present, repair its visual semantics and emphasis rather than merely decorating it.
+
+Validation scripts must be **non-mutating**. If an artifact needs repair, run a separate explicit build/authoring action, not a validator that silently rewrites files. For a targeted PPTX edit, verify that all non-target pages remain unchanged where feasible (package/XML diff or equivalent structural comparison); a test must not opportunistically patch unrelated pages.
 
 Repairs transition into the appropriate current action:
 

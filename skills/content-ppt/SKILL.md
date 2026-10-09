@@ -1,6 +1,6 @@
 ---
 name: content-ppt
-description: Build, continue, review, generate, or revise evidence-heavy PowerPoint presentations. Primary practice is ChatGPT Plus with CCM as the persistent project runtime; Codex may use its native runtime instead. CPA is the visual-generation backend when generation is required.
+description: Build, continue, review, generate, or revise evidence-heavy PowerPoint presentations using either ChatGPT with CCM or Codex with its native runtime. CPA is the separate visual-generation backend when needed.
 ---
 
 # Content PPT Pipeline
@@ -9,8 +9,8 @@ Use this skill for content-first presentations where correctness, evidence, stru
 
 ## Runtime and backend contract
 
-- **ChatGPT Plus:** use **CCM** as the persistent project runtime.
-- **Codex:** use the native Codex workspace/execution environment; CCM is not required.
+- **ChatGPT + CCM:** first-class project execution route; CCM provides the persistent workspace, files, tooling, and Git.
+- **Codex native:** equally first-class route; use its native workspace and execution environment without CCM.
 - **CPA:** use for page visual generation/regeneration. CPA is an independent backend, not the project runtime.
 - **Content PPT Pipeline:** owns orchestration policy, evidence rules, page lifecycle, review gates, and PowerPoint delivery rules.
 
@@ -18,18 +18,20 @@ User instructions for the current task take priority over workflow defaults.
 
 ## Core contract
 
-1. **Enter the active project runtime first.** Read project README/protocol and AGENTS/AGENT before changing tracked files; inspect Git status when the project uses Git.
+1. **Reground before each actual revision round.** Enter the active runtime; reread project README/protocol, AGENTS/AGENT, the current layout/master authority, and the primary source passages relevant to this revision. Inspect Git status before tracked edits. Do not rely solely on prior-chat recall; keep source reads scoped.
 2. **Use project files as durable authority.** Chat history is transient context. Do not create a parallel state system.
 3. **Inspect evidence and references.** Never infer image/source content from filenames, listings, snippets, or another model's description.
 4. **Keep one current canonical spec and one current derived prompt per page.** Do not create v2/final/revised forks unless explicitly requested.
-5. **Track page state as sets, not scalar progress:** approved / rework-unreviewed / not-generated. Pages may be generated and reviewed out of order.
-6. **Every CPA result starts unreviewed.** File existence is not approval. Only visually reviewed output enters approved-current.
+5. **Track page state as stage-scoped sets, not scalar progress:** approved / rework-unreviewed / not-generated within the active gate. Pages may be reviewed out of order; a generation-stage approval is not final editable or whole-deck approval.
+6. **Every CPA result starts unreviewed.** File existence is not approval. A generated visual can enter approved-current only after actual visual review; reliably editable local fixes may be recorded for downstream work.
 7. **One slide = one fresh CPA HTTP request.** Each request contains that page's current prompt and only that page's selected references. If the page has no references, send none. Do not carry forward any prior-page generation/session/conversation identifier or request context.
 8. **Do not recursively feed generated presentation visuals back into CPA.** Old generated pages, rejected outputs, Pipeline-generated diagrams, and presentation-specific derived visuals are not CPA references unless the user explicitly overrides this for the current task.
 9. **Protect the evidence boundary.** Actual project/practice evidence must come from traceable real sources or faithful deterministic reconstruction from real data. Do not generate realistic-looking substitutes for actual experiments, apparatus, measurements, results, sites, or project records. Conceptual illustrations and generic engineering/application scene-setting visuals may be generated when they do not carry the proof burden.
 10. **Keep quantitative evidence deterministic.** Rebuild plots from data/code when possible; do not ask generation models to reinterpret exact axes, legends, values, uncertainty, or series mappings.
 11. **Only change canonical/prompt when review identifies a real source/instruction defect.** A poor CPA render by itself is not evidence that canonical content is wrong.
 12. **Material QA is not rendered QA.** The actual generated pages and final assembled deck must be visually reviewed.
+13. **Use audience-facing, evidence-led language.** Prefer real, inspected apparatus/engineering images when available; avoid internal project codes in visible copy and defensive caveats without evidentiary value.
+14. **Honor the established layout authority and explanatory purpose.** Diagrams need semantically meaningful relationships; review whether every visual supports the page's question and takeaway, not just whether it looks correct.
 
 Project README/canonical may specialize workflow defaults, but do not silently weaken this core contract.
 
@@ -93,7 +95,15 @@ Read: `references/workflow.md` + `references/runtime.md`.
 
 Build or modify the formal PPTX from approved pages, canonical specs, real assets, data, and native objects.
 
+For ImgGen-to-editable reconstruction, retain the current approved image as a temporary bottom alignment guide, reconstruct editable objects above it, and allow temporary double imagery. Preserve true scientific figure aspect ratios; redraw from source code/data rather than distorting them to fit.
+
 Read: `references/ppt-authoring.md` + `references/runtime.md`.
+
+### Research / thesis / proposal / midterm defense
+
+When the deck is an academic or scientific defense, additionally apply the specific research-question, motivation, model-comparison, and evidence-claim narrative guidance.
+
+Read: `references/research-defense.md` along with the action-specific references above.
 
 ### Whole-deck QA / final review
 
@@ -107,4 +117,4 @@ Use `references/examples/` only when explicitly selected by the user/project. Ex
 
 ## Reference loading
 
-Reuse authority already available in the active context. Reread a reference when current context is partial, stale, conflicting, or insufficient.
+For each actual revision round, reread current project authority and the directly relevant primary sources; the layout/master authority must already be established. Load only the action-specific skill references needed, and reread those when context is partial, stale, conflicting, or insufficient.

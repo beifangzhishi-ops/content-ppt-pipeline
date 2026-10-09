@@ -1,15 +1,15 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "content-ppt-pipeline",
-  "version": "0.6.0",
-  "description": "A ChatGPT Plus, CCM-first PowerPoint workflow with CPA generation for evidence-heavy research, engineering, course, and technical decks; also compatible with native Codex execution.",
+  "version": "0.7.0",
+  "description": "An evidence-led PowerPoint workflow with equal execution support for ChatGPT with CCM and Codex native runtime; CPA provides optional per-page visual generation.",
   "keywords": ["powerpoint", "presentation", "research", "course", "engineering", "technical-report", "content-heavy", "evidence"],
   "extensions": {
     "com.openai": {
       "interface": {
         "displayName": "Content PPT Pipeline",
-        "shortDescription": "CCM-first technical PPT flow",
-        "longDescription": "Run persistent PowerPoint projects with CCM on ChatGPT Plus, or native execution in Codex; close narrative and evidence gaps, manage canonical specs and discrete page states, generate independent pages through fresh CPA requests, review rendered pages, build editable PowerPoint files, and run whole-deck QA.",
+        "shortDescription": "Evidence-led technical PPT workflow",
+        "longDescription": "Run PowerPoint projects using ChatGPT with CCM or Codex native runtime as peer execution routes; close narrative and evidence gaps, maintain canonical specs and stage-scoped page states, generate independent visuals through fresh CPA requests, review composition before editable reconstruction, and validate editable PowerPoint and whole-deck output.",
         "category": "Productivity",
         "capabilities": ["Read", "Write"],
         "defaultPrompt": [

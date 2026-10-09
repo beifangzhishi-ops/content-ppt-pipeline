@@ -170,6 +170,7 @@ Before CPA submission, check:
 - no stale/forbidden reference filename remains;
 - PDF-derived references were converted and inspected;
 - conceptual diagrams communicate relationships/facts rather than inheriting old generated geometry;
+- the prompt distinguishes visible page copy from visual-construction instructions and non-displayed source/verification notes;
 - current output state is known so a new candidate cannot ambiguously overwrite approved-current.
 
 ## 9. Prompt completeness
@@ -187,6 +188,14 @@ Include, as applicable:
 - prior reproducible rendering problem that must not recur.
 
 The prompt should specify the page to produce, not merely summarize the canonical spec.
+
+Separate three prompt roles explicitly:
+
+1. **Must display**: exact intended page-visible title, copy, formulae, numeric values, citations, and labels.
+2. **Visual duty**: relationships to illustrate, geometry, reading path, and design constraints; these are instructions, not prose to place on the slide.
+3. **Do not display / source checks**: asset provenance, raw source URLs, internal project identifiers, review notes, and scientific or construction guardrails unless the canonical spec explicitly designates a visible attribution.
+
+Do not paste internal source checks and construction directions into a visible-copy block. If CPA repeatedly renders them as slide text, repair prompt structure and regenerate rather than editing the pixels of its PNG.
 
 ## 10. CPA production loop
 
@@ -240,10 +249,17 @@ Check for:
 - decorative content replacing main evidence;
 - stale page identity;
 - layout/density/style failure.
+- arrows or relationship diagrams whose actual meaning cannot be explained;
+- visuals that are technically correct but do not explain the page's message;
+- unnecessary empty spaces, font fallback, out-of-frame items, or broken math rendering (not the mere presence of regular columns, formula boxes, or arrows).
 
-Decide approved vs rework directly.
+Decide **generation-stage approved vs rework** directly:
 
-**Page approved means pipeline-reviewed and usable as the current artifact. It does not mean the user has completed final whole-deck approval.**
+- **Approve with logged downstream fixes** only when main composition, reading path, visual hierarchy, core evidence configuration, and scientific relationships are sound, and the remaining flaws (such as a typo, page number, local label, formula text, or arrow) can reliably be corrected as editable objects. Use the existing project canonical/fix-list tracking, not a new parallel state system.
+- **Rework in CPA** when the structure, main explanation, evidence, scientific meaning, or page relationships cannot safely be salvaged through downstream editable adjustments.
+- A deferred fix remains outstanding until editable-stage correction and review; generation approval is never final PPTX or whole-deck approval. If the final delivery path is raster-only, visible defects cannot be deferred to nonexistent editable work.
+
+**Approved-current means visually reviewed and reusable at the CPA stage, not defect-free editable or user-approved final delivery.**
 
 ## 13. Regeneration
 
@@ -256,6 +272,8 @@ When a CPA page fails review:
 Use the complete current page prompt/reference set for regeneration rather than a chat-only delta instruction.
 
 Rejected generations may be inspected diagnostically but are not fed back into CPA as references by default.
+
+Do **not** repair the authoritative generated PNG by script-based erasing, patching, compositing, pixel repainting, or stitching to manufacture an approved result. If the generation-stage image needs a structural change, correct the owning prompt/source if warranted and send a fresh CPA request. Native objects constructed over an unchanged temporary base **after** entering editable reconstruction are downstream authoring, not PNG pixel patching.
 
 CPA authorization, quota, timeout, network, or backend failures block generation execution; they are not page-review conclusions and do not justify canonical changes.
 
