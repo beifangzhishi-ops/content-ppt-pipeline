@@ -1,165 +1,80 @@
-# Project Runtime
+# 项目运行时与接续
 
-This file owns persistent project execution, durable state, local artifact lifecycle, Git, and host-specific runtime routing.
+本文件负责宿主路由、项目持久权威、产物生命周期、接续与 Git；业务审核见 workflow，生成细节见 cpa-generation。
 
-## 1. Runtime routing
+## 1. 运行时路由
 
-The two supported project runtimes are peer execution routes. The generation backend is a separate role; neither host changes the business workflow.
+两个宿主是并列的正式执行入口，业务合同相同：
 
-### ChatGPT + CCM
+- `ChatGPT Plus -> Content PPT Pipeline -> CCM -> 项目文件/产物/Git`。CCM 提供持久工作区、文件、执行、看图及 Git；宿主模型负责推理、审核与编排。
+- `Codex -> Content PPT Pipeline -> Codex 原生工作区 -> 项目文件/产物/Git`。不要为兼容而额外启用 CCM。
+- CPA 只负责视觉生成/重生成，由当前运行时调用，不是项目运行时或打包依赖。
 
-Use CCM as the persistent project runtime:
+## 2. 进入或恢复项目
 
-`ChatGPT Plus -> Content PPT Pipeline -> CCM workspace -> project files/artifacts/Git`
+1. 进入既有项目的当前运行时/工作区，不另建平行项目。
+2. 读 README/protocol，确认当前稿、来源与专项入口、当前任务和下一步。
+3. 读 AGENTS/AGENT，确认长期规则及对 skill 默认方式的明确覆盖。
+4. 检查 Git 状态。
+5. 按当前任务读对应 canonical、当前 prompt、来源和实际产物。
+6. 核对产物身份、适用性及审核依据，继续当前动作；不要求恢复三类页面集合。
 
-CCM supplies the durable workspace, filesystem/process execution, image reads, and Git surface while the ChatGPT model remains the reasoning/review/orchestration layer.
+每轮实际修改前重读上述项目入口、版式/母版权威及本轮直接相关来源。按论文、章节、方法、实验链或结果单元读取长材料，记录有效发现后做全局核查；这是工作方法，不是 token 上限。
 
-### Codex native
+不要让用户重述项目里已有的信息，也不要仅凭聊天回忆恢复项目。
 
-When the skill runs in Codex, use the equally supported native Codex workspace/execution environment:
+## 3. 文件职责与权威
 
-`Codex -> Content PPT Pipeline -> native Codex workspace -> project files/artifacts/Git`
+默认权威顺序：当前用户指令 -> 项目 README/protocol 与 AGENTS -> 单页 canonical/来源索引 -> 当前派生 prompt -> 实际候选/过审产物 -> 瞬时聊天上下文。项目已声明的来源和版式权威须遵守。
 
-Do not instantiate CCM merely for compatibility when Codex already supplies the required execution environment. The same canonical, CPA, evidence, editability, and review rules apply to both hosts.
+- **README/protocol**：唯一当前入口，维护当前交付稿、任务、下一步、来源/专项规范入口及必要接续信息；替换失效内容，不写成追加历史。
+- **AGENTS/AGENT**：长期规则、入口顺序、授权边界和项目对 skill 的明确覆盖；通用流程引用 skill，避免重复抄写。
+- **canonical**：每页唯一事实、叙事、布局、素材角色、当前产物映射和实际未解决问题；已解决的待办及时关闭。
+- **来源/素材索引**：溯源和跨页素材映射，沿用已有文件，不创建第二索引。
+- **专项规范**：按需读取的施工、视觉、科学等细则；核心入口必须能找到它们。
+- **prompt**：由当前 canonical 派生，同轮同步。
 
-### CPA
+不另建进度数据库、状态文件、接续日志或重复权威。聊天记录不是项目数据库。
 
-CPA is not the project runtime. It is invoked from the active runtime only for CPA generation/regeneration actions.
+## 4. 闭环与最小接续
 
-## 2. Enter or resume a project
+模型负责生成、实际看图、判断和返工，直至当前任务达标或遇到实际阻塞。无需逐次持久记录审核动作，也不维护逐页三类集合、“审核到某页”或百分比作为持久台账。
 
-When the user refers to an existing project:
+中断时在现有 README/protocol 的当前任务位置记录必要信息：当前任务与生产阶段、当前页及候选文件、未完成动作、实际阻塞及下一步；没有候选或阻塞就不虚构记录。科学/施工待修项留在所属 canonical 或已有 fix list，不复制成进度表。
 
-1. enter the selected runtime/workspace;
-2. read the project README/protocol;
-3. read AGENTS.md / AGENT.md or equivalent project rules;
-4. inspect current Git status when applicable;
-5. inspect only the canonical/source/artifact files needed for the current action;
-6. restore page state from project files and actual local artifacts;
-7. continue from current state rather than reconstructing the project from chat history.
+恢复时检查实际文件和当前权威；审核依据不明的候选重新实际查看。页序空缺不阻止后续页审查。目录名、文件名或旧进展说明均不能单独证明产物过审。
 
-Before **each actual modification round**, not only on a fresh conversation, reread current README/protocol and AGENTS plus the specific canonical/source passages governing that revision. Reconfirm the current layout/master authority; every project needs one, and a local revision inherits it unless a deck-level change has been approved. Scope rereading to the relevant source portion, not the whole library.
+## 5. 产物生命周期
 
-For long material, split deep reading at natural source boundaries (paper, thesis chapter, method, experiment, or result chain), persist local findings, then perform a global narrative/evidence check. Experience with one model suggested roughly one paper or thesis chapter per deep-reading unit, but this is **not** a token limit or model specification.
+区分两个产物位置或视图：
 
-Do not ask the user to repeat information already present in the project.
+- **candidate**：新返回、尚未审核或失败的候选。
+- **approved-current**：实际审核通过且符合当前 canonical 的唯一当前视觉产物。
 
-Do not create a parallel project directory merely to make the current task easier.
+优先采用项目已有目录/映射。新候选不覆盖当前过审产物；失败候选留在当前成品视图外，按项目规定归档或删除。必要的当前产物映射写回已有 canonical/索引，不额外记录完整审核历史。
 
-## 3. Durable authority
+生成阶段通过仅表示构图、阅读路径、核心证据和科学关系可用于后续施工，不等于可编辑稿或用户整套验收通过。能可靠编辑修复的局部错字、标签、公式文字、页码或箭头，可在现有 fix list/canonical 记录精确修复要求；结构、科学关系、证据和核心解释缺陷仍阻止通过。所有下游待修项须在可编辑交付门禁关闭；纯位图交付不能延期至不存在的编辑步骤。
 
-Use this default hierarchy unless the project declares another one:
+关键内容、证据角色或页面职责改变后，重新核对适用性。若当前过审映射指向缺失或错误文件，先查明并恢复正确映射/重新审核，不直接复用。
 
-1. current user instruction;
-2. project README/protocol for current state and entry points;
-3. AGENTS/AGENT for durable project rules;
-4. canonical per-slide specs and source/evidence indexes;
-5. current derived prompts;
-6. local candidate and approved artifacts;
-7. chat history as transient interaction context.
+## 6. CPA 输出与进展查询
 
-Conversation history is not the project database.
+CPA 返回后：落地当前项目 -> 关联正确页/请求 -> 保留为候选 -> 实际检查 -> 通过则进入 approved-current，否则独立新请求返工。允许下游修复时记录精确待修项。
 
-## 4. Page-state model
+用户询问进展时，读当前任务、扫描相关产物，核对实际页身份；报告本轮完成内容、当前动作、未解决问题和阻塞。可临时汇总数量或页面范围，但不为回复建立持久集合。只读进展查询不自动启动生成或修改产物；用户要求接续生产时继续闭环。
 
-Do not maintain scalar durable progress such as:
+运行时授权、配额、超时、网络或后端故障是执行阻塞，不是页面审核结论，也不允许据此修改科学 canonical。
 
-- generated through Pxx;
-- reviewed through Pxx;
-- N% reviewed.
+## 7. Git 与维护
 
-Persist page status as disjoint sets **within the named current production stage** (e.g., CPA visual production or editable delivery):
+- 修改前检查状态，提交前核对预期差异。
+- 当前入口或长期规则改变时同步所属 README/AGENTS；单页事实写回 canonical。
+- 临时脚本、缓存、密钥、token、provider 临时输出按项目规则忽略。
+- 已授权实施后遵循项目提交与推送规则；不保留能恢复旧逻辑的过时脚本/命名，除非用户明确要求。
+- 文本使用 UTF-8；跨工具或 Windows 写入后读回中文样本，检查问号串、替换字符、乱码和不可见控制字符。
 
-- **approved**: the current artifact has been reviewed and accepted **for this stage only**;
-- **rework/unreviewed**: a generated artifact exists but is not currently accepted, including every fresh unreviewed output;
-- **not-generated**: no current generation exists for that page.
+## 8. 秘密与新会话恢复
 
-Pages may advance out of order. An earlier missing/rework page never invalidates a later approved page.
+CPA 密钥、token、端点/模型配置和凭据保留在忽略的本地配置、环境变量或安全运行时，不进入 Git、README、canonical、prompt 或插件权威。
 
-For CPA, `approved-current` means an accepted **visual reconstruction source**, not a final defect-free editable PPTX. Local text, label, formula, or connector defects that can reliably be fixed downstream can be registered in the project's existing canonical/fix-list mechanism. Structural, scientific, or evidence failures still block CPA approval. The editable gate and final user whole-deck gate are separately checked; do not invent a parallel progress database.
-
-Counts and percentages may be shown as temporary summaries but are not durable state.
-
-## 5. Local artifact lifecycle
-
-Projects should distinguish:
-
-- **candidate outputs**: fresh, unreviewed, or failed generations;
-- **approved-current artifacts**: the accepted current visual for each page **in its generation stage**.
-
-Use project-declared directories when available. Otherwise establish clear local directories or indexes rather than mixing both classes.
-
-Rules:
-
-- file existence does not imply approval;
-- failed/unreviewed images must not enter the approved-current view;
-- one page should have an unambiguous current approved artifact;
-- approved artifacts should use stable page-oriented names when practical;
-- a materially changed canonical/evidence role invalidates reuse until the artifact is reassessed;
-- a rejected candidate may be deleted or archived according to project policy, but must not be mistaken for current output.
-
-If the project already maintains an artifact index, update it in the same work cycle as README/protocol status. Do not invent a second persistent index without need.
-
-## 6. CPA output handling
-
-When CPA returns a page:
-
-1. write/receive the output inside the active project runtime or project-declared output directory;
-2. associate it with the correct page/job;
-3. classify it as rework/unreviewed;
-4. inspect it;
-5. on approval, place/rename/copy it into the approved-current artifact view and update project status;
-6. on structural or non-delegable review failure, keep it out of approved-current and route it back to CPA regeneration; when a permitted local defect is deferred, record the precise downstream fix.
-
-## 7. State checks
-
-For requests such as status, progress, review what is done, or continue:
-
-1. read current project status;
-2. scan relevant candidate/approved artifact locations;
-3. reconcile actual files with approved / rework / not-generated sets;
-4. review newly appeared unreviewed artifacts when review was requested;
-5. update project status in the same work cycle;
-6. report page sets or the meaningful delta, not a consecutive progress number.
-
-Do not assume that every image in an output directory is a valid slide artifact. Verify page identity and actual content when needed.
-
-## 8. Regeneration and runtime failure
-
-- if an actual returned page fails its stage's blocking visual criteria, keep it in rework/unreviewed and regenerate through CPA;
-- change canonical or prompt only when review identifies a real source/instruction defect;
-- CPA authorization, quota, timeout, network, or backend failures are runtime blockers, not page-review conclusions.
-
-## 9. Git and tracked project maintenance
-
-When the project uses Git:
-
-- inspect status before tracked edits;
-- update README and AGENTS when current state or durable project rules change;
-- keep transient scripts, caches, API keys, tokens, and provider scratch output ignored;
-- never commit secrets;
-- validate expected tracked changes before commit;
-- after a user-authorized implementation task, commit and push when the project protocol requires it.
-
-Do not retain obsolete compatibility rules or stale workflow names unless the user explicitly requests historical compatibility.
-
-## 10. Secrets and provider configuration
-
-CPA API keys, tokens, endpoint configuration, model discovery, and local execution credentials belong to the active runtime.
-
-They must not appear in:
-
-- canonical slide specs;
-- prompt TXT files;
-- project README status;
-- Git-tracked plugin authority.
-
-Use ignored local files, environment variables, or secure provider/runtime mechanisms.
-
-## 11. Fresh-conversation recovery
-
-A healthy project should be recoverable in a fresh host conversation from:
-
-`workspace -> README/AGENTS -> canonical/current prompts -> local artifacts -> current action`
-
-Normal recovery must not require replaying prior chat history.
+新会话应能按 `工作区 -> README/AGENTS -> canonical/当前 prompt -> 实际产物 -> 当前动作` 接续，无需重放历史会话。

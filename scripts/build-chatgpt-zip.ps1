@@ -18,7 +18,7 @@ if (!(Test-Path -LiteralPath $skillRoot)) {
     throw "Missing skills/ directory."
 }
 
-$manifestPrefix = @(Get-Content -LiteralPath $manifestPath -Encoding Byte -TotalCount 3)
+$manifestPrefix = [System.IO.File]::ReadAllBytes($manifestPath)
 if ($manifestPrefix.Count -ge 3 -and
     $manifestPrefix[0] -eq 239 -and
     $manifestPrefix[1] -eq 187 -and
@@ -26,7 +26,7 @@ if ($manifestPrefix.Count -ge 3 -and
     throw "plugin.json has a UTF-8 BOM. Save it as UTF-8 without BOM before packaging."
 }
 
-$manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
+$manifest = Get-Content -LiteralPath $manifestPath -Raw -Encoding UTF8 | ConvertFrom-Json
 if (!$manifest.name) {
     throw "plugin.json is missing name."
 }

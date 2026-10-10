@@ -1,214 +1,81 @@
-# Editable PowerPoint Authoring
+# 可编辑 PowerPoint 施工
 
-This file owns reusable rules and implementation cautions for creating, reconstructing, validating, and revising editable PPTX files. Workflow-stage decisions stay in workflow.md; this file owns how the PowerPoint artifact itself is authored and verified.
+本文件负责原生对象施工、重建、局部修订和实机验证；生产门禁见 workflow，接续见 runtime。
 
-## 1. Authoring environment
+## 1. 环境与原生可编辑性
 
-For persistent Content PPT projects, author inside the active project runtime or the project-declared working directory. The project runtime owns the current canonical files, approved artifacts, scripts, and final PPT work.
+在当前运行时或项目指定工作目录施工，保留一个权威工作副本；不要为了换工具复制平行项目，也不要为验收打开/修改无关 PPT。产物写项目指定位置；未经用户要求，不自动复制到其他目录或上传云盘。
 
-Do not create a second project copy merely because another tool surface is available.
+文字、标题、公式、表格、图表、简单图示、方框、线条、箭头和连接优先使用 PowerPoint 原生对象。对象必须在用户目标工作流中可见、可选、可修改，不能只存在于包内，不能隐藏原生对象冒充交付，也不能将整页截图冒充可编辑页。
 
-If the user explicitly selects another working location, follow that project decision and keep one authoritative working copy.
+## 2. 原生版式权威与对象组织
 
-Do not open or modify unrelated local PPT files merely for validation.
+- 用户指定的原生重建样板决定原生版式；生成图只承担其被指定的定位/视觉参考职责，不能反向覆盖样板。用户明确要求忠实复刻生成图且未另指定样板时，以该图为重建基准；不要从旧 prompt 另行设计。
+- 固定页顶、页底和章节过渡页优先复用样板的完整原生对象及内部格式，包括字体、字号、段落、内边距、背景、线条和对齐。不能仅复制坐标再创建内部排版不同的对象；过渡页只改必要的编号/标题。
+- 同一语义内容使用一个文本框，通过框内换行、段落和局部格式排版，不按每行或句子片段拆框。公式和相关标签可在同一语义框中组织，同时保留原生数学结构。
+- 按区域职责核对水平左/中/右对齐和垂直顶/中/底对齐，不机械将整页居中。
+- 方框完整性、边框颜色/粗细、填充/透明度和嵌套色块逐层核对。采用指定参考的真实样式/色值，不把不同语义区域统一成一种浅色。
+- 保留已认可的原生对象，不为适配版式把整页主体统一组合缩放；需要分组时按局部语义组织。
 
-## 2. Native editability requirements
+## 3. 科研图、数据图与生成插图
 
-Prefer PowerPoint-native editable objects for:
+实际实验装置、现场、显微/传感/观测图、测量曲线和 CFD/DNS 等定量结果使用可追溯真实原件或真实数据忠实重绘，不用生成仿制图。概念机制、通用装置和无证据职责的工程背景可使用生成插图，包括写实风格；正文/图注不能冒充真实记录，特定已命名设施的事实图采用真实来源。
 
-- text and titles;
-- equations;
-- lines, connectors, and arrows;
-- boxes, callouts, and process/architecture structures;
-- charts;
-- tables;
-- simple diagrams.
+真实图片实际查看后才能放置，并核对其页面职责，避免误导裁切。科研图必须保持长宽比；布局空间冲突时改布局，或从数据/脚本调整画布、坐标、图例和字体后重新渲染等比放置，不拉伸坐标或物理几何。
 
-Do not flatten a slide into a screenshot when the intended deliverable is editable.
+可重绘图保留值、单位、坐标含义/尺度、类别/曲线映射、不确定度和注释；数据缺失不能为可编辑性编造。无法忠实重构的复杂科研图保留真实源图。不为风格统一篡改原论文图或实验图。
 
-Do not rasterize equations, labels, tables, or diagrams merely for convenience when they are expected to remain editable.
+未重绘的科研图片保留原媒体字节；检查嵌入媒体和源件对应关系及比例。确定性重绘的图保留数据与方法溯源，不能把字节变化误判成必须恢复旧图。
 
-An object merely existing in the PPTX is not enough. It must also be accessible and editable in the user's intended PowerPoint workflow.
+## 4. 原生公式与结构验收
 
-## 3. Visual evidence, generated illustration, and real images
+数学字体普通文字不等于原生公式；使用目标 PowerPoint 真正识别、能编辑的数学对象。OOXML 合法或其他渲染器可显示，不证明公式在 PowerPoint 可用。
 
-Classify the role of a visual before authoring it:
+Office Math 同时核对符号和节点层级，特别是指数、下标、分式、括号和独立乘子。不能只拼接字符比较。修复转换残留依据已确认 canonical；涉及面积/尺度/系数定义的科学改变先按 workflow 回源，同步依赖页，不在转换阶段擅自重新定义。
 
-### Evidence / project-specific factual visual
+保存重开可能拆分数学 run，验收允许等价 run 分段，但不允许数学结构、符号或含义改变。实际渲染与目标应用编辑检查均需完成。
 
-If a visual communicates “this is the actual object, actual work, actual measurement, or actual result,” use a traceable real source or faithful reconstruction from real data.
+## 5. ImgGen 到可编辑：独立对照页
 
-Examples include:
+将过审或用户指定的完整生成原图放在对应编辑页之后的下一张独立对照页，供用户翻页比较。保留完整原图媒体字节，不擦除像素页码/文字；原生页码遵循项目要求。对照页只承担比较职责，不冒充原生编辑内容。
 
-- actual experimental apparatus/test rig/site photographs;
-- microscopy, measurement, sensor, or observation outputs;
-- real quantitative data charts and uncertainty plots;
-- CFD/DNS/simulation result figures carrying specific numeric conclusions;
-- visuals used to demonstrate actual project work or a specific named real-world facility.
+在编辑页重建原生文字、公式、标签、真实科研图、表格、形状和连接，目标是关键对象可编辑、定位合理，便于用户继续微调。编辑页须独立完整、可读、可选和可修改；完整原图只出现在独立对照页。
 
-Do not recreate these with CPA-generated lookalikes and present them as evidence.
+核对每张编辑页与原图的正确映射，防止错误或缺失对照。比较工作稿保留对照页，并分开说明正式页数与工作稿总页数；用户索取正式净稿时排除对照页。参考原图不自动成为 CPA 合格参考或真实科学证据。
 
-Faithful redraw from real data using code/PowerPoint is allowed. Fabricating plausible values or a plausible-looking result image is not.
+## 6. 表格与概念图
 
-### Conceptual scientific illustration
+表格使用 PowerPoint 原生表格，不用零散文本框和线条拼成表格。逐单元格核对字体、字号、加粗、字色、水平/垂直对齐、表头/正文填充以及内外边框；单位在同一单元格换行。
 
-Generated visuals may explain a mechanism, structure, process, force relationship, scale change, or generic experimental concept.
+简单关系图优先原生形状与连接，并保持可解释的科学关系。复杂概念图不应为“全原生”而拼出失真且难编辑的零散对象。
 
-They may be realistic or photorealistic if the page does not imply that the image is an actual project record, actual experiment photograph, or measured result.
+用户允许时可从对应生成原图用 PowerPoint 原生图片裁切提取概念图形，作为可替换图片，明确其为概念插图、不是可编辑矢量或事实证据。真实实验图、数据曲线和数值结果不能从生成页裁取。
 
-For apparatus visuals:
+要求内部标签可编辑时，只裁取不含文字的图形区域，按语义单框重建标签/阶段名/说明，保留换行与局部格式；完整重建原生外边框/虚线框。无法避开像素文字时另找可用素材或回到生成，不用白块遮字或代码像素补丁。完整原图在下一张独立对照页保留，不改写权威 PNG。
 
-- use a real image when the claim is “this is our actual apparatus”;
-- a generated generic apparatus illustration is acceptable when the purpose is only to explain how such a system is conceptually arranged.
+## 7. 代表页试制与局部保护
 
-### Application / scene-setting illustration
+新建或替换重要施工方法，先用包含本项目真实复杂对象的代表页试制，在目标 PowerPoint 打开、保存、关闭、重开并编辑关键对象，通过后再按授权范围扩展。只授权代表页时不自动批量修改其余页面。
 
-Introduction, background, motivation, and engineering-application pages may use photorealistic CPA-generated visuals for generic scenes such as power plants, factories, chemical facilities, pipelines, energy systems, offshore platforms, heat-transfer systems, or industrial environments.
+局部修订从当前用户认可稿开始，改变最小必要对象集；保留已接受内容、样式和对象。已有另一会话/用户修改时先核对最新稿和 Git，不用旧脚本覆盖。
 
-These generated scenes are allowed when they:
+删除或合并前按对象几何、内容及素材角色保护结论区、页脚和真实图片，不能只凭对象编号/名称批量删除或隐藏。未经内容修订不改结论文字，未经明确布局要求不移动/缩放结论区或更改内边距/对齐。
 
-- do not claim to depict a specific real project/site;
-- do not carry precise geometry, quantitative results, measurements, or project facts;
-- are not used as proof of actual work performed.
+删除旧概念拼图时只清理对应对象，避免误删实际图或保留重影。扩展样式时逐页核对语义分组及嵌套色块，不能盲目套统一颜色/位置。
 
-If a specific named plant/facility/case is itself part of the factual claim, prefer a real source image instead of a generated lookalike.
+QA/validator 只读，修复在单独 authoring/build 步骤执行。局部修改尽可能比较非目标页 slide parts、对象及相关媒体/关系，确认没有无关改动；先修错误源头，停用会回写旧逻辑的脚本。
 
-Page titles, captions, and surrounding text must not mislabel generated illustration as “actual plant image,” “experimental setup,” “measured field,” or equivalent factual evidence.
+## 8. PowerPoint 实机与交付验收
 
-Before placing any real source image, actually view it and match it to the slide's claim. Preserve aspect ratio and avoid misleading crops.
+包/XML、python-pptx、LibreOffice 或其他渲染成功仅辅助验证，不能证明 Microsoft PowerPoint 可打开、保存和编辑。复杂对象、Office Math、手工 OOXML、外部 Office 对象、表格及图像参考层尤其需要实机检查：
 
-For genuine scientific plots, experiment photos, microscopy and other geometry- or evidence-bearing images, **never non-uniformly stretch to match a generated layout**. Preserve aspect ratio. If the reserved space is incompatible, revise the layout or (for reproducible data-derived figures) change the plotting script's canvas, axes, legend, and typography, render anew from the authoritative data, then place proportionally. Never distort data curves or measurements to satisfy a screenshot's geometry.
+1. 打开 PPTX，确认无修复/读取错误。
+2. 保存、关闭、重新打开。
+3. 编辑代表文字、公式、表格/连接或替换图片，确认关键对象真实可修改。
+4. 实际渲染/查看，核对编辑页及下一张独立对照页。
 
-## 4. Native equation authoring
+编辑试验使用验证副本，不把试验改动写回权威交付；正式修复在独立施工步骤完成。仅完成这些检查才可称为 PowerPoint 实机通过；能力不可用时明确边界，项目要求实机验收而未完成的只能作为中间稿，不能更新正式交付入口。
 
-“Looks like an equation” is not the same as a native editable equation.
+交付前核对对象齐全、文本可编辑、公式结构与显示、图表数据、原图字节/比例、结论位置/文字、框线/填充/对齐、层级及溢出。确认原生内容无需生成整页也能独立理解，所有下游待修项关闭；没有非预期隐藏层或重复对象。
 
-When the requirement is a PowerPoint-native equation:
-
-- use an equation structure that the target PowerPoint actually recognizes and edits as math;
-- do not treat ordinary text in a math font as equivalent to a native equation;
-- do not assume manually injected OOXML is valid merely because the package is well-formed or another renderer displays it.
-
-If an Office-native path is used to create equations, validate the resulting object in the target PowerPoint application when that capability is available.
-
-## 5. Default ImgGen-to-editable reconstruction
-
-When reconstructing an approved or user-designated ImgGen/CPA slide into editable PowerPoint:
-
-- treat the user-designated artifact as the visual source of truth when the user explicitly says to reproduce it;
-- **place the original generated slide as a temporary bottom-layer image on the same slide** to serve as a visible alignment template;
-- above that guide, rebuild the intended editable text, equations, labels, scientific figures, tables, shapes, connectors, and arrows using actual editable PowerPoint objects or faithful real assets;
-- preserve approximate geometry, alignment, hierarchy, and accepted visual relationships unless a verified scientific error or explicit user request requires change;
-- do not redesign from an old prompt when the user has said the current artifact is the base;
-- aim for **editable and approximately positioned**, not a complete one-pass pixel-perfect clone; the user will visually align and modify objects with the guide in place, then delete it;
-- **temporary doubled text, equations, or graphics are acceptable** because the underlying guide is deliberately visible during reconstruction; do not hide editable objects or distort geometry to suppress this double image;
-- when the user requests the **clean final deck**, remove the temporary guide and verify that native content remains complete and legible; a guide-bearing working draft is a valid intermediate deliverable;
-- a generated artifact can serve as this **reconstruction target/visual guide** but is not thereby an eligible CPA reference input or scientific evidence.
-
-Use connectors for logical relationships when editability matters, rather than baking arrows/lines into a raster layer.
-
-### Reconstruction pilot and verification
-
-Before rolling out a new reconstruction method to a large deck, choose a representative complex page containing several of the actual object types: mathematical equations, charts/real scientific figures, tables, and connectors as appropriate. Open, save, close, reopen, and edit it in the intended PowerPoint application. Correct the underlying authoring method before bulk conversion.
-
-The generated guide may be visually noisy while editing; judge the reconstruction on its editability and its **guide-hidden / guide-deleted** content, not the double appearance of the working view. Avoid a hidden-edit-layer workaround: editable objects must be selectable, visible in the clean view, and genuinely modifiable.
-
-Check for missing objects, inaccessible overlays, wrong object order, and content that vanishes when the guide is hidden. Do not mistake guide duplicates for actual overlapping native objects. The guide must remain easy for the user to select/remove without deleting the objects above it.
-
-## 7. Charts, tables, and diagrams
-
-When a chart represents real data, rebuild it from the actual data when available.
-
-Preserve:
-
-- values and units;
-- axis meaning and scaling;
-- category/series mapping;
-- uncertainty/error representation;
-- relevant annotations.
-
-If the underlying data are unavailable, do not fabricate them merely to make the chart editable.
-
-Prefer native PowerPoint tables for editable tabular content. Prefer native shapes/connectors for simple schematics and process diagrams.
-
-For complex scientific figures that cannot be faithfully reconstructed without losing meaning, retain the real source figure rather than replacing it with a fabricated editable approximation.
-
-## 8. Mode-specific authoring
-
-### CPA generation path
-
-Accepted generated slide visuals may remain when the selected final mode allows them.
-
-Keep overlays native where practical: titles, labels, equations, callouts, arrows, page numbers, and source notes should not be unnecessarily burned into a bitmap.
-
-### Native-editable mode
-
-The **cleaned final deck**, after guide removal, must contain no generated **full-page** image pretending to be editable content. A working reconstruction PPTX may intentionally retain its temporary full-page ImgGen guide. Ordinary non-evidence generated conceptual illustrations may remain when expressly part of the selected final visual design.
-
-Rebuild generated content using:
-
-- native PowerPoint text and shapes;
-- editable equations;
-- real source images;
-- data-derived charts;
-- native diagrams or other editable structures.
-
-Use a CPA-generated page as the temporary bottom-layer reconstruction target, never as a substitute for independently editable content and never as a CPA reference merely because it is the reconstruction target.
-
-## 9. Revision
-
-When revising an existing editable deck:
-
-- change the smallest necessary set of objects;
-- preserve accepted content and layout unless dependencies require broader change;
-- keep object editability;
-- do not replace an editable page with a raster image as a shortcut;
-- re-run page-level checks after the edit.
-
-Run QA/validation in read-only mode. Never hide a corrective write operation inside a validator. For local changes, compare **non-target pages** and their PPTX slide parts/objects to the baseline when feasible and reject accidental changes outside the intended pages; repairs must be separate explicit authoring steps.
-
-When the user designates a current screenshot/PPT artifact as the editable reconstruction base, that artifact controls the reconstruction. This authoring rule does not override CPA reference-eligibility rules.
-
-## 10. PowerPoint application-level compatibility validation
-
-Structural/package checks are auxiliary. ZIP/XML validity, python-pptx readability, or successful LibreOffice rendering do **not** prove that Microsoft PowerPoint will open and edit the file correctly.
-
-For complex native outputs, especially those involving:
-
-- Office Math;
-- manually/programmatically authored OOXML;
-- external Office objects;
-- complex tables;
-- hidden layers/objects;
-- image-base plus editable overlays;
-
-perform application-level validation in the target PowerPoint environment when available:
-
-1. open the PPTX;
-2. save it;
-3. close it;
-4. reopen it;
-5. confirm there is no repair/read error;
-6. spot-check that critical objects are still editable.
-
-Only after this check may the result be described as PowerPoint-verified.
-
-If target PowerPoint validation is unavailable, state the validation boundary. Do not claim PowerPoint compatibility merely because XML/package checks or another renderer succeeded.
-
-## 11. Final authoring checks
-
-Before returning a candidate PPTX to whole-deck QA, verify:
-
-- no unexpected overflow/clipping;
-- equations render correctly and remain genuinely editable where intended;
-- text is selectable/editable;
-- shapes/arrows/connectors are native where intended;
-- charts and tables use correct data;
-- real images are the intended source assets;
-- generated illustrations are used only in permitted non-evidence roles;
-- no unintended duplicate/hidden layers remain;
-- temporary guide remains removable, and guide-hidden content stands alone; overlapping guide and editable objects during construction are expected, not final-layout defects;
-- evidence-bearing images preserve their true aspect ratios (redraw data figures from source code rather than non-uniformly stretching them);
-- page size/master/layout are consistent;
-- complex outputs have completed the available PowerPoint compatibility check;
-- clean native-editable delivery has no residual full-page generated guide unless the user explicitly requested the working alignment draft.
+带独立对照页的工作稿须明确性质；原生净稿的正式编辑页不能有整页生成图冒充可编辑内容。允许的普通概念插图可以保留。随后执行 workflow 的整套 QA 与用户整套验收。

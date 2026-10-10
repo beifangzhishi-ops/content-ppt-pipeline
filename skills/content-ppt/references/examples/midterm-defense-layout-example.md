@@ -1,57 +1,33 @@
-# Example: Research Midterm-Defense Layout
+# 示例：科研中期答辩版式
 
-This file is a non-authoritative visual example from a research midterm-defense project.
+这是来自科研中期答辩项目的非权威视觉示例。只有用户明确选择该风格，或项目 README/protocol 指定时才读取/采用。它不是默认版式或硬门禁；不要把本示例的尺寸、配色、密度和页面模式抄入通用规则。
 
-It is not the default Content PPT layout, not a hard gate, and not a style that should be automatically applied to new projects. Load or apply it only when the user explicitly asks for this example/style or when a project README/protocol selects it.
+## 示例外部母版
 
-Do not copy these measurements, colors, density choices, or page patterns into the normative workflow.
+- 16:9 科研答辩页面。
+- 本示例的近似纵向分配：标题/页顶 23%，科学内容 64%，结论条 9%，页脚 4%。
+- 白色或很浅的冷灰背景；深海军蓝标题层级，标题区域下有细蓝分隔线。
+- 浅蓝灰结论条，左侧克制的深蓝强调；页脚与结论条分开，左侧作者/机构，右侧演示/页码标记。
+- 风格正式、学术、工程化，不采用产品仪表盘、大圆角卡片、渐变、发光、厚阴影或装饰界面组件。
 
-## Outer master used in the example
+## 科学内容区
 
-- 16:9 research-defense slide.
-- Approximate vertical allocation used by this example:
-  - title/header region: 23%;
-  - scientific content region: 64%;
-  - conclusion strip: 9%;
-  - footer: 4%.
-- White or very light cool-gray background.
-- Deep navy title hierarchy with a thin navy divider under the title region.
-- Pale blue-gray conclusion strip with a restrained navy accent at the left.
-- Footer separated from the conclusion strip; presenter/institution on the left and presentation/page marker on the right.
-- Overall style is formal, academic, and engineering-oriented. Avoid product-dashboard styling, heavy rounded cards, gradients, glow, thick shadows, or decorative UI chrome.
+外部母版稳定，中间区域围绕证据自由组织。使用清楚层级，不强制等宽列/等大网格。结果页可有一个主证据对象和两三个次级证据层，允许视觉平衡的不对称构图。
 
-## Middle scientific-content composition
+本示例主要模块间在可行时留约 5%–8% 呼吸空间，避免实际内容成为无功能留白中的小岛，也避免科学结构不需要的卡片墙或机械重复方框。
 
-The outer master stays stable, while the middle scientific region is composed freely around the evidence.
+## 本示例的高密度工作量页面
 
-- Prefer a clear visual hierarchy instead of equal-width columns or equal-size grids.
-- A result page may use one dominant evidence object plus two or three secondary evidence layers.
-- Asymmetric composition is acceptable when the page remains visually balanced.
-- Keep roughly 5%–8% visual breathing space between major scientific modules when practical.
-- Avoid leaving the real content as a small island surrounded by nonfunctional whitespace.
-- Avoid card walls or mechanically repeated boxes unless the scientific structure actually calls for them.
+本项目有时用密集证据布局展示重复实验、多工况、扫描或分层验证。可以将多张小科研图并列，重复证据本身构成信息；次级图不必每个轴标签都能现场读清，但曲线、点、形状、趋势和证据数量须可理解。
 
-## Dense / workload-oriented page treatment in this example
+至少保留一个清楚的主要问题/结果，避免无差别图片墙。局部密集证据带可以与较大的主图/结论并存；不重复同图或伪造面板冒充工作量。拥挤到损害主证据/推理时拆页，不统一缩小全部内容。
 
-This project sometimes intentionally used dense evidence layouts to make repeated experiments, multiple conditions, parameter sweeps, or layered validation visible at a glance.
+这些密度选择仅属于示例，不是其他演示的默认规则。
 
-- Multiple small scientific plots may be arranged together when the repeated evidence itself is part of the message.
-- Supporting plots may be small enough that every axis label is not readable during the live presentation, provided the curves, points, shapes, trends, and evidence count remain visually understandable.
-- Keep at least one clear primary question/result so the page does not become an undifferentiated image wall.
-- Use local density: a dense evidence band or cluster can coexist with a larger primary plot or conclusion area.
-- Do not duplicate one plot or fabricate extra panels merely to create the appearance of workload.
-- When the page becomes too crowded to preserve the primary evidence or reasoning chain, split the page instead of shrinking everything uniformly.
+## 本示例的关系/路线图
 
-These density choices are specific to this example and must not become default workflow rules for other presentations.
+来源约束科学关系，不强制旧几何。连接应清楚克制、不与科学内容竞争；短水平/垂直或有序连接适用于本示例，但不据此规定通用几何比例。
 
-## Relationship / route diagrams in this example
+## 用途
 
-- Source diagrams may constrain the scientific relationships without requiring the same geometry.
-- Prefer clean, restrained connectors that do not compete with the scientific content.
-- Short horizontal/vertical or otherwise orderly connectors worked well in this example, but this is a local visual choice rather than a plugin-wide requirement.
-
-## What this example is useful for
-
-Use it when a project wants a restrained academic defense style with a stable outer frame, a flexible evidence-first middle region, and the option to show substantial experimental/modeling workload without turning the slide into a commercial dashboard.
-
-For other projects, recalibrate the master, palette, spacing, and density from the user's material, audience, existing brand/template, and explicit preferences.
+适合希望采用克制学术答辩风格、稳定外框、证据优先且灵活的中部区域，并清楚展示实验/建模工作量的项目。其他项目应从材料、听众、品牌/模板和明确偏好重新校准母版、配色、间距和密度。

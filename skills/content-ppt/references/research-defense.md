@@ -1,49 +1,44 @@
-# Research Defense Decks
+# 科研答辩叙事与证据
 
-Read this reference for thesis, dissertation, proposal, scientific midterm, research-group defense, or similarly evidence-intensive academic presentations. It supplements, rather than replaces, the generic `workflow.md` evidence and narrative rules.
+仅在论文开题、中期、学位、研究组答辩等证据密集型学术演示中读取。本文件补充 workflow，不替代通用证据与门禁规则。
 
-## 1. Research purpose is not a retrospective result list
+## 1. 研究目的与动机
 
-An objective or motivation page answers **why the question matters and what is to be investigated**, not a chain of conclusions known only after the work. Do not rewrite experimental findings, derived closures, or numerical outputs as if they were the original research purpose.
+目的/动机页解释为何研究、要研究什么，不能把后来已知的实验发现、闭合关系或计算结果倒写成最初研究目标。
 
-## 2. Motivation: physical phenomenon -> consequence -> questions -> method
+有效的职责链是“物理现象与机制 -> 有证据的工程/科学影响 -> 未解问题与跨尺度接口 -> 方法与证据生产路线”。可合并页面，但职责须清楚；工具清单不是科学问题，机制示意不能掩盖研究必要性。
 
-Make the audience understand both **what happens** and **why anyone must study it**. A useful neighboring-page duty sequence is:
+每项影响与来源强度相称。压力响应变化的案例不自动证明堵塞、气膜、换热失效或事故危害；凝结/流型等条件改变解释时须说明。文献案例仍是外部证据，不是当前项目新验证结果。
 
-1. physical phenomenon and governing mechanism;
-2. evidence-grounded engineering/scientific impact and research necessity;
-3. unresolved scientific questions and interfaces across scales;
-4. methods and evidence-production route.
+## 2. 模型改进与科研路线
 
-This need not occupy four separate slides. The logical jobs should remain distinct even when consolidated: do not present a tool list as the scientific question, or bury research necessity under mechanism sketches.
+模型改进按“旧假设/适用域 -> 观察到的失配 -> 修订物理量/尺度/假设 -> 新关系 -> 证据比较”解释。必要时保留旧模型/基准，不能只放一条新曲线宣称改进；区别开发集一致、独立验证、敏感性和数值核查。
 
-Make each asserted consequence proportional to its source. A case that demonstrates a pressure-response change does not, by itself, establish blockage, a gas film, heat-transfer failure, or accident harm. State conditions for effects such as condensation or flow-regime dependency when those conditions change the claim. A literature example remains **external evidence**, not a result newly verified by the current project.
+路线图解释“科学问题 -> 方法/数据 -> 可解释输出 -> 下一模型接口”，说明传递什么及为何相连。部门、章节、内部编号或方法名本身不解释科学依赖。
 
-## 3. Model improvement and comparative logic
+涉及公式面积、尺度或系数定义，按 workflow 回原论文/推导与当前数据核对。说明物理定义及适用范围，不把经验选择写成严格推导或独立标定。
 
-When explaining a new model or closure, use the scientific chain:
+## 3. 新数据、证据密度与现场表达
 
-`old assumption / applicable regime -> observed failure -> revised physical variable, scale or assumption -> resulting relation -> evidence comparison`
+已核准新数据优先增强页面证据密度、参数覆盖、重复规模和可追溯工作量。能可靠重绘的 CSV/JSON、轨迹或扫描结果可组织成复合证据图，不强迫每次计算都产生新的论文式结论。复合图仍须可读、身份清楚、统计口径一致。
 
-Show the former model or baseline when it is necessary to demonstrate the improvement; avoid presenting a new curve in isolation as proof of progress. Distinguish agreement on the development dataset, independent validation, and sensitivity or numerical checks.
+保留清楚、准确、现场易讲的结论。较早表述只有在与当前科学定义、证据强度和展示数值一致时才可继续使用；不因表达有力而保留已被新证据推翻的主张。
 
-## 4. Research routes are interfaces, not organizational charts
+真正改变结论解释的边界/方法限定在最相关页面明确说明；可交叉引用，避免每页堆重复 caveat。内部调试、核查细节和非必需审稿限定放 canonical、讲稿或源项目说明，不能隐藏必需限定或夸大证据。
 
-Explain `scientific question -> method / dataset -> interpretable output -> next-model interface`. A route diagram should communicate why stages connect and what is transferred. Department labels, internal task IDs, chapter numbers, and method names alone do not explain a scientific dependency.
+提示词过度简化可能导致页面只剩结论。核对旧基准、失配证据、关键定义/推导、新关系和比较图是否按页面职责保留；必要时拆页/调整密度，不用装饰留白替代真实工作。
 
-## 5. Traceability and parameter claims
+## 4. 来源与参数主张
 
-Concrete policies, national programs, engineering deployments, named facilities, and practical background claims need traceable authoritative references. Generated context images may illustrate a scene, not prove such a factual claim.
+具体政策、工程部署、计划、设施和实际背景主张须有可追溯权威来源。生成背景图只能说明场景，不能证明事实。
 
-Do not label a representative scenario parameter, uncalibrated assumption, or scan level as an experimentally optimized value. Preserve material assumptions when they affect conclusions. Do not select a parameter using the same response data and then present its match to those data as independent validation. Where an exact scenario value is not necessary to the main claim, explain the variable's physical role on the main slide and put detailed ranges/calibration status in Q&A or appendix, without disguising the evidence boundary.
+代表情景参数、未标定假设或扫描水平不能写成实验优化值。影响结论的假设必须保留，不能用同一响应数据选参后再称其匹配为独立验证。精确数值不影响主结论时，正文解释变量物理作用，详细范围和标定状态放答疑/附录，同时保持证据边界清楚。
 
-## 6. Defense review
+## 5. 答辩复查
 
-Before finalizing, verify that:
-
-- an examiner can identify why each research question matters before seeing a method or dataset code;
-- titles, evidence, conclusions, and verbal explanation share the same strength of claim;
-- definitions/abbreviations are introduced before they become prerequisites for understanding;
-- every comparison identifies the baseline, dataset, and what was actually tested;
-- main-talk pages tell the scientific story, while secondary audits and parameter scans live in Q&A unless essential to the claim;
-- the background claim chain stops where the source evidence stops.
+- 评委在看到方法/内部数据代号前能理解每个问题为何重要。
+- 标题、证据、结论与口头解释的强度一致；术语在成为理解前提前已定义。
+- 每个比较明确基准、数据身份和实际检验职责。
+- 主讲说清主线；次要审计和扫描放答疑，必要条件没有被移出解释。
+- 新数据体现真实工作量，提示词没有删掉必要逻辑/证据，也没有制造独立性。
+- 背景事实链停在来源能支持的位置。

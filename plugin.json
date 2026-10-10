@@ -1,20 +1,32 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "content-ppt-pipeline",
-  "version": "0.7.0",
-  "description": "An evidence-led PowerPoint workflow with equal execution support for ChatGPT with CCM and Codex native runtime; CPA provides optional per-page visual generation.",
-  "keywords": ["powerpoint", "presentation", "research", "course", "engineering", "technical-report", "content-heavy", "evidence"],
+  "version": "0.8.0",
+  "description": "内容与证据优先的 PowerPoint 工作流，支持 ChatGPT + CCM 和 Codex 原生运行时；模型自行完成生成审核闭环，CPA 提供独立逐页视觉生成。",
+  "keywords": [
+    "powerpoint",
+    "presentation",
+    "research",
+    "course",
+    "engineering",
+    "technical-report",
+    "content-heavy",
+    "evidence"
+  ],
   "extensions": {
     "com.openai": {
       "interface": {
         "displayName": "Content PPT Pipeline",
-        "shortDescription": "Evidence-led technical PPT workflow",
-        "longDescription": "Run PowerPoint projects using ChatGPT with CCM or Codex native runtime as peer execution routes; close narrative and evidence gaps, maintain canonical specs and stage-scoped page states, generate independent visuals through fresh CPA requests, review composition before editable reconstruction, and validate editable PowerPoint and whole-deck output.",
+        "shortDescription": "证据驱动的技术 PPT 工作流",
+        "longDescription": "在 ChatGPT + CCM 或 Codex 原生运行时接续 PowerPoint 项目，维护当前内容权威，通过独立 CPA 请求自行推进生成、检查与返工，无需逐页状态台账；以原生样板施工可编辑页面，完整原图置于下一张独立对照页，并验证公式结构、真实素材、PowerPoint 编辑性及整套交付。",
         "category": "Productivity",
-        "capabilities": ["Read", "Write"],
+        "capabilities": [
+          "Read",
+          "Write"
+        ],
         "defaultPrompt": [
-          "Use Content PPT Pipeline to turn my material into a content-heavy presentation.",
-          "Use Content PPT Pipeline to review and continue this technical PowerPoint project."
+          "使用 Content PPT Pipeline，将我的材料制作成内容密集型演示文稿。",
+          "使用 Content PPT Pipeline，审查并接续这个技术 PowerPoint 项目。"
         ]
       }
     }

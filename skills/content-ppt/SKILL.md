@@ -1,120 +1,61 @@
 ---
 name: content-ppt
-description: Build, continue, review, generate, or revise evidence-heavy PowerPoint presentations using either ChatGPT with CCM or Codex with its native runtime. CPA is the separate visual-generation backend when needed.
+description: 为科研答辩、工程报告、课程和技术评审等证据密集型演示文稿创建、接续、审查、生成或修订 PowerPoint。支持 ChatGPT + CCM 与 Codex 原生运行时；CPA 是独立的视觉生成后端。
 ---
 
 # Content PPT Pipeline
 
-Use this skill for content-first presentations where correctness, evidence, structure, information density, traceable assets, and editable delivery matter more than decorative styling.
+用于内容优先、重视准确性、证据、结构、信息密度、素材溯源和可编辑交付的演示文稿。
 
-## Runtime and backend contract
+## 运行时与后端合同
 
-- **ChatGPT + CCM:** first-class project execution route; CCM provides the persistent workspace, files, tooling, and Git.
-- **Codex native:** equally first-class route; use its native workspace and execution environment without CCM.
-- **CPA:** use for page visual generation/regeneration. CPA is an independent backend, not the project runtime.
-- **Content PPT Pipeline:** owns orchestration policy, evidence rules, page lifecycle, review gates, and PowerPoint delivery rules.
+- **ChatGPT + CCM**：正式项目执行入口，CCM 提供持久工作区、文件、工具执行和 Git。
+- **Codex 原生运行时**：并列的正式入口，使用 Codex 自身的工作区与执行能力，无需 CCM。
+- **CPA**：用于页面视觉生成与重生成，是独立后端，不是项目运行时。
+- **Content PPT Pipeline**：规定编排、证据边界、生成与审核闭环、PowerPoint 施工和交付规则。
 
-User instructions for the current task take priority over workflow defaults.
+当前任务的用户指令优先于工作流默认规则。
 
-## Core contract
+## 核心合同
 
-1. **Reground before each actual revision round.** Enter the active runtime; reread project README/protocol, AGENTS/AGENT, the current layout/master authority, and the primary source passages relevant to this revision. Inspect Git status before tracked edits. Do not rely solely on prior-chat recall; keep source reads scoped.
-2. **Use project files as durable authority.** Chat history is transient context. Do not create a parallel state system.
-3. **Inspect evidence and references.** Never infer image/source content from filenames, listings, snippets, or another model's description.
-4. **Keep one current canonical spec and one current derived prompt per page.** Do not create v2/final/revised forks unless explicitly requested.
-5. **Track page state as stage-scoped sets, not scalar progress:** approved / rework-unreviewed / not-generated within the active gate. Pages may be reviewed out of order; a generation-stage approval is not final editable or whole-deck approval.
-6. **Every CPA result starts unreviewed.** File existence is not approval. A generated visual can enter approved-current only after actual visual review; reliably editable local fixes may be recorded for downstream work.
-7. **One slide = one fresh CPA HTTP request.** Each request contains that page's current prompt and only that page's selected references. If the page has no references, send none. Do not carry forward any prior-page generation/session/conversation identifier or request context.
-8. **Do not recursively feed generated presentation visuals back into CPA.** Old generated pages, rejected outputs, Pipeline-generated diagrams, and presentation-specific derived visuals are not CPA references unless the user explicitly overrides this for the current task.
-9. **Protect the evidence boundary.** Actual project/practice evidence must come from traceable real sources or faithful deterministic reconstruction from real data. Do not generate realistic-looking substitutes for actual experiments, apparatus, measurements, results, sites, or project records. Conceptual illustrations and generic engineering/application scene-setting visuals may be generated when they do not carry the proof burden.
-10. **Keep quantitative evidence deterministic.** Rebuild plots from data/code when possible; do not ask generation models to reinterpret exact axes, legends, values, uncertainty, or series mappings.
-11. **Only change canonical/prompt when review identifies a real source/instruction defect.** A poor CPA render by itself is not evidence that canonical content is wrong.
-12. **Material QA is not rendered QA.** The actual generated pages and final assembled deck must be visually reviewed.
-13. **Use audience-facing, evidence-led language.** Prefer real, inspected apparatus/engineering images when available; avoid internal project codes in visible copy and defensive caveats without evidentiary value.
-14. **Honor the established layout authority and explanatory purpose.** Diagrams need semantically meaningful relationships; review whether every visual supports the page's question and takeaway, not just whether it looks correct.
+1. **每轮实际修改前重新核对依据。** 进入当前运行时；重读项目 README/protocol、AGENTS/AGENT、版式/母版权威，以及本轮涉及的原始来源。修改受跟踪文件前检查 Git 状态；按自然材料单元读取，不只依赖聊天回忆。
+2. **项目文件是持久权威。** README 管当前入口与接续，AGENTS 管长期规则，canonical 管单页内容和实际未解决问题；详细规范按需读取，不创建平行状态系统。
+3. **实际查看证据与参考图。** 不凭文件名、目录、摘要、搜索片段或其他模型描述推断内容。
+4. **每页只有一份当前 canonical 和一份派生 prompt。** 内容变化先改所属权威，再同轮同步 prompt；除非用户要求，不保留 v2/final/revised 分叉。
+5. **模型负责生成—目视检查—返工闭环。** 持续推进至达标或实际阻塞，不要求持久维护三类页面状态集合、逐页进度台账或百分比。中断接续只记录必要的当前任务、产物、未完成动作和阻塞。
+6. **候选产物与 approved-current 分开。** 新输出须实际视觉审核，文件存在不是过审。生成阶段通过不等于可编辑或用户整套终审通过；可可靠下游修复的局部缺陷须记录并在交付前关闭。
+7. **一页 = 一个独立的 fresh CPA HTTP request。** 每次只传该页当前完整 prompt 与该页选定参考图；没有参考图就不传，不携带任何上一页 generation/session/conversation 标识或请求上下文。
+8. **不将生成的演示视觉递归送回 CPA。** 旧生成页、拒绝产物、Pipeline 图示和演示专用派生图默认不能作为 CPA 参考，除非用户明确覆盖。
+9. **保护证据边界。** 实际项目、实验、装置、测量、结果和现场必须来自可追溯真实来源或真实数据的忠实重建。概念示意和无事实证明职责的通用工程背景允许生成，不能冒充真实记录。
+10. **定量证据确定性重建。** 尽可能从数据/代码重绘，不让生成模型重解释精确坐标、数值、图例、色标、不确定度或曲线身份。
+11. **只有查明来源或指令缺陷才改 canonical/prompt。** 单次 CPA 成图不佳不证明 canonical 有错；运行时失败也不构成科学内容修改理由。
+12. **材料核查不能代替成图核查。** 分开执行材料闭合、生成前门禁和实际成图/整套审核；验证工具只读，修复属于明确的施工步骤。
+13. **面向观众、以证据解释问题。** 优先真实且已查看的装置/工程素材；正文避免内部代号与无信息的防御性限定，保留真正影响结论解释的边界。
+14. **遵守既定版式权威与解释职责。** 用户指定的原生样板优先于生成图的原生版式；每个重要图示关系必须可解释，并支持该页问题和结论。具体施工和保护要求见 ppt-authoring。
 
-Project README/canonical may specialize workflow defaults, but do not silently weaken this core contract.
+项目规则可明确调整默认方式；不得无说明地削弱核心合同。
 
-## Action routing
+## 动作路由
 
-Load only the references needed for the current action.
+只加载当前动作需要的参考文件。
 
-### Start / resume / status
+| 动作 | 执行职责 | 读取 |
+|---|---|---|
+| 开始、接续、进展 | 从项目文件、Git 和实际产物恢复当前工作；审核依据不明则重新查看 | runtime + workflow |
+| 内容/证据审查 | 核对叙事权威、实验/工况/数据身份、证据角色、数值与统计定义、页面职责、主讲与答疑边界、工作量及跨页一致性 | workflow |
+| 材料审计/闭合 | 审查 canonical、prompt、来源索引、数据、派生图和 QA/构建逻辑，完整复查至一轮无新增实质问题 | workflow + runtime |
+| 素材查看/选择 | 实际查看真实素材，先判证据角色，再判能否生成、重建或必须保留原件 | workflow + cpa-generation |
+| 生成前门禁 | 核对 canonical/prompt、参考资格、独立请求和候选输出位置 | workflow + cpa-generation + runtime |
+| CPA 生成/返工 | 只生成需要生成的页；独立请求、落地候选、逐张实际检查并迭代 | cpa-generation + runtime |
+| 成图审查 | 对照 canonical、prompt、合格参考，查科学/证据/数值/可读性/版式及相邻页一致性 | cpa-generation + workflow + runtime |
+| 复用/重建/新增/退休 | 按当前职责、内容、证据兼容性及可确认的当前过审产物决定 | workflow + runtime |
+| 可编辑施工/修订 | 从当前产物、canonical、真实素材和原生对象施工；完整原图置于下一张独立对照页，编辑页独立完整可读 | ppt-authoring + runtime |
+| 整套 QA/终审 | 实际渲染连读，核对叙事、事实、公式、证据、可读性、重复/遗漏、可编辑性和交付边界 | workflow + ppt-authoring |
 
-Restore current project state from the active runtime, project files, Git state, and local artifacts.
+表中名称对应 `references/<名称>.md`。
 
-Read: `references/runtime.md` + `references/workflow.md`.
+科研答辩、论文开题/中期/学位答辩额外读取 `references/research-defense.md`。其他任务不自动套用答辩专属规则。
 
-### Content / evidence review
+`references/examples/` 仅在用户或项目明确选择时读取，示例不是权威。
 
-Review narrative, evidence, numbers, equations, terminology, page roles, source identity, or the full material pack.
-
-Always cover: narrative authority; experiment/condition/dataset identity; evidence role and strength; numeric/equation/statistical definitions; page duty; main-talk vs Q&A boundary; traceable workload; cross-page consistency.
-
-Read: `references/workflow.md`.
-
-### Material audit / evidence closure
-
-Deep-review canonical specs, prompts, source/evidence indexes, data, derived figures, and QA/build logic. Continue complete passes until one pass finds no new substantive issue.
-
-Read: `references/workflow.md` + `references/runtime.md`.
-
-### Asset inspection / selection
-
-Inspect and select real source/reference assets. Apply the evidence boundary before deciding whether an asset may be generated, reconstructed, or must remain a real source.
-
-Read: `references/workflow.md` + `references/cpa-generation.md`.
-
-### Pre-generation gate
-
-Check canonical/prompt sync, prompt executability, reference eligibility, fresh-request inputs, and local output state before CPA submission.
-
-Read: `references/workflow.md` + `references/cpa-generation.md` + `references/runtime.md`.
-
-### CPA generation
-
-Generate only pages that require generation. Every page uses a fresh CPA HTTP request with its own prompt and selected references only. Returned output enters candidate/rework-unreviewed until visually reviewed.
-
-Read: `references/cpa-generation.md` + `references/runtime.md`.
-
-### Generated-page review
-
-Actually view the current generated page, compare it with canonical/prompt/eligible references, and decide approved vs rework.
-
-Always check: wrong source/condition; invented evidence; numeric/formula/label errors; evidence readability; decorative content displacing evidence; stale page identity; density/layout; neighboring-page consistency.
-
-Read: `references/cpa-generation.md` + `references/workflow.md` + `references/runtime.md`.
-
-### Reuse / rebuild / new / retire planning
-
-Classify existing pages using current canonical compatibility and approved-current artifact status.
-
-Read: `references/workflow.md` + `references/runtime.md`.
-
-### Editable PPT build or revision
-
-Build or modify the formal PPTX from approved pages, canonical specs, real assets, data, and native objects.
-
-For ImgGen-to-editable reconstruction, retain the current approved image as a temporary bottom alignment guide, reconstruct editable objects above it, and allow temporary double imagery. Preserve true scientific figure aspect ratios; redraw from source code/data rather than distorting them to fit.
-
-Read: `references/ppt-authoring.md` + `references/runtime.md`.
-
-### Research / thesis / proposal / midterm defense
-
-When the deck is an academic or scientific defense, additionally apply the specific research-question, motivation, model-comparison, and evidence-claim narrative guidance.
-
-Read: `references/research-defense.md` along with the action-specific references above.
-
-### Whole-deck QA / final review
-
-Actually inspect the complete rendered deck for narrative, terminology, facts, equations, numbers, titles, evidence readability, density, visual consistency, duplicates, omissions, and production-path constraints.
-
-Read: `references/workflow.md` + `references/ppt-authoring.md`.
-
-### Optional layout example
-
-Use `references/examples/` only when explicitly selected by the user/project. Examples are not authority.
-
-## Reference loading
-
-For each actual revision round, reread current project authority and the directly relevant primary sources; the layout/master authority must already be established. Load only the action-specific skill references needed, and reread those when context is partial, stale, conflicting, or insufficient.
+每轮实际修订重读当前项目权威和直接相关来源；参考文件在上下文不完整、过时、冲突或不足时重新读取。

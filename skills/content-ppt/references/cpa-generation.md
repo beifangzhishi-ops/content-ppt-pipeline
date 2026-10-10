@@ -1,295 +1,105 @@
-# CPA Generation
+# CPA 视觉生成
 
-This file owns reference inspection, reference eligibility, pre-generation checks, CPA submission, fresh-request behavior, bounded parallel production, generated-page review, regeneration, and local output handling.
+本文件负责参考图资格、生成前门禁、独立请求、有界并发、成图审查和返工。产物与接续机制见 runtime。
 
-The production path is:
+生产路径：`当前运行时 -> CPA -> 本地候选 -> 实际视觉审核 -> approved-current`。
 
-`active project runtime -> CPA -> local candidate -> review -> approved-current`
+## 1. 后端与独立请求
 
-## 1. CPA generation backend
+页面视觉生成/重生成使用 CPA。端点、模型发现、认证、配额与凭据属于当前运行时，不进入 canonical、prompt、README 或 Git。
 
-Use CPA for slide visual generation/regeneration.
+**一页 = 一个独立的 fresh CPA HTTP request。** 每次生成或返工：
 
-CPA-specific endpoint/model discovery, authorization, quota, and credentials belong to the active execution environment. Do not place secrets or provider configuration in canonical specs, prompt TXT files, README state, or Git-tracked skill authority.
+1. 新建请求，只发送该页当前完整 prompt。
+2. 只附该页当前选定且合格的参考图；没有参考图就不传。
+3. 不转发任何上一页 generation/session/conversation 标识或请求上下文，不依赖“与上一页相同”。
 
-If CPA is unavailable, the generation action is blocked until CPA is available again.
+并发只能是多个独立新请求，不改变该约束。CPA 不可用时记录实际阻塞，不擅自换后端或修改科学内容。
 
-## 2. Fresh-request rule
+## 2. 实际查看与证据边界
 
-Every slide generation uses a **fresh CPA HTTP request**.
+证据图和最终入选参考图必须实际查看，不能只凭文件名、目录、元数据、搜索片段或另一模型描述判断。预览/联系表可筛选候选，但最终每张仍须查看。
 
-For each page `Pxx`:
+沿用来源索引记录足够溯源：来源、目标页、素材角色、是否已查看及当前资格。
 
-1. create a new request;
-2. send that page's current prompt;
-3. attach only that page's selected eligible references;
-4. if the page has no references, send no reference images;
-5. do not carry forward any previous page generation/session/conversation identifier or prior-page request context.
+- **实际项目/实践证据**：实际装置、实验、测量、数值结果、现场和事实记录，必须采用可追溯真实图或真实数据的忠实确定性重建，不能生成写实替身。
+- **概念示意**：允许生成机制、结构、流程、物理关系或通用装置概念，但不能宣称是真实项目记录或测量。
+- **工程/应用背景**：没有事实证明职责的通用场景可生成，包括写实场景；特定已命名设施/现场/事件身份承担事实主张时使用真实来源图。
 
-Conceptually:
+标题、图注和正文不得把生成图写成实际证据。
 
-`P41 = fresh request`
-`P42 = fresh request`
-`P43 = fresh request`
+## 3. 参考资格与格式
 
-Bounded parallel generation may place multiple independent fresh requests in flight at once. Parallelism does not change the per-page request rule.
+合格事实输入是已查看、可追溯且符合项目政策的真实源图，例如装置照片、真实对象/现场、源论文的定性事实图或仅用于定性物理背景的测量图。它们提供事实背景，不自动提供复制风格的许可。
 
-## 3. Inspect before use
+若精确坐标、数值、图例、色标、不确定度、类别/曲线映射或数值标签承担证据职责，不交给 CPA 重解释；从数据/代码重绘或保留真实原图，在 PPT 装配层直接放置。
 
-Any image used as evidence or supplied to CPA as a reference must be actually viewed.
+默认不使用以下 CPA 参考：旧生成页、AI 输出、拒绝产物、Pipeline 生成示意、演示专用脚本图、答辩临时派生图、内部布局/关系校准图。可以内部查看诊断，只有用户明确覆盖资格规则时才可上传。作为可编辑重建目标不自动赋予参考资格。
 
-Do not infer content from filenames, directory names, metadata, search snippets, or another model's description alone.
+独立风格/布局参考仅在用户或项目明确选择、且不是当前演示的生成产物时使用；示例文件不是权威。
 
-When many assets exist, previews/contact sheets may narrow candidates, but every final selected reference still requires actual inspection.
+参考必须是 PNG、JPG/JPEG 或 WebP 等图像。PDF 不直接作为图片参考：定位精确页面/图件 -> 转为图片 -> 实际查看 -> 核对裁切、清晰度与含义 -> 纳入当前页映射。
 
-Track enough provenance to know:
+## 4. 输入与输出分工
 
-- source;
-- target page;
-- evidence/structural/style role;
-- whether it was actually viewed;
-- whether it is current and eligible.
+canonical 是权威；当前 prompt 是派生指令；合格参考是该页输入；candidate 是待审核输出；approved-current 是当前已核查的成品。canonical 变化同轮覆盖同步唯一当前 prompt。
 
-## 4. Evidence and illustration boundary
+提交前核对：
 
-### Project/practice evidence
+- canonical/prompt 一致、完整、自包含，清除旧工况、标题、结论和布局措辞。
+- 没有跨页隐含依赖、互相冲突的构图指令、伪造实际证据或定量图要求。
+- 参考图当前、已查看、合格、可用；PDF 转换已检查，失效/禁用参考已移除。
+- 图示表达科学关系，而非盲目继承旧生成图几何。
+- 明确候选输出位置，不能含糊覆盖当前过审图。
 
-If a visual is part of the proof chain or represents actual project work, apparatus, experiment, measurement, simulation result, site, or another factual record, do **not** use CPA to fabricate a realistic-looking substitute.
+## 5. 提示词完整性
 
-Use:
+按页面职责写明标题、问题/结论、必须保留的事实/数字/公式/术语、证据角色、概念或背景图职责、阅读顺序、密度、版式约束、必要禁止项及需防止复发的渲染问题。prompt 要能执行页面生产，而不是 canonical 的过短摘要。
 
-- a traceable real source image; or
-- a faithful deterministic reconstruction from real data when appropriate.
+明确分开三个角色：
 
-If a specific named facility, site, experiment, or case is itself part of the factual claim, prefer a real source image rather than a generated lookalike.
+1. **必须显示**：准确的标题、正文、公式、数值、引用和标签。
+2. **视觉职责**：关系、构图、阅读路径和设计约束，是施工指令，不是页面正文。
+3. **不得显示/仅核查**：原始路径、网址、内部代号、溯源/审核说明及科学/施工约束；只有 canonical 明确指定可见引用时才显示对应内容。
 
-### Conceptual scientific illustration
+不得将内部说明粘入可见正文。若反复泄漏成图，修正提示词结构后独立新请求返工，不修补 PNG 像素。
 
-CPA generation may be used to explain a mechanism, structure, process, relationship, or generic apparatus concept when the generated image is not presented as an actual project record or measured result.
+检查是否因过度压缩提示词而丢失必需的基准比较、关键推导、证据面板或解释层次；保证可读性，不以空白装饰替代论证。答辩专属密度与讲述规则见 research-defense。
 
-### Engineering application / scene-setting
+## 6. 模型推进闭环
 
-Generated visuals, including photorealistic scenes, are allowed for background, motivation, industrial/application context, or generic engineering environments when they do not carry the deck's factual proof burden.
+`选页 -> 生成前门禁 -> fresh CPA request -> 本地候选 -> 实际看图 -> 通过或返工 -> approved-current`。
 
-Titles, captions, and surrounding copy must not make a generated illustration appear to be actual experimental/project evidence.
+模型自行完成这个闭环，直到当前任务达标或实际阻塞，不要求逐次更新三类状态集合，也不把每张页的内部审核变成用户批准门禁。尚未委托的科学判断、重大设计选择或凭据配置需要用户信息时再交回必要问题；已有授权持续有效。
 
-## 5. Reference eligibility
+每次返工使用该页完整当前 prompt 与合格参考，不使用仅存在于聊天中的增量指令。旧失败理由作为复查重点，不自动判定新输出失败。
 
-### Eligible factual references
+## 7. 有界并发
 
-Real, traceable, inspected source images may be supplied when project policy allows it, such as:
+可以保持少量独立请求在途，等待时准备下一合格页，结果返回即检查，通过即归入当前成品。允许跳号和乱序完成，不维护额外页面状态台账。
 
-- experiment/apparatus photographs;
-- real site/object images;
-- paper/source figures used for qualitative factual content;
-- traceable numerical/measurement imagery when CPA only needs qualitative physical context.
+并发数、错峰和退避由项目/供应商决定，不写通用固定数值。多个页面出现相同失败时停止扩队，先诊断是否为共同指令/风格缺陷；查明缺陷才修所属指令，单次差图不能推定 canonical 错误。
 
-They provide factual content, not permission to copy the source visual style.
+配额、限流、认证或后端阻塞按实际响应处理；已给出恢复时间时避免无意义重复探测。中断信息遵循 runtime，不新建失败分类数据库。
 
-### Keep quantitative evidence out of generation when exact values matter
+## 8. 成图审查与通过条件
 
-If a figure's scientific role depends on preserving exact:
+每份新输出在实际审核前都是候选。对照当前 canonical、完整 prompt、该页真实参考及其角色、要求的数值/公式/标签、信息层级与相邻页。
 
-- axes;
-- values;
-- legends;
-- color bars;
-- uncertainty;
-- category/series mapping;
-- numeric annotations;
+检查工况/数据身份错误、伪造装置或结果、数值/公式/标签错误、证据太小、装饰挤占证据、旧页身份、密度/版式失败、无意义连接、不能解释页面问题的视觉、异常留白、字体替换、出框和数学乱码。正常三栏、公式框和箭头不是缺陷。
 
-do not send it to CPA for reinterpretation.
+- **视觉阶段通过**：主构图、阅读路径、层级、核心证据和科学关系可靠；剩余局部错字、标签、公式文字、页码或箭头能在可编辑层可靠修复时，精确记录下游待修项。
+- **CPA 返工**：结构、科学含义、证据或核心解释错误，不能安全留给下游。
+- **交付检查**：待修项必须在编辑层修复并验证；纯位图交付不能延期到不存在的可编辑步骤。
 
-Instead:
+approved-current 只表示该生成视觉经过实际审核、可复用，不表示无缺陷可编辑稿或用户最终认可。
 
-- reproduce it deterministically from data/code when possible;
-- retain the real source figure when reconstruction is not appropriate;
-- place/composite it directly in the final PPT or editable assembly layer.
+## 9. 返工与产物保护
 
-### Not eligible as CPA references by default
+canonical/prompt 正确时只发另一个独立新请求；查明来源/指令缺陷时先修所属权威、同步完整 prompt，再生成。运行时授权、配额、超时、网络和后端故障不构成页面科学审核结论。
 
-Do not use:
+不得用代码擦除、拼贴、补丁、重绘像素或拼接权威 CPA PNG 来制造过审结果。进入可编辑施工后，在未改写原图的前提下构建原生对象或按用户要求原生裁切概念区域，属于下游施工，规则见 ppt-authoring。
 
-- old generated slide pages;
-- AI/generated outputs;
-- rejected generations;
-- Content PPT Pipeline-generated diagrams;
-- project-script-generated presentation schematics;
-- temporary defense/report redraws;
-- internal relationship/layout calibration images.
+输出留在当前项目运行时：新输出进 candidate，通过的进 approved-current，失败的留在当前成品视图外并按项目政策处理。不要凭文件存在判过审，不另建平行进度索引。
 
-These may be inspected internally for diagnosis or factual/logic comparison, but they do not enter the next CPA request unless the user explicitly overrides this rule for the current task.
-
-### Independent style/layout references
-
-A style/layout reference may be used only when explicitly selected by the user/project and it is not a generated artifact from the current deck.
-
-Example files are non-authoritative.
-
-## 6. Reference file format
-
-CPA reference inputs must be actual images such as:
-
-- PNG;
-- JPG / JPEG;
-- WebP.
-
-Do not pass PDFs directly as image references.
-
-When an authoritative source exists only in PDF:
-
-1. locate the exact page/figure;
-2. render/export it to an image;
-3. inspect the converted image;
-4. verify crop, readability, resolution, and meaning;
-5. use the converted image in the current reference mapping.
-
-## 7. Canonical, prompt, reference, and output separation
-
-Keep these roles distinct:
-
-- canonical spec: source of truth;
-- current prompt TXT: derived generation instruction;
-- eligible references: visual inputs for the current page;
-- candidate output: CPA result awaiting review;
-- approved-current artifact: accepted current page.
-
-When canonical changes, overwrite/synchronize the one current prompt in the same work cycle.
-
-## 8. Pre-generation gate
-
-Before CPA submission, check:
-
-- canonical and current prompt are synchronized;
-- prompt is self-contained;
-- no stale experiment/condition/title/conclusion/layout language remains;
-- no "same as previous slide" or hidden cross-slide dependency remains;
-- composition instructions do not materially conflict;
-- prompt does not ask CPA to fabricate project-specific evidence or quantitative plots;
-- every referenced asset is current, inspected, eligible, and available;
-- no stale/forbidden reference filename remains;
-- PDF-derived references were converted and inspected;
-- conceptual diagrams communicate relationships/facts rather than inheriting old generated geometry;
-- the prompt distinguishes visible page copy from visual-construction instructions and non-displayed source/verification notes;
-- current output state is known so a new candidate cannot ambiguously overwrite approved-current.
-
-## 9. Prompt completeness
-
-Include, as applicable:
-
-- slide title and role;
-- purpose/takeaway;
-- facts, numbers, equations, and terminology that must be preserved;
-- evidence roles;
-- conceptual/application illustration role;
-- reading order and density;
-- layout/composition constraints;
-- high-value prohibitions;
-- prior reproducible rendering problem that must not recur.
-
-The prompt should specify the page to produce, not merely summarize the canonical spec.
-
-Separate three prompt roles explicitly:
-
-1. **Must display**: exact intended page-visible title, copy, formulae, numeric values, citations, and labels.
-2. **Visual duty**: relationships to illustrate, geometry, reading path, and design constraints; these are instructions, not prose to place on the slide.
-3. **Do not display / source checks**: asset provenance, raw source URLs, internal project identifiers, review notes, and scientific or construction guardrails unless the canonical spec explicitly designates a visible attribution.
-
-Do not paste internal source checks and construction directions into a visible-copy block. If CPA repeatedly renders them as slide text, repair prompt structure and regenerate rather than editing the pixels of its PNG.
-
-## 10. CPA production loop
-
-Default loop:
-
-`select page -> pre-generation gate -> fresh CPA request -> local candidate -> mark unreviewed -> inspect -> approve or regenerate -> approved-current`
-
-The agent owns the mechanical loop. User involvement is needed only for:
-
-- a scientific/content decision requiring judgment;
-- a material design choice the user has not delegated;
-- CPA authorization/configuration action;
-- persistent CPA unavailability.
-
-## 11. Bounded parallel queue
-
-CPA production may be asynchronous.
-
-Use a small bounded queue when useful:
-
-- multiple independent page requests may be in flight;
-- prepare another eligible page while one request waits;
-- review returned outputs as they arrive;
-- revise prompts for reproducible rendering failures while other requests continue;
-- archive approved pages immediately;
-- keep page-state sets independent of return order.
-
-The concurrency limit is project/provider specific. Do not hard-code a universal value in the generic skill.
-
-If repeated pages show the same visual failure, stop expanding the queue and fix the common instruction/style cause first.
-
-## 12. Generated-page review
-
-Every CPA result starts as rework/unreviewed.
-
-Actually inspect it against:
-
-- current canonical;
-- current prompt;
-- eligible real references and their declared roles;
-- required numbers/equations/labels;
-- visual hierarchy and page role;
-- neighboring approved pages when whole-deck consistency matters.
-
-Check for:
-
-- wrong experiment/condition/data identity;
-- invented apparatus/data/evidence;
-- numeric/formula/label errors;
-- evidence too small to read;
-- decorative content replacing main evidence;
-- stale page identity;
-- layout/density/style failure.
-- arrows or relationship diagrams whose actual meaning cannot be explained;
-- visuals that are technically correct but do not explain the page's message;
-- unnecessary empty spaces, font fallback, out-of-frame items, or broken math rendering (not the mere presence of regular columns, formula boxes, or arrows).
-
-Decide **generation-stage approved vs rework** directly:
-
-- **Approve with logged downstream fixes** only when main composition, reading path, visual hierarchy, core evidence configuration, and scientific relationships are sound, and the remaining flaws (such as a typo, page number, local label, formula text, or arrow) can reliably be corrected as editable objects. Use the existing project canonical/fix-list tracking, not a new parallel state system.
-- **Rework in CPA** when the structure, main explanation, evidence, scientific meaning, or page relationships cannot safely be salvaged through downstream editable adjustments.
-- A deferred fix remains outstanding until editable-stage correction and review; generation approval is never final PPTX or whole-deck approval. If the final delivery path is raster-only, visible defects cannot be deferred to nonexistent editable work.
-
-**Approved-current means visually reviewed and reusable at the CPA stage, not defect-free editable or user-approved final delivery.**
-
-## 13. Regeneration
-
-When a CPA page fails review:
-
-- if canonical and prompt remain correct, regenerate with another fresh request;
-- if review reveals a real source/instruction defect, fix the owning source, synchronize the complete current prompt, then regenerate;
-- do not infer a canonical defect merely from a poor render.
-
-Use the complete current page prompt/reference set for regeneration rather than a chat-only delta instruction.
-
-Rejected generations may be inspected diagnostically but are not fed back into CPA as references by default.
-
-Do **not** repair the authoritative generated PNG by script-based erasing, patching, compositing, pixel repainting, or stitching to manufacture an approved result. If the generation-stage image needs a structural change, correct the owning prompt/source if warranted and send a fresh CPA request. Native objects constructed over an unchanged temporary base **after** entering editable reconstruction are downstream authoring, not PNG pixel patching.
-
-CPA authorization, quota, timeout, network, or backend failures block generation execution; they are not page-review conclusions and do not justify canonical changes.
-
-## 14. Local output handling
-
-CPA output stays in the active project runtime.
-
-Use project-declared candidate and approved-current locations:
-
-- fresh outputs -> candidate/rework;
-- accepted outputs -> approved-current;
-- failed outputs -> remove from current view; archive/delete according to project policy;
-- never infer approval from file presence.
-
-## 15. Secrets and provider configuration
-
-Keep CPA API keys, tokens, endpoint configuration, model discovery, and provider-specific setup outside canonical/prompt/plugin authority.
-
-Use ignored local configuration or secure runtime mechanisms. Never commit secrets.
+秘密保留在忽略的本地配置或安全运行时，永不进入 Git 或页面输入。

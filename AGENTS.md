@@ -1,319 +1,83 @@
-# Maintenance Guide
+# Content PPT Pipeline 维护规则
 
-This file is for maintainers and agents working on the Content PPT Pipeline repository.
+## 权威与产品边界
 
-## Authority
+- `plugin.json`：身份、安装元数据和版本。
+- `skills/content-ppt/SKILL.md`：短核心合同、运行时/后端合同和动作路由。
+- `references/runtime.md`：宿主、文件职责、接续、产物和 Git。
+- `references/workflow.md`：内容/证据、叙事、材料闭合和整套生命周期。
+- `references/cpa-generation.md`：参考资格、独立请求、队列、成图审查和返工。
+- `references/ppt-authoring.md`：原生施工、独立对照页、对象保护和实机验收。
+- `references/research-defense.md`：只用于答辩类任务的叙事/证据密度规则。
+- README：用户可读的当前产品模型。上述 reference 路径相对于 `skills/content-ppt/`。
 
-- `plugin.json`: install metadata and version.
-- `skills/content-ppt/SKILL.md`: model-facing runtime/backend contract, core contract, and action routing.
-- `skills/content-ppt/references/runtime.md`: host/runtime routing, persistent state, local artifacts, Git.
-- `skills/content-ppt/references/workflow.md`: content/evidence/deck lifecycle.
-- `skills/content-ppt/references/cpa-generation.md`: CPA production, fresh requests, reference eligibility, queue/review/regeneration.
-- `skills/content-ppt/references/ppt-authoring.md`: editable/native PowerPoint construction.
-- `skills/content-ppt/references/research-defense.md`: optional defense-specific narrative and evidence safeguards.
-- `README.md`: user-facing current product model.
+正式入口为 `ChatGPT Plus -> Content PPT Pipeline -> CCM` 和 `Codex -> Content PPT Pipeline -> Codex 原生运行时`。宿主负责推理/研究/编排/审核，当前运行时负责项目执行，CPA 只负责视觉生成。不要添加虚假的 CPA manifest 依赖，也不要声称 CCM 随插件打包。
 
-Do not preserve obsolete workflow branches or aliases for compatibility unless the user explicitly requests it.
+保持核心合同短小，细节按职责下沉，不在多个参考中重复机械细则。下层规则冲突时核心合同优先，除非用户明确覆盖当前任务。用户没有要求兼容时，不保留过时工作流、别名或脚本分支。
 
-## Product scope and dependencies
+## 修改前与文件分工
 
-Peer execution route A:
+每轮实际修改前进入既有项目，读 README/protocol、AGENTS、当前版式/母版权威和本轮相关原始来源，检查 Git，并核对 canonical、当前 prompt 和实际产物。按自然论文/章节/实验单元读取，不用聊天回忆代替权威。
 
-`ChatGPT Plus -> Content PPT Pipeline -> CCM -> project -> CPA when generation is required`
+README 管当前稿、任务、下一步、来源/专项入口和必要接续；AGENTS 管长期规则及入口；canonical 管单页事实、素材角色和实际未解决问题；详细规范按需读取。变化写回所属文件，不建平行项目、进度数据库、状态文件或接续日志，不将 README 写成追加历史。
 
-Peer execution route B:
+每页只保留一份当前 canonical 和一份当前 prompt。内容/证据规则变化先修所属源，同轮同步派生 prompt/索引/脚本；除非明确要求，不建 v2/final/revised 权威分叉。移除会把旧逻辑恢复进当前文件的脚本。
 
-`Codex -> Content PPT Pipeline -> native Codex runtime -> CPA when generation is required`
+## 生成闭环与接续
 
-Roles:
+模型负责生成—实际看图—返工，直至达标或实际阻塞。不要求持久维护三类页面集合或标量进度。中断时在已有项目入口写必要的当前任务/阶段、当前页/候选文件、未完成动作、实际阻塞和下一步；恢复核对实际产物，审核依据不明就重新检查。
 
-- the host model owns reasoning, research, review, and orchestration;
-- CCM is the durable project runtime for the ChatGPT route;
-- Codex uses its own equally supported native workspace/execution environment instead of CCM;
-- CPA is an independent visual-generation backend, not a project runtime or bundled plugin dependency;
-- Content PPT Pipeline owns orchestration policy.
+候选与 approved-current 仍分开，文件存在不是审核通过。生成阶段通过只意味着视觉构图可用于下游，不是可编辑或用户整套终审通过。可靠可编辑的局部错字、标签、公式文字、页码或箭头可记入已有 fix list/canonical，交付前关闭；结构、科学、证据或核心解释缺陷仍阻止通过。
 
-Do not add a fake manifest dependency on CPA. Do not imply CCM is bundled into Content PPT Pipeline.
+**一页 = 一个独立的 fresh CPA HTTP request。** 每次只发送该页当前完整 prompt 与该页已查看、合格的参考；无参考就不传，不携带任何上一页 generation/session/conversation 标识或请求上下文。并发也是多个独立新请求。
 
-## Model-readable design
+CPA 差图不自动说明 canonical 错。查明真实来源/指令缺陷才改源和 prompt，否则独立新请求返工。认证、配额、超时、网络或后端故障是运行时阻塞，不是科学审核结论，不建立通用失败分类数据库。
 
-The skill is intentionally layered:
+提示词分清必须显示、视觉职责、不得显示/仅核查三个角色。权威 CPA PNG 不做脚本擦除、拼贴或像素补丁。并发、错峰和退避由项目/供应商决定；共同失败时停止扩队并诊断，不写通用固定并发值。
 
-1. `SKILL.md` contains the small runtime/backend contract, core contract, and action routing that the model should rarely miss.
-2. Each reference file owns one concern.
-3. Detailed rules should not be duplicated across multiple reference files unless needed to prevent a known dangerous ambiguity.
-4. When a lower-level rule conflicts with the core contract, the core contract wins unless the user explicitly overrides that rule for the current task.
+## 证据与三道门禁
 
-Keep `SKILL.md` short enough to read in full. Move mechanics downward rather than adding incidental detail to the top level.
+实际项目/实验/装置/测量/结果/现场采用可追溯真实来源或真实数据忠实确定性重建；具体已命名对象身份承担事实主张时使用真实图。概念机制与无证明职责的通用工程背景可以生成，包括写实图，但不能冒充实际证据。
 
-## Runtime
+最终参考必须实际查看。默认不能上传旧生成页、AI 输出、拒绝产物、Pipeline 图示、演示脚本派生图或内部布局/关系校准图。PDF 精确页面/图件先转图片并查看。重建目标不自动成为 CPA 合格参考。
 
-For persistent projects:
+精确数值、坐标、图例、色标、不确定度或曲线身份依赖真实图/数据代码，不交给 CPA 重解释。重绘保留溯源、语义配色和轴定义，并实际检查；不能忠实重建时保留源图。
 
-1. enter the active runtime/workspace;
-2. read project README/protocol;
-3. read project AGENTS/AGENT;
-4. inspect Git status;
-5. restore state from canonical/current project files and local artifacts;
-6. update README/AGENTS when current state or durable project rules change.
+审查优先顺序：叙事与科学正确性 -> 来源/身份/角色/独立性 -> 数值/公式/统计定义 -> 页面职责及主讲/答疑边界 -> 工作量覆盖 -> 输入就绪 -> 成图可读性与整套一致性 -> 装饰。
 
-Use CCM on ChatGPT Plus. Use native Codex execution in Codex.
+同数据集比较不是独立验证，连续事件不是自动独立重复，扫描不是自动独立标定，边界输入不是预测输出，派生量不是直接测量；verification、外部验证/参考、一致性核查、数值审计、敏感性和模型区分不能混同。
 
-Before every actual modification round, reread project README/protocol, AGENTS, the established layout/master authority, and the specific primary sources for the pages being changed. Keep source reading bounded by natural paper/chapter/experiment units; do not trust chat recall as a replacement for current authority.
+每页一个主要问题，标题、主证据与结论一致；关系图每个重要连接可解释为“来源 -> 动作/关系 -> 目标”，不为好看捏造反馈。保留必要边界，避免内部代号或重复防御文案，不编码通用配色/比例。
 
-Do not use chat history as the project database.
+分别执行材料闭合、生成前输入门禁、实际成图/整套审核。材料闭合至少一完整轮无新增实质问题；文字/结构检查不能代替看图。整套内审后保留用户完整稿件验收机会。
 
-## CPA fresh-request invariant
+## 原生施工与保护
 
-**One slide = one fresh CPA HTTP request.**
+完整生成原图放在对应编辑页后的下一张独立对照页，保留媒体字节；编辑页独立完整可读、可选、可编辑。比较工作稿说明正式页数和工作稿总页数；正式净稿排除对照页。
 
-For every page:
+用户指定的原生样板决定版式。固定区域复用完整对象及内部格式；同一语义单框、表格原生。删除/合并按几何与素材角色保护结论、页脚和真实图片，保留认可对象，避免整页统一组合缩放。科研图保持比例与未重绘源图字节；需适配时改布局或真实数据重绘。
 
-- create a new request;
-- send that page's current prompt;
-- attach only that page's selected eligible references;
-- send no reference when the page has none;
-- do not forward any previous page generation/session/conversation identifier or prior-page request context.
+用户允许的概念图可用原生裁切与可编辑标签，不裁取生成科研证据，不用白块遮字；裁切不改写权威原图。Office Math 验收比较符号及节点层级，允许等价 run 分段，禁止含义改变。
 
-Parallel production is allowed only as multiple independent fresh requests.
+新方法先真实复杂代表页试制，按授权扩展。目标 PowerPoint 打开、保存、关闭、重开并编辑关键对象才能声称实机通过；未验证稿只作中间稿。QA 只读，修复单独施工；编辑试验用副本，局部修改尽可能对照非目标页结构及媒体，避免暗中改稿。
 
-## Page state
+## 秘密与发布检查
 
-Do not use scalar durable progress.
+密钥、token、端点/模型配置和凭据只在忽略的本地配置或安全运行时，不能进入 Git、README、canonical、prompt 或插件包。
 
-Maintain within the **explicitly named current production stage**:
+发布前：
 
-- approved;
-- rework/unreviewed;
-- not-generated.
+1. 检查 Git 差异及 `git diff --check`。
+2. 解析 plugin/marketplace JSON，核对 README 和 manifest 版本一致。
+3. 搜索过时权威、路由、强制状态台账和旧重建路线残留。
+4. 核对双宿主路由、CPA 独立后端及 SKILL/CPA/AGENTS 的 fresh request 合同。
+5. 核对证据边界、三个提示词角色、三道门禁、阶段限定通过、下游待修关闭及只读 QA。
+6. 核对独立对照页、样板权威、对象组织、科研原件/比例保护和公式结构验收。
+7. 确认 research-defense 只路由答辩任务，核心合同保持短小。
+8. 用中断恢复、局部表格修订、独立对照页、公式保存重开场景审查条款一致性。
+9. 构建 ChatGPT ZIP，核对根目录只有 plugin.json 和 skills/，当前权威齐全且旧文件不存在。
+10. 核对无秘密/provider 配置跟踪，检查最终 Git 状态，按项目要求提交并通过 gh 推送。
 
-Pages may advance out of order.
+安装后在新的宿主会话读取已安装 skill，核对仓库合同；未执行时明确报告未验证，不把仓库静态检查当作安装后行为验证。
 
-Every fresh CPA output enters rework/unreviewed first.
-
-Candidate output and approved-current artifacts remain separate.
-
-Generation-stage approved means the current **visual composition** is usable downstream; it is not final editable/final user acceptance. A reliably editable typo, formula label, local arrow, or page number may be logged for downstream correction after visual approval, but a scientific, evidence, explanation, or structural defect still blocks it. All deferred fixes must be closed at the editable/delivery gate; keep fix records in the existing project files, not a new database.
-
-## Canonical discipline
-
-Maintain one current canonical spec and one current prompt per page.
-
-- update owning source first when content/evidence rules change;
-- synchronize prompt in the same work cycle;
-- do not keep `_v2`, `_final`, `_revised` forks unless explicitly requested;
-- remove obsolete scripts/rules that can restore superseded logic.
-
-When a CPA render fails:
-
-- if canonical/prompt is still correct, regenerate with another fresh request;
-- if review identifies a real source/instruction defect, fix the owning source and synchronize prompt;
-- CPA runtime failures do not justify canonical edits.
-
-Do not maintain a general failure taxonomy.
-
-## Material/evidence closure
-
-Default review priority:
-
-1. narrative continuity and scientific/domain correctness;
-2. evidence source/identity/role/independence;
-3. numeric/equation/statistical-definition consistency;
-4. page duty and main-talk/Q&A boundary;
-5. traceable workload/coverage;
-6. prompt/reference readiness;
-7. rendered evidence readability and whole-deck consistency;
-8. decorative polish.
-
-Each slide should have one primary question. Title, primary evidence, and takeaway align to that question.
-
-Visible copy must address the audience, not internal project shorthand. Prefer direct claim + evidence + necessary qualifier instead of defense-oriented disclaimers and gratuitous hedging. Use real inspected apparatus / engineering evidence when it is available, rather than fabricating a more photogenic substitute.
-
-Evidence-strength guardrails:
-
-- same-dataset comparison/selection is not independent validation;
-- continuous events from one experiment chain are not automatically independent repeats;
-- parameter scans/sensitivity are not automatically independent calibration;
-- supplied input/boundary history is not a predicted-and-validated output;
-- derived values are not direct measurements;
-- verification, external validation, external reference, consistency check, numerical audit, sensitivity, and model discrimination remain distinct.
-
-Run complete review passes. Material closure requires at least one pass with no new substantive issue.
-
-Material closure is not rendered approval.
-
-## Evidence vs generated illustration
-
-Do not let terminology cleanup weaken this boundary.
-
-### Proof-chain/project/practice evidence
-
-Actual project work, apparatus, experiments, measurements, simulation results, sites, or other factual records must use traceable real sources or faithful deterministic reconstruction from real data.
-
-Do not use CPA to fabricate a realistic-looking substitute and present it as actual evidence.
-
-If a named real facility/site/case is itself part of the factual claim, use a real source image rather than a generated lookalike.
-
-### Conceptual illustration
-
-CPA-generated visuals may explain mechanisms, relationships, processes, structures, or generic apparatus concepts when they are not presented as actual project records or measured results.
-
-### Engineering application / scene-setting
-
-CPA-generated visuals, including photorealistic scenes, are allowed for background, motivation, application context, or generic engineering environments when they do not carry the factual proof burden.
-
-Titles/captions/copy must not misrepresent generated illustration as actual evidence.
-
-## Three production gates
-
-Keep separate:
-
-1. material closure;
-2. pre-generation prompt/reference/fresh-request gate;
-3. rendered-page/deck review.
-
-No text/package/build validation substitutes for actual visual review.
-
-CPA generation review can pass reusable composition with explicitly logged downstream edits; final editable and final whole-deck checks are distinct. Normal three-column layouts, formula boxes, and arrows are not automatically "code-like"; inspect instead for broken equations, text overflow, unjustified voids, font substitutions, and failure to explain the page's scientific question.
-
-## CPA reference discipline
-
-Every final selected reference must be actually viewed.
-
-Eligible factual inputs are real, traceable, inspected source images that provide appropriate factual context.
-
-If exact axes/values/legend/colorbar/uncertainty/series mapping matter, keep the figure out of CPA reinterpretation and place/rebuild it directly in the PPT assembly layer.
-
-Do not use as CPA references by default:
-
-- old generated slides;
-- AI/generated output;
-- rejected output;
-- Pipeline-generated diagrams;
-- presentation-specific script redraws;
-- internal layout/relationship calibration images.
-
-A generated page explicitly selected as an editable reconstruction target is still not automatically a CPA reference.
-
-PDF is not a direct CPA image reference. Convert the exact needed page/figure to PNG/JPG/WebP and inspect it first.
-
-## CPA production
-
-Use CPA for generation/regeneration.
-
-Prompts must distinguish required page-visible content from visual duty/instructions and non-displayed provenance/source/QA notes. Do not allow internal construction instructions to leak into rendered page copy. Never use code to retouch or pixel-patch an authoritative CPA PNG; repair relevant instructions when needed and regenerate with a fresh request.
-
-Loop:
-
-`pre-generation gate -> fresh CPA request -> local candidate -> unreviewed -> visual review -> approved/rework -> regenerate -> approved-current`
-
-Parallel production is allowed:
-
-- bounded in-flight queue;
-- each page remains an independent fresh request;
-- asynchronous review;
-- page state independent of return order;
-- stop queue expansion when a common visual failure appears.
-
-Concurrency remains project/provider specific.
-
-## Secrets
-
-CPA API keys, tokens, endpoint/model config, and credentials:
-
-- stay in ignored local config or secure runtime;
-- never enter Git;
-- never enter README/project state;
-- never enter canonical;
-- never enter prompt TXT.
-
-## Data figures
-
-For quantitative evidence:
-
-- derive from source data/code when possible;
-- preserve provenance;
-- actually inspect rendered output;
-- maintain semantic axis/color/legend consistency;
-- retain the real source figure if faithful reconstruction is not appropriate;
-- do not ask a generation model to reinterpret exact values.
-
-## Reuse / rebuild
-
-Reuse requires:
-
-- current role/content/evidence compatibility;
-- an unambiguous approved-current artifact.
-
-Renumbering alone is not a rebuild reason.
-
-Material/evidence changes invalidate prior approval until reassessed.
-
-## Conceptual diagrams
-
-Preserve relationships, not old generated geometry.
-
-Every meaningful edge must be explainable as source -> action/relationship -> target. Do not fabricate feedback arrows merely for an attractive closed loop. Visual QA judges explanatory power, not just correctness or geometry.
-
-Prefer short horizontal/vertical/90-degree connectors. Avoid unnecessary long diagonals and crossings.
-
-Do not encode one project's palette/proportions as universal rules.
-
-## Editable PowerPoint
-
-Native-editable mode uses PowerPoint-native text, equations, shapes, connectors, charts, tables, and simple diagrams wherever practical.
-
-For ImgGen-to-editable construction, keep the approved page as a **temporary, removable bottom-layer alignment guide**; recreate editable objects visibly above it. The user fine-tunes them against the guide and later deletes the guide. Temporary double images/text are acceptable, hidden editable objects are not. Native objects should remain understandable with the guide hidden. Genuine scientific figures must preserve aspect ratio; redraw reproducible plots from data/code or revise layout rather than stretching axes to fit.
-
-Pilot a genuinely representative complex slide before mass conversion. Open/save/reopen in target PowerPoint, confirm editability, and inspect guide-hidden content. QA tools must be read-only: fixes belong in separate build steps. Compare non-target slide parts on localized edits when feasible so validators and stale helper scripts cannot silently rewrite unrelated pages.
-
-Generated screenshots are not a substitute for editable delivery.
-
-An explicitly user-selected generated artifact may be an editable reconstruction target; this does not make it an eligible CPA reference.
-
-## Change discipline
-
-Keep README current, not append-only history.
-
-When architecture changes:
-
-- update authority files in one change;
-- remove obsolete naming and branches;
-- search repository for stale references;
-- avoid compatibility residue unless explicitly requested.
-
-## Release checks
-
-Before release:
-
-1. `git diff --check`;
-2. parse `plugin.json` and marketplace JSON;
-3. confirm README and plugin versions match;
-4. search for retired workflow, authority-name, and routing residue;
-5. confirm only current authority files and production-path names remain;
-6. verify runtime routing: ChatGPT Plus -> CCM; Codex -> native runtime; CPA -> generation backend;
-7. verify fresh-request wording in SKILL + cpa-generation + AGENTS;
-8. verify evidence boundary still allows non-proof conceptual/application visuals but forbids generated lookalikes as actual project/practice evidence;
-9. verify stage-scoped approval, downstream-fix tracking, three prompt-content roles, and editable bottom-guide behavior (including aspect-ratio protection);
-10. verify research-defense.md is routed only for defense-like tasks and that QA remains non-mutating;
-11. build ChatGPT ZIP;
-12. confirm ZIP root is only `plugin.json + skills/`;
-13. confirm retired authority files are absent from the ZIP;
-14. confirm no secrets/provider config are tracked;
-15. inspect final Git status.
-
-After installation, inspect the installed skill in a fresh ChatGPT conversation. The installed release must match the repository contract and contain only current runtime and CPA routing.
-
-## Versioning
-
-Use semver.
-
-0.7.0 establishes:
-
-- ChatGPT + CCM and Codex native as peer execution routes;
-- explicit runtime vs CPA backend dependency roles;
-- one-slide/one-fresh-CPA-request behavior;
-- stage-scoped visual approval and logged downstream fixes;
-- editable reconstruction with a removable ImgGen bottom guide and preserved scientific figure aspect ratios;
-- prompt role separation, non-mutating validation, and defense-specific research narrative guidance;
-- preserved evidence-vs-generated-illustration boundary and discrete page-state semantics.
+使用 semver。0.8.0 取消强制状态台账，明确最小接续/文件分工，统一独立对照页，补齐原生样板、对象组织、局部保护、Office Math 结构验收及答辩证据密度；双宿主、fresh request 和证据边界继续有效。

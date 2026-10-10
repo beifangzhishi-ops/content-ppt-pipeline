@@ -1,400 +1,147 @@
-# Content PPT Workflow
+# 内容与证据工作流
 
-This file owns the business workflow: intake, research, narrative/source authority, material closure, deck design, canonical slide specs, pre-generation review, generation/reuse planning, rendered-page review, assembly transitions, post-generation revision, and whole-deck final review.
+本文件负责材料理解、叙事/来源权威、材料闭合、页面设计、canonical、生产门禁、复用、成图审核、整套验收与局部修订。运行时机制见 runtime，CPA 执行见 cpa-generation，原生施工见 ppt-authoring。
 
-It does not own host/runtime mechanics, detailed CPA-generation execution, or PowerPoint object-authoring mechanics.
+## 1. 需求与生产路径
 
-## 1. Intake and mode
+从当前请求及已有材料确定目标、听众、证据基础、篇幅、来源和交付要求。已有项目按当前用户指令、明确项目规则/权威、skill 默认方式的顺序处理。
 
-Determine the presentation goal, audience, evidence base, desired length, available source materials, and delivery expectations from the current request and artifacts.
+- **CPA 视觉路径**：在当前运行时调用 CPA，产物直接落地项目；选定交付允许时可装配过审生成视觉。
+- **原生可编辑路径**：从当前认可的视觉/原生稿和真实素材重建可编辑对象。完整原图放在对应编辑页后的独立对照页；具体施工、样板权威与净稿条件见 ppt-authoring。
 
-Use one of two production paths:
+从请求、README/protocol、canonical 和实际产物确定当前动作，不建立独立模式/阶段状态文件，不要求跨会话持久维护三类页面集合。
 
-- CPA generation: CPA performs page visual production and returns output directly to the active project runtime.
-- Native-editable reconstruction: use an approved/generated visual as a **temporary bottom-layer alignment guide**, rebuild the intended editable content above it, and let the user refine and remove the guide before declaring a clean final deliverable. The working PPTX may contain the temporary generated-page guide; do not mistake it for native editable content.
+## 2. 来源理解与权威
 
-Do not create a separate persistent mode/stage state file. The current mode and action should be inferable from the current request, project README/protocol, canonical files, and actual local artifacts. Cross-session page state is maintained as approved / rework-unreviewed / not-generated sets, not as scalar progress counters.
+系统阅读足够材料，理解核心主张、章节依赖、术语、实体、公式、数字、约束、需引用/证据的论点和可用图表。不要根据文件名、路径、元数据或搜索片段推断内容；外部引用应匹配演示的正式程度和证据职责，并能回源。
 
-For an existing project, use this precedence unless the user explicitly says otherwise:
+### 视觉角色
 
-1. the user's latest explicit instruction;
-2. the project's explicit README/protocol and canonical project files;
-3. this skill's reusable defaults.
+- **实际证据**：真实实验、装置、测量、项目结果、现场或已命名对象，采用可追溯真实来源或真实数据忠实重建，不能生成写实替身。
+- **概念示意**：机制、结构、流程、物理关系或通用装置概念，可以生成，不能冒充测量/项目记录。
+- **应用背景**：无事实证明职责的通用工程/行业场景可生成，包括写实图；具体设施身份本身是事实主张时使用真实图。
 
-## 2. Source understanding
+决定依据是素材的证据职责，不是是否写实。有合适真实装置照片、实物图或忠实结构图时优先使用，不为视觉统一生成仿制品。
 
-Read the source materials systematically enough to understand:
+### 项目文件与来源索引
 
-- the central claim or purpose;
-- major sections and dependencies;
-- terms, entities, equations, numeric results, and constraints;
-- which claims require citation or visual evidence;
-- which source figures/tables/images may be useful.
+文件职责遵循 runtime：README 保持当前入口和来源目录地图，AGENTS 保持长期规则，单页内容、布局、素材角色和反馈写入 canonical，prompt 同轮派生。不要把 README 写成逐页错误/重试流水账或逐页来源表；素材映射留在已有单页/图源/材料索引。
 
-Do not infer a document/image's contents from its filename, search result, path, or metadata alone.
+发现重要论文、数据集、实验记录、源图或素材目录时，登记来源、职责、版本/日期、核查情况及是否建立工作副本。来源可区分当前、冻结、原始、历史、失效或待澄清，但不是新的页面进度系统。
 
-When searching external references, favor sources suitable for the deck's level of formality and evidentiary burden. Keep claims traceable to their real sources.
+来源权威由用户/项目声明，不根据文件名、修改时间或最近看到的副本推断。较新计算可以更新数值，较早稳定博论/报告仍可决定主线。历史材料不能默默覆盖当前权威。
 
-### Visual-role classification
+可读不代表可改。只读源保持不动，派生材料留在工作项目；稳定原件可继续作为来源时不为方便复制整棵目录，只取生产需要的子集。规则描述能力，不绑定某个 OS 工具或 MCP 实现。
 
-Before deciding whether to find a real image, rebuild a figure, or generate a visual, classify what role the image plays:
+项目文本使用 UTF-8，写入后检查中文读回和不可见控制字符。
 
-- **Evidence / project-specific factual visual**: proves or depicts an actual experiment, actual apparatus, actual measurement, actual project result, actual site, or specific named real-world object. Use traceable real sources or faithful reconstruction from real data; do not substitute a generated realistic-looking version.
-- **Conceptual scientific illustration**: explains a mechanism, structure, process, physical relationship, or generic experimental concept. CPA generation may be used when it does not imply that the result is an actual measurement or actual project record.
-- **Application / scene-setting illustration**: establishes engineering context, motivation, industry environment, or application background. CPA-generated visuals may be photorealistic here when they do not claim to depict a specific real project/site or carry the page's factual proof burden.
+### 主线先于局部细节
 
-Photorealism itself is not the deciding factor. The deciding factor is whether the image is being used as evidence or as illustration.
+深度审计前确认谁拥有章节顺序、实验分组、证据角色和证据到结论的关系。专项项目、新数据或工作稿只能更新对应叙事节点的已核准数值、图件、方法和边界，不因较新或详细而重排主线。
 
-If a slide discusses a specific named plant, facility, experiment, or case and the identity of that object is part of the factual claim, prefer a real source image rather than a generated lookalike.
+未完成计算、探索性重跑、未稳定定义或仍需实验的工作，不升级为正式证据。用户指定主参考时遵守其权威。答疑/附录不得反向污染主讲、提升探索性证据或改变已确定的证据职责。
 
-When suitable real photographs, apparatus images, or faithful object diagrams already exist, **prefer those** over generating replacements, even if the generated alternative looks cleaner. Use CPA for genuinely conceptual or illustrative needs not met by real material.
+## 3. 版式与密度校准
 
-### Project-local context and source registry
+生产前确认正式程度、信息密度、标题/正文层级、公式/表格/科研图职责、代表页面模式及母版锚点。先建立具体版式权威；单页修订继承它，改变设计系统属于明确的整套决策。
 
-For a long-running PPT project, treat project files as durable context rather than relying only on chat history.
+引入新施工代码、公式/图表/Office 对象或其他重要方法，先用含真实复杂内容的代表页做端到端试制，并在目标 PowerPoint 实际编辑验证，再扩展。不能只用最简单页证明可批量。
 
-- Keep long-lived, cross-slide project rules, source conventions, workflow choices, and current project status in the project's existing README/protocol when that is how the project is organized.
-- Keep slide-specific content, layout, asset roles, generation constraints, and slide feedback in that slide's canonical production spec.
-- When user feedback changes a slide, write the change into the appropriate project file first, then regenerate the current prompt/production inputs from the updated canonical content. Do not maintain a separate chat-only version.
-- Do not turn the project README into a chronological list of per-slide mistakes or retries. Keep it as durable project description, reusable rules, source registry, and concise current status.
-- When a materially important new paper, deck, dataset, experiment record, figure source, or asset directory is discovered, register it in the project's existing source index/README when that information will matter across later slides. Record enough provenance to identify the source, its role, version/date when available, review status, and whether any working copy was made.
-- Prefer a directory/source-level entry map in README/protocol: source/path, status, and intended use. Do not turn README into a per-slide source table; keep per-slide asset/source mappings in canonical specs, an image index, material audit, or an equivalent project file.
-- Source authority is a declared project property, not something inferred from filename, folder name, modification time, or whichever working copy was seen most recently. A newer working draft may supply updated data while an older stable report/thesis still owns the narrative structure.
-- Useful source-status labels may include current, frozen, raw/traceable, historical, obsolete, or confusing. Historical/obsolete material must not silently overwrite current authority.
-- A readable source location does not imply permission to modify it. If a source tree is designated read-only, keep canonical files and derived work in the working project and leave the source untouched.
-- Do not copy a large source tree merely for convenience when a stable read-only original can remain the source of truth; copy only the production subset that is actually needed.
-- Describe required capabilities, not one hard-coded OS utility or MCP implementation. Use the available equivalent tool that satisfies the workflow gate.
+不规定通用固定图文比例；内容密集型质量来自层级和可读证据，而非装饰留白。用户原生样板与生成图冲突时按 ppt-authoring 的权威规则处理。
 
-Project text files such as README, canonical Markdown, prompt text, and indexes should be UTF-8. After cross-tool or Windows writes involving non-ASCII text, actually read back a sample and reject runs of placeholder question marks, replacement characters, or mojibake before continuing delivery.
+## 4. 叙事与页面设计
 
-### Narrative authority before local evidence
+围绕科学/工程问题组织页面，不机械照搬来源标题。审核优先：叙事与领域正确性 -> 来源/身份/证据角色及独立性 -> 数值与统计定义 -> 页面职责及主讲/答疑边界 -> 工作量覆盖 -> 输入就绪 -> 成图可读性与整套一致性 -> 装饰。
 
-Before a deep material audit, identify which source owns the presentation's narrative backbone and which sources only supplement it.
+每页明确一个主要问题、叙事职责、信息目标、标题、证据和结论，并与前后页衔接。标题、主证据和结论回答同一问题；次要审计、敏感性或边界测试不能抢主证据职责。
 
-- The narrative authority owns chapter/section order, experiment grouping, evidence roles, and the relationship from evidence to conclusion.
-- Specialized projects, newer calculations, follow-up experiments, and working drafts may update the relevant node's data, figure, method detail, or verified boundary. They must not reorganize the narrative merely because they are newer or locally more detailed.
-- Unfinished calculations, exploratory reruns, unstable definitions, or work that still needs experiments are not formal evidence until they are completed and reviewed to the project's required standard.
-- When the user explicitly designates a thesis, report, previous deck, protocol, or other source as the main reference, use that declared authority rather than automatically choosing the latest timestamp.
-- Backup/Q&A material may contain additional audits and edge cases, but it must not reverse-pollute the main narrative, upgrade exploratory evidence into a formal conclusion, or contradict the evidence roles already established in the main deck.
+正文面向观众：内部代号、人名简称、目录与任务标签换成领域术语或正式引用；陌生缩写在需要时首次解释。采用“直接主张 -> 支持证据 -> 必要边界”，避免无信息的防御性免责声明，不机械删除科学不确定度或条件。
 
-## 3. Visual and information-density calibration
+主讲负责主线，答疑/附录放非必需细节，不能将探索结果升级为主结论。用真实事件、轨迹、帧、样本、扫描、网格、窗口、重复及计算覆盖表达工作量；若冲突则压缩或重组展示，保留叙事连贯。
 
-Before producing the full deck, calibrate:
+推理本身重要时保留推导/过程页；过载就拆页，不把关键逻辑缩成小字。答辩专属证据密度与限定位置见 research-defense。
 
-- formality level;
-- information density;
-- title/body hierarchy;
-- use of equations, tables, charts, and real images;
-- representative page patterns;
-- master anchors and density range.
+## 5. 材料与证据闭合
 
-Establish a concrete layout/master authority before designing or revising slides. Page-level repairs inherit that authority. A change to the design system must be an explicit deck-level decision, never accidental drift during local regeneration.
+冻结生产包前按系统审核，不只逐页校字。旧稿/旧页数是材料索引，不是不可改变目录；根据权威主线与当前证据保留、替换、合并、拆分、重排或新增。
 
-When introducing a materially different production technique (new editable reconstruction code, math/chart/Office objects, or another authoring route), first complete an **end-to-end pilot on a genuinely representative complex page**. Test editing in the intended PowerPoint application, not just generation of the simplest possible page, before scaling up.
+“审查材料”的默认对象是当前 canonical、prompt、证据/来源索引、源数据、派生图脚本、QA/构建脚本和入口文件。没有成图审核或生成请求时，不自动启动 CPA 或改成审查生成图。
 
-Do not enforce a universal fixed text-to-image ratio. The correct density depends on the material and slide role.
+核查顺序：
 
-For a content-heavy deck, visual quality means disciplined hierarchy and readable evidence, not decorative emptiness.
+1. 章节/页面在权威叙事中的职责。
+2. 实验、工况、数据集和统计总体是否属于同一组。
+3. 测量、计算、估计、拟合、预测、verification、外部验证/参考、一致性核查、数值审计等角色。
+4. 单位、分母、事件/样本数、ROI、汇总/逐事件/逐轨迹统计、公式与源数值。
+5. 适合补入既有节点的已完成新证据。
+6. 文案、索引、格式等低层清理。
 
-## 4. Deck design
+证据强度不能混同：同数据集比较/选模型不是独立验证；同一实验链连续事件不是自动独立重复；参数扫描/敏感性不是自动独立标定；输入边界历史不是预测输出；派生量不是直接测量；verification、外部验证、外部参考、一致性核查、数值审计、敏感性与模型区分各有职责。
 
-Design the story and page order autonomously from the content. Avoid simply mirroring source document headings.
+标题/结论强度须匹配实际证据。未独立验证时使用支持、显示、一致、区分或审计等准确表达；新鲜或漂亮的局部结果不自动成为主线。优先真实重复、扫描、原表、CSV/JSON 和已完成计算，不能只用文字宣称工作量。
 
-Default review priority is:
+涉及面积、尺度、系数或统计口径的科学变化，先回源确认定义、适用条件与量纲，再修改所属 canonical 并同步相关公式、数值、图件和 prompt；不能只改显示式。
 
-1. narrative continuity and scientific/domain correctness;
-2. evidence source, role, identity, and independence;
-3. traceable workload/coverage evidence;
-4. whole-deck visual consistency;
-5. single-slide decorative polish.
+完整审核闭环：发现实质问题 -> 回源 -> 修所属项目文件 -> 同步依赖 prompt/索引/脚本 -> QA -> 完整复查。至少一轮完整审查没有新增实质问题才算材料闭合；这不代表成图通过。
 
-Each slide should have:
+长期深审可每个完整轮次使用新会话，轮末把有效规则/事实/未解决问题写回所属文件；下一轮从当前权威恢复，不依赖不断增长的聊天记录，也不建立审核流水账。
 
-- a clear role in the story;
-- one main information objective;
-- a title that states the slide's purpose or conclusion;
-- enough evidence to support its takeaway;
-- a deliberate relationship to the previous and next slide.
+错误来自构建器、索引/提示词生成器、派生图或维护脚本时修源头，移除会恢复旧逻辑的废弃脚本。已有 QA 框架可为真实错误添加语义回归检查，避免锁死具体句子或宽泛禁词，保留必要否定和限定；同时检测编码和不可见字符。
 
-The title, primary evidence, and closing takeaway should answer the same primary question. Secondary audits, sensitivity checks, or boundary tests must not steal the main evidence role.
+### 定量图与关系图
 
-Visible presentation copy is for the **audience**, not the internal project team. Translate opaque task codes, nicknames, folder names, and working-file labels into domain terminology or formal citations; retain internal identifiers only in provenance/notes where useful. On first use, define unfamiliar technical sources or abbreviations when comprehension requires it.
+有结构化源数据/可靠脚本时确定性重绘，保留来源与方法并实际查看输出。同项目同语义类别统一字体、坐标、网格、线宽、标记、图例层级、数字格式和色彩语义；不把项目配色写成全局规则，不为统一风格篡改原论文图、实验/显微图或不可忠实重构的正式图。
 
-Use direct **claim -> supporting evidence -> necessary boundary** language. Avoid defensive disclaimers, speculative rebuttals, and redundant hedging that add no scope or precision. Preserve necessary limitations exactly where they matter; do not mechanically delete scientific uncertainty or qualifying conditions.
+关系图保留科学关系，不照搬旧箭头几何。重要边必须能解释为“来源 -> 动作/关系 -> 目标”；不为闭环好看捏造反馈。优先短水平、垂直或直角连接，减少长斜线与交叉。几何整齐不能代替解释力。
 
-Main-talk pages carry the main narrative. Q&A/appendix pages carry advanced evidence that the audience may ask for but that the main talk does not need to expand. They must not reverse-pollute the main narrative or upgrade exploratory results into primary conclusions.
+## 6. 单页 canonical 与全包自审
 
-Workload should be communicated with real, traceable evidence such as events, trajectories, frames, samples, scans, grids, windows, repetitions, or calculation coverage. If workload display competes with story continuity, preserve the story and compress/restructure the workload display.
+生成/施工前每页建立唯一、自包含 canonical，按需含页身份/标题、问题/职责、事实/主张、公式/数值、可见引用、真实图表素材、生成视觉职责、布局/阅读顺序、密度、结论和明确禁止项。不能依赖“同上一页”。
 
-Use derivation/process pages when the reasoning itself matters. Split overloaded slides instead of hiding important logic in tiny text.
+全包审查事实、叙事、公式/数值、标题/结论、溯源、已查看素材、页图匹配、密度/母版、遗漏/孤页/重复、术语冲突、编码/链接、叙事权威、工况身份、统计口径、源值与派生图、入口/canonical/prompt/索引/QA/构建同步，以及可恢复旧逻辑的脚本。复杂材料多轮审查，先就绪再付生成成本。
 
-## 5. Material and evidence closure
+## 7. 三道门禁与生成闭环
 
-Before freezing the production pack, audit the current material as a system rather than only proofreading individual slides.
+分别执行：
 
-Treat an old deck or old page count as a material index, not as an immutable table of contents. Keep, replace, merge, split, reorder, or add pages when the authoritative narrative and current evidence require it.
+1. **材料闭合**：主线、实验/数据身份、证据职责、定义、页面职责和工作量已厘清。
+2. **生成前门禁**：prompt 可执行且同步，参考图合格/可追溯，无失效或冲突指令，独立请求输入正确。
+3. **成图/整套审核**：实际查看生成图或装配稿。
 
-When the user asks to "review the material" or equivalent, the default review surface is the current canonical specs, prompts, evidence/source indexes, source data, derived-figure scripts, QA/build scripts, and project current-state documents. Do not automatically review already generated slide images or invoke CPA generation unless the user asks for generated-page review or generation.
+文本 QA、包结构、构建成功或材料闭合都不能替代实际视觉审核。生成阶段可接受可复用构图并记录可靠下游修复；科学、证据、结构和核心解释错误仍阻止通过。可编辑验收和用户整套终审另行检查。
 
-Review in this order:
+模型按 cpa-generation 执行生成—目视检查—返工，至达标或实际阻塞。可以有界并发、跳号完成，先前失败不阻止后页审核；共同失败出现时停止扩队诊断。新输出是候选，不强制写状态集合。
 
-1. narrative role: what job does each section/page perform in the authoritative story;
-2. experiment/data grouping: whether evidence really belongs to the same experiment, condition, dataset, or statistical population;
-3. evidence role: measured, calculated, estimated, fitted, predicted, verification, external validation/reference, consistency check, numerical audit, or other project-defined category;
-4. quantitative definitions: units, denominators, sample/event counts, ROI, pooled vs event-wise/trajectory-wise definitions, equations, and source values;
-5. current supplementary evidence: completed new experiments/calculations that belong at an existing narrative node;
-6. wording, indexes, formatting, and other lower-level cleanup.
+当前内容、职责、证据及视觉意义兼容，且当前过审图明确时复用；页码/章节位置变化本身不要求重建。没有有效图、审核失败或实质内容改变则生成/重建。小页码/文字变化可在安全的编辑层处理。只提交确需生成的页。
 
-Evidence-strength guardrails:
+返回后实际查看，核对当前 canonical、完整 prompt 和该页真实参考角色；优先查错工况、错证据、数值/单位/坐标/公式/图例、缺证据、角色混同、伪造图、内部指令泄漏、可读性与结构。
 
-- model comparison or candidate selection on the same dataset is not independent validation;
-- repeated/continuous events from one experimental chain do not automatically become independent repeat experiments;
-- a parameter scan or sensitivity study is not automatically an independent calibration from upstream state to parameter;
-- a supplied boundary/input history is not a model output that was predicted and validated;
-- a derived quantity is not a direct measurement;
-- verification, external validation, external reference, consistency check, numerical audit, sensitivity analysis, and model discrimination are distinct roles and must not be rhetorically upgraded into one another.
+构图/科学关系/主证据可靠才进入当前成品；精确记录允许的下游待修项。其余返工。只有查明来源/指令缺陷才改 canonical/prompt；对新图独立评判，旧失败仅是复查重点。通过且无新规则/事实时只更新必要产物映射，不为留痕改 canonical。
 
-Titles and summary statements must use evidence strength consistent with the body. Prefer accurate terms such as support, show, agree with, discriminate, or audit when independent validation/proof has not actually occurred.
+进展回复与接续遵循 runtime：核对实际产物，报告当前动作和实际问题，不重建持久页面台账；当前成品缺失或身份不明时先纠正，再复用。
 
-Do not let local audit details or a newly discovered sub-project result become the deck's main story merely because they are fresh or visually strong.
+## 8. 可编辑转换与整套 QA
 
-Prefer real, traceable repeated evidence, parameter scans, audits, raw tables, structured CSV/JSON, and completed calculations over prose that merely claims workload or coverage.
+按交付目标转入 ppt-authoring；完整原图置于对应编辑页后的独立对照页，编辑页须独立完整可读。
 
-Run review in complete passes. A pass follows: find a substantive issue -> trace it to authority/source -> fix the project files directly -> synchronize dependent prompts/indexes/scripts -> run QA -> rescan. Material closure is reached only after at least one complete pass finds no new substantive issue.
+交用户终审前实际打开/渲染并连读整套，核对：
 
-For long-running deep audits, use one fresh conversation per complete review pass. At the end of a pass, persist all durable state in project files; the next pass starts from the current README/AGENTS/canonical/index/QA rather than depending on an ever-growing chat transcript. README keeps current state and source/authority entry points; AGENTS keeps reusable rules, not a chronological audit log; concrete findings are fixed in the files they affect.
+- 叙事、页序、术语、公式/数字、标题/结论、证据身份、密度及阅读路径。
+- 科研图的来源、比例、清晰度与证明职责；生成插图没有伪造真实证据，装饰没有挤占证据。
+- 重复/遗漏、裁切/溢出、字体替换、错误标签、异常空白或比例、母版漂移。
+- 图示是否解释物理/信息关系并支持结论，不能只判断“正确且好看”。
+- 待修项已关闭；编辑页独立可读，原图对照页是明确标示的比较材料；正式页数与含对照页工作稿页数分开说明，正式净稿排除对照页，比较工作稿保留对照页。
 
-Do not fix only generated outputs when the real source of the defect is a builder, index generator, QA rule, prompt generator, derived-figure script, or maintenance script. Update the source that would otherwise recreate the error. Remove or clearly retire obsolete one-off scripts that can rewrite superseded logic back into current canonical files.
+QA/validator 只读。修复用独立施工步骤；局部修改尽可能对照非目标页的包/XML 或对象结构，不能让验证器顺手改稿。
 
-When a real error class is worth guarding, add a regression check if the project has a QA harness. Prefer semantic/evidence anchors over exact sentence locks or broad forbidden-word checks; necessary qualifiers, negations, and boundary statements must remain expressible. QA should also detect invisible control characters or equivalent text corruption that can survive superficial structure checks.
+问题按职责回流：内容/叙事 -> 材料审查；生成视觉 -> CPA 返工；原生对象/布局 -> PPT 修订。
 
-### Reproducible quantitative figures
+## 9. 用户整套验收与局部修订
 
-When structured source data or a reliable reconstruction script exists, quantitative plots should be programmatically/reproducibly redrawn rather than fabricated by a generation model.
+内部 QA 后必须让用户有机会查看完整稿件；这是整套门禁，逐页用户批准不是强制门禁。反馈修复后重复相关 QA 再交付。
 
-- Within one project and semantic category, align fonts, axes, grids, line weights, markers, legend hierarchy, number formatting, and semantic color roles.
-- Keep semantic color roles stable across pages, but do not hard-code a universal plugin palette.
-- Preserve scientific meaning when standardizing axes, units, or legend conventions.
-- Do not alter original paper figures, experimental imagery, microscopy, or unreconstructable official plots merely to make them look stylistically uniform.
-- Record enough provenance for a derived figure to identify the source data and reconstruction method/script, and actually inspect the rendered output.
+有完整候选稿后，从当前页/稿、最新反馈、权威来源及已接受约束修最小必要范围，不默认重启材料 intake、版式校准或全包生成。区分科学/逻辑、证据、生成视觉、编辑对象和增删/拆分/重排问题。
 
-Conceptual or relationship diagrams may use an authoritative source as a scientific relationship reference without copying its exact arrow geometry or layout. Preserve the relationships; redesign the geometry when that improves the presentation. Prefer short, clear horizontal/vertical/90-degree connectors over unnecessary long diagonal arrows, cross-module diagonal links, or crossings.
+canonical 仍有效则更新；缺失/过时/冲突则依据当前稿、反馈、权威源和已认可约束恢复唯一当前 spec，旧 prompt 缺失不能阻止修订。
 
-Every meaningful arrow, loop, feedback edge, or cross-module link must express a describable **source -> verb/action -> target** relation (e.g., drives, constrains, transfers, predicts, or checks). Delete, relabel, or redesign connections whose meaning cannot be explained. Geometry and tidy connectors do not substitute for semantic clarity.
-
-## 6. Canonical per-slide production spec
-
-Create one canonical, self-contained production spec for every slide before generation or editable build.
-
-Each spec should contain, as applicable:
-
-- slide number and title;
-- communicative purpose;
-- key facts/claims;
-- equations and numeric values;
-- source attribution requirements;
-- real images/figures/tables that may be used;
-- generated visual instructions when applicable;
-- layout structure and reading order;
-- target information density;
-- slide conclusion/takeaway;
-- explicit prohibitions or common failure modes.
-
-Do not write specs that depend on “same as previous slide” or other hidden cross-slide instructions. A production spec should be usable on its own.
-
-## 7. Full-pack self-audit before production
-
-Before generating or building the full deck, audit the entire spec pack as one system.
-
-Check at least:
-
-- factual/domain correctness;
-- story continuity;
-- equations and numbers;
-- title/conclusion alignment;
-- source traceability;
-- real images actually viewed before being selected;
-- asset-to-slide fit;
-- information density and master consistency;
-- self-contained slide specs;
-- missing slides or orphan slides;
-- unnecessary repetition;
-- conflicting terminology or numeric values;
-- broken encoding/file references.
-- narrative-authority alignment;
-- experiment/condition/dataset identity;
-- evidence-role and statistical-definition consistency;
-- source data vs derived values/plots;
-- README/canonical/prompt/index/QA/build-script synchronization;
-- absence of stale maintenance logic that can recreate superseded content.
-
-Run more than one review pass when the deck is complex. The purpose is to make the pack production-ready before expensive page generation.
-
-## 8. CPA generation and review
-
-Detailed execution mechanics are owned by cpa-generation.md. Persistent local state and artifact lifecycle are owned by runtime.md.
-
-### Three distinct production gates
-
-Do not collapse these into one:
-
-1. **Material closure**: narrative authority, dataset/experiment identity, evidence role, definitions, page duty, and workload hierarchy are resolved.
-2. **Pre-generation gate**: current prompt is executable and synchronized; reference eligibility/provenance is valid; stale or conflicting instructions are removed.
-3. **Rendered-page/deck review**: the actual generated visual or assembled candidate deck is inspected.
-
-`QA PASSED`, canonical/prompt synchronization, package validation, or material closure never substitute for visual review of the actual rendered artifact.
-
-Approval is **stage-scoped**: a CPA visual can pass its composition/reading-path/major-evidence gate even when specific reliably editable local fixes have been registered. It is **not** a claim that those errors are gone or that a final editable deck has passed. Do not defer structural flaws, weak or wrong evidence, erroneous scientific relations, or missing essential message content.
-
-### Reuse / rebuild / new / retire planning
-
-When an existing deck is reordered, renumbered, or partially redesigned, decide page disposition before generating again. Use project terminology such as `reuse / rebuild / new / retire` in an index or plan when useful.
-
-- Reuse an already approved page when its communicative role, core content, evidence roles, and visual meaning remain valid. Renumbering or moving it to another chapter is not by itself a rebuild reason.
-- Rebuild a page when its prior generated version failed and no later approved version exists, when the page has never been generated, or when its role/content/evidence materially changed.
-- A failed page does not become reusable merely because the artifact still exists in a local output directory.
-- A previously approved page does not automatically remain approved after material content or evidence roles change.
-- Minor page-number/text/index updates may be handled in the editable stage instead of CPA regeneration when the selected production path and artifact make that safe.
-- CPA generation should submit only pages that actually need generation.
-
-### Generation and asynchronous review
-
-Generation may proceed in parallel or out of order when useful. A later page may exist while an earlier page is missing or still unresolved.
-
-Page status is independent of page order:
-
-- approved;
-- rework/unreviewed;
-- not-generated.
-
-A gap or failed earlier page never blocks review or approval of a later page. Fresh generated output enters rework/unreviewed until it is visually accepted.
-
-CPA generation may use a bounded parallel queue. Review outputs as they return, and pause queue expansion when repeated pages show the same common failure.
-
-### Status/review request
-
-For a status/review request:
-
-1. Inspect the project's local status and designated candidate/approved artifact locations.
-2. Reconcile actual artifacts with approved / rework-unreviewed / not-generated page sets.
-3. Review newly available unreviewed artifacts when review was requested.
-4. Update the page-state sets and local approved-current artifact view.
-5. Report meaningful missing/rework/approved deltas rather than a consecutive progress number.
-
-If a page is marked approved but its current approved artifact cannot be located, report an artifact-availability/state inconsistency and reconcile it before reuse.
-
-### Returned-page decision
-
-When a generated page becomes available:
-
-1. Actually inspect the returned image.
-2. Compare it with the current canonical production spec, current complete prompt, and the real reference assets/roles used for that page.
-3. Prioritize factual/domain errors, evidence mistakes, readability, hierarchy, structure, and obvious layout failures. Common blocking failures include wrong figure-to-role mapping; altered axes/units/numbers/formulas/legends; missing required evidence; conflating measured/calculated/predicted/validation roles; fabricated project-specific scientific imagery; placeholders/internal management text; or material drift from the current canonical spec.
-4. Decide directly:
-   - accept the **visual-production stage** when composition, reading path, scientific relationships, primary evidence configuration and explanation are reusable; record precise downstream fixes for safely editable typos, labels, formulas, page numbers, or local arrows;
-   - regenerate when a structural, scientific, evidence, or explanatory defect cannot reliably be repaired in the downstream editable stage.
-5. Change canonical or prompt only when the review reveals a real source/instruction defect. Otherwise regenerate the page through CPA.
-
-After regeneration, review the new generated artifact on its own merits. Prior failure reasons are regression targets, not an automatic verdict on the new version.
-
-If a returned page is accepted and creates no new slide rule, no new project-wide rule, and no source change, do not modify canonical merely to leave an audit trail; update only the required project state/artifact mapping.
-
-## 9. Transition to editable PowerPoint
-
-Transition based on the selected production mode and the current delivery goal.
-
-Detailed native PowerPoint construction is owned by ppt-authoring.md.
-
-The CPA generation path may assemble accepted generated page visuals directly when that is part of the chosen final delivery.
-
-For editable reconstruction, retain the generated page as a **temporary bottom-layer visual guide** and rebuild key objects above it. Temporary double text/figures are acceptable during alignment. When the user finishes fine-tuning, remove the guide; then verify that the remaining editable content stands on its own. Do not require the working reconstruction file to be visually clean before the guide is removed.
-
-## 10. Whole-deck QA
-
-Before asking the user for the final review, actually render/open and inspect the whole candidate deck. A successful build, valid file structure, or canonical/prompt QA is not enough.
-
-Check:
-
-- story and page order;
-- terminology consistency;
-- equations and numbers;
-- titles and conclusions;
-- evidence/source correctness;
-- readability and density;
-- image quality and image-to-claim fit;
-- whether each evidence image is large/readable enough to perform its stated role;
-- whether generated illustration has fabricated project-specific apparatus, data, or results;
-- whether decorative content has displaced the main evidence;
-- duplicated/missing slides;
-- broken/cropped content;
-- master/layout consistency;
-- whether every diagram and image explains its intended physical/information relation and directly supports the page takeaway;
-- unintended empty space, font substitutions, formula-rendering defects, overflow, misplaced labels, or inconsistent visual scaling; regular columns, formula boxes, and arrows themselves are legitimate technical-slide grammar;
-- clean native-editable final delivery: the temporary generated-page guide is removed and the editable content remains independently complete (unless the user specifically requests a guide-bearing working draft).
-
-Review explanatory value separately from factual correctness: if a diagram is true but leaves the audience unable to say what it demonstrates or why it is present, repair its visual semantics and emphasis rather than merely decorating it.
-
-Validation scripts must be **non-mutating**. If an artifact needs repair, run a separate explicit build/authoring action, not a validator that silently rewrites files. For a targeted PPTX edit, verify that all non-target pages remain unchanged where feasible (package/XML diff or equivalent structural comparison); a test must not opportunistically patch unrelated pages.
-
-Repairs transition into the appropriate current action:
-
-- content/story fix -> content/evidence review;
-- regenerated page -> CPA regeneration;
-- editable object/layout fix -> editable PPT revision.
-
-## 11. Mandatory user whole-deck review
-
-After internal whole-deck QA, the user must have a chance to review the complete deck as a whole.
-
-Treat this as a real gate, not a courtesy phrase.
-
-If the user requests targeted changes, enter the post-generation revision round below.
-
-After repairs, repeat the relevant QA checks before final delivery.
-
-## 12. Post-generation revision round
-
-Use this phase when a complete candidate deck already exists and the user identifies problems after whole-deck generation/assembly.
-
-Do not restart source intake, visual calibration, deck design, or full-pack generation by default. Start from:
-
-- the current deck/page;
-- the user's latest feedback;
-- authoritative source material;
-- already accepted cross-slide constraints.
-
-### Revision triage
-
-For each affected slide, classify the problem as one or more of:
-
-- scientific/content/logic;
-- asset/evidence;
-- generated visual/layout;
-- editable-object;
-- structural deck change such as add/delete/split/reorder.
-
-Repair the smallest scope that fully resolves the defect and its real dependencies.
-
-### Canonical spec recovery
-
-If the current canonical slide spec still exists and matches the accepted state, update it.
-
-If it is missing, stale, hard to recover, or conflicts with the current page, reconstruct a new canonical spec from the current artifact, latest feedback, authoritative sources, and accepted constraints. Missing old prompts must not block repair.
-
-### Preserve accepted content
-
-Preserve user-accepted scientific content, unaffected correct content, confirmed numbers/equations, asset choices, and visual constraints.
-
-Change only the defect and dependent content. If newly verified evidence overturns an accepted item, the new evidence wins and affected dependent slides must be updated.
-
-The user may explicitly accept a non-blocking defect and continue. Per-slide acceptance is not a mandatory gate.
-
-### Structural changes
-
-If the repair changes slide count or order:
-
-- update numbering/order;
-- re-check adjacent-slide logic;
-- re-check cross-slide terminology, equations, claims, and conclusions;
-- rerun QA on affected neighbors;
-- rerun whole-deck QA before final delivery.
+保留未受影响的科学内容、确认数字、素材和版式；核实的新证据推翻旧项时同步依赖页。用户可明确接受非阻塞缺陷。页数/顺序改变时同步编号/映射，复查邻页逻辑、术语、公式与结论，并在最终交付前重做整套 QA。
