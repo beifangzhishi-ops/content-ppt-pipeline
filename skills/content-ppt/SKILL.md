@@ -1,6 +1,6 @@
 ---
 name: content-ppt
-description: 为科研答辩、工程报告、课程和技术评审等证据密集型演示文稿创建、接续、审查、生成或修订 PowerPoint。支持 ChatGPT + CCM 与 Codex 原生运行时；CPA 是独立的视觉生成后端。
+description: 为科研答辩、工程报告、课程和技术评审等证据密集型演示文稿创建、接续、审查、生成或修订 PowerPoint。支持 ChatGPT + CCM 使用 CPA、Codex 原生运行时使用内置 ImgGen；各页独立输入。
 ---
 
 # Content PPT Pipeline
@@ -11,7 +11,7 @@ description: 为科研答辩、工程报告、课程和技术评审等证据密�
 
 - **ChatGPT + CCM**：正式项目执行入口，CCM 提供持久工作区、文件、工具执行和 Git。
 - **Codex 原生运行时**：并列的正式入口，使用 Codex 自身的工作区与执行能力，无需 CCM。
-- **CPA**：用于页面视觉生成与重生成，是独立后端，不是项目运行时。
+- **视觉生成路由**：ChatGPT + CCM 调用 CPA；Codex 原生运行时只调用内置 `image_gen.imagegen`，不调用 CPA。后端不是项目运行时。
 - **Content PPT Pipeline**：规定编排、证据边界、生成与审核闭环、PowerPoint 施工和交付规则。
 
 当前任务的用户指令优先于工作流默认规则。
@@ -24,11 +24,11 @@ description: 为科研答辩、工程报告、课程和技术评审等证据密�
 4. **每页只有一份当前 canonical 和一份派生 prompt。** 内容变化先改所属权威，再同轮同步 prompt；除非用户要求，不保留 v2/final/revised 分叉。
 5. **模型负责生成—目视检查—返工闭环。** 持续推进至达标或实际阻塞，不要求持久维护三类页面状态集合、逐页进度台账或百分比。中断接续只记录必要的当前任务、产物、未完成动作和阻塞。
 6. **候选产物与 approved-current 分开。** 新输出须实际视觉审核，文件存在不是过审。生成阶段通过不等于可编辑或用户整套终审通过；可可靠下游修复的局部缺陷须记录并在交付前关闭。
-7. **一页 = 一个独立的 fresh CPA HTTP request。** 每次只传该页当前完整 prompt 与该页选定参考图；没有参考图就不传，不携带任何上一页 generation/session/conversation 标识或请求上下文。
-8. **不将生成的演示视觉递归送回 CPA。** 旧生成页、拒绝产物、Pipeline 图示和演示专用派生图默认不能作为 CPA 参考，除非用户明确覆盖。
+7. **一页 = 一次独立生成调用。** ChatGPT + CCM 使用 fresh CPA HTTP request；Codex 使用新的内置 ImgGen 工具调用。重新读取该页 canonical/完整当前 prompt，`prompt` 原文直传，只附该页已查看且合格的参考图；Codex 只用显式 `referenced_image_paths`，禁止 `num_last_images_to_include`。不从历史聊天、上一页或前次生成结果继承输入。
+8. **不将生成的演示视觉递归送回生成后端。** 旧生成页、拒绝产物、Pipeline 图示和演示专用派生图默认不能作为生图参考，除非用户明确覆盖。
 9. **保护证据边界。** 实际项目、实验、装置、测量、结果和现场必须来自可追溯真实来源或真实数据的忠实重建。概念示意和无事实证明职责的通用工程背景允许生成，不能冒充真实记录。
 10. **定量证据确定性重建。** 尽可能从数据/代码重绘，不让生成模型重解释精确坐标、数值、图例、色标、不确定度或曲线身份。
-11. **只有查明来源或指令缺陷才改 canonical/prompt。** 单次 CPA 成图不佳不证明 canonical 有错；运行时失败也不构成科学内容修改理由。
+11. **只有查明来源或指令缺陷才改 canonical/prompt。** 单次生成图不佳不证明 canonical 有错；运行时失败也不构成科学内容修改理由。
 12. **材料核查不能代替成图核查。** 分开执行材料闭合、生成前门禁和实际成图/整套审核；验证工具只读，修复属于明确的施工步骤。
 13. **面向观众、以证据解释问题。** 优先真实且已查看的装置/工程素材；正文避免内部代号与无信息的防御性限定，保留真正影响结论解释的边界。
 14. **遵守既定版式权威与解释职责。** 用户指定的原生样板优先于生成图的原生版式；每个重要图示关系必须可解释，并支持该页问题和结论。具体施工和保护要求见 ppt-authoring。
@@ -44,10 +44,10 @@ description: 为科研答辩、工程报告、课程和技术评审等证据密�
 | 开始、接续、进展 | 从项目文件、Git 和实际产物恢复当前工作；审核依据不明则重新查看 | runtime + workflow |
 | 内容/证据审查 | 核对叙事权威、实验/工况/数据身份、证据角色、数值与统计定义、页面职责、主讲与答疑边界、工作量及跨页一致性 | workflow |
 | 材料审计/闭合 | 审查 canonical、prompt、来源索引、数据、派生图和 QA/构建逻辑，完整复查至一轮无新增实质问题 | workflow + runtime |
-| 素材查看/选择 | 实际查看真实素材，先判证据角色，再判能否生成、重建或必须保留原件 | workflow + cpa-generation |
-| 生成前门禁 | 核对 canonical/prompt、参考资格、独立请求和候选输出位置 | workflow + cpa-generation + runtime |
-| CPA 生成/返工 | 只生成需要生成的页；独立请求、落地候选、逐张实际检查并迭代 | cpa-generation + runtime |
-| 成图审查 | 对照 canonical、prompt、合格参考，查科学/证据/数值/可读性/版式及相邻页一致性 | cpa-generation + workflow + runtime |
+| 素材查看/选择 | 实际查看真实素材，先判证据角色，再判能否生成、重建或必须保留原件 | workflow + visual-generation |
+| 生成前门禁 | 核对 canonical/prompt、参考资格、独立输入和候选输出位置 | workflow + visual-generation + runtime |
+| 视觉生成/返工 | 按宿主固定后端只生成需要的页；独立调用、落地候选、逐张实际检查并迭代 | visual-generation + runtime |
+| 成图审查 | 对照 canonical、prompt、合格参考，查科学/证据/数值/可读性/版式及相邻页一致性 | visual-generation + workflow + runtime |
 | 复用/重建/新增/退休 | 按当前职责、内容、证据兼容性及可确认的当前过审产物决定 | workflow + runtime |
 | 可编辑施工/修订 | 从当前产物、canonical、真实素材和原生对象施工；完整原图置于下一张独立对照页，编辑页独立完整可读 | ppt-authoring + runtime |
 | 整套 QA/终审 | 实际渲染连读，核对叙事、事实、公式、证据、可读性、重复/遗漏、可编辑性和交付边界 | workflow + ppt-authoring |

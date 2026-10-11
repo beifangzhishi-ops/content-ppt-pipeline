@@ -1,23 +1,23 @@
 # Content PPT Pipeline
 
-面向 ChatGPT 和 Codex 的证据驱动、内容优先 PowerPoint 工作流 Skill，适用于科研答辩、工程报告、课程和技术评审。当前版本：**0.8.0**。
+面向 ChatGPT 和 Codex 的证据驱动、内容优先 PowerPoint 工作流 Skill，适用于科研答辩、工程报告、课程和技术评审。当前版本：**0.8.1**。
 
 ## 正式运行入口
 
 - **ChatGPT + CCM**：CCM 提供持久项目工作区、文件、执行和 Git；ChatGPT 负责推理、研究、编排和审核。
 - **Codex 原生运行时**：直接使用 Codex 的原生工作区和工具，与 ChatGPT + CCM 是并列的正式入口。
 - **Content PPT Pipeline**：负责内容叙事、证据边界、生成审核闭环、可编辑施工及交付门禁。
-- **CPA**：按需用于视觉生成/重生成的独立后端，不是项目运行时，不随本插件打包。CCM 也不是本插件的捆绑依赖。
+- **视觉生成**：ChatGPT + CCM 使用独立 CPA 后端；Codex 直接使用内置 `image_gen.imagegen`，无需 CPA。生成后端不是项目运行时，CPA 和 CCM 均不随本插件打包。
 
 ## 生成、检查与返工
 
-模型自行推进 `canonical -> 当前 prompt/合格参考门禁 -> fresh CPA request -> 本地候选 -> 实际看图 -> 通过或返工 -> approved-current`，直至当前任务达标或遇到实际阻塞。
+模型自行推进 `canonical -> 当前 prompt/合格参考门禁 -> 独立生成调用 -> 本地候选 -> 实际看图 -> 通过或返工 -> approved-current`，直至当前任务达标或遇到实际阻塞。
 
-**一页 = 一个独立的 fresh CPA HTTP request。** 每次只传该页完整当前 prompt 和已查看、合格的该页参考；无参考就不传，不继承上一页 generation/session/conversation 标识或请求上下文。可有界并发，但每个请求独立。
+**一页 = 一次独立生成调用。** ChatGPT + CCM 每次发起 fresh CPA HTTP request；Codex 每次直接调用内置 ImgGen。均重新读取该页 canonical 和完整当前 prompt，原文传入 `prompt`，只附该页已查看、合格的明确参考；不得继承聊天历史或上一页生成结果。Codex 仅以 `referenced_image_paths` 显式引用合格图片，禁止 `num_last_images_to_include`。支持时可有界并发，但每次调用独立；后端不可用时不自动切换。
 
 不要求持久维护三类页面状态集合或逐页进度台账。候选和当前过审成品仍分开；文件存在、目录名和旧记录不能证明通过。生成阶段通过不等于可编辑验收或用户整套终审通过。
 
-生成前分清三个提示词角色：必须显示的内容、仅指导构图的视觉职责、不得显示的溯源/施工/核查说明。不能用代码擦除、拼接或像素补丁改造权威 CPA PNG；查明来源/指令缺陷才修改 canonical/prompt，否则独立新请求返工。
+生成前分清三个提示词角色：必须显示的内容、仅指导构图的视觉职责、不得显示的溯源/施工/核查说明。不能用代码擦除、拼接或像素补丁改造权威生成原图；查明来源/指令缺陷才修改 canonical/prompt，否则独立新调用返工。
 
 ## 项目入口与接续
 
@@ -47,7 +47,7 @@
 
 实际项目、实验、装置、测量、模拟结果、现场和已命名事实对象使用真实可追溯来源或真实数据忠实重建，禁止生成写实替身。概念机制和不承担事实证明职责的通用工程背景允许生成，包括写实图；标题/图注不得冒充真实记录。
 
-真实素材优先且必须实际查看。精确坐标、数值、图例、色标、不确定度和曲线身份在数据/代码或真实图层保持，不让 CPA 重解释。
+真实素材优先且必须实际查看。精确坐标、数值、图例、色标、不确定度和曲线身份在数据/代码或真实图层保持，不让生成模型重解释。
 
 每页一个主要问题，标题、主证据与结论一致；重要箭头能解释“来源 -> 关系/动作 -> 目标”。正文面向听众，避免内部代号和无信息的防御性文案，保留必要限定。
 
@@ -63,7 +63,7 @@ QA/validator 只读。局部修改尽可能对照非目标页和相关媒体/关
 
 ## Skill 分层与打包
 
-核心合同与动作路由在 `skills/content-ppt/SKILL.md`。参考文件分别负责运行时（runtime）、业务工作流（workflow）、CPA（cpa-generation）、原生施工（ppt-authoring）和答辩叙事（research-defense）。`references/examples/` 仅在明确选择时使用，不是权威。
+核心合同与动作路由在 `skills/content-ppt/SKILL.md`。参考文件分别负责运行时（runtime）、业务工作流（workflow）、双宿主视觉生成（visual-generation）、原生施工（ppt-authoring）和答辩叙事（research-defense）。`references/examples/` 仅在明确选择时使用，不是权威。
 
 在仓库根目录运行：
 
@@ -71,8 +71,8 @@ QA/validator 只读。局部修改尽可能对照非目标页和相关媒体/关
 .\scripts\build-chatgpt-zip.ps1
 ```
 
-生成 `dist/content-ppt-pipeline-chatgpt-upload-0.8.0.zip`，根目录仅有 `plugin.json` 与 `skills/`，不含源码仓库管理文件、缓存、密钥或供应商配置。
+生成 `dist/content-ppt-pipeline-chatgpt-upload-0.8.1.zip`，根目录仅有 `plugin.json` 与 `skills/`，不含源码仓库管理文件、缓存、密钥或供应商配置。
 
-0.8.0 取消强制页面状态台账，明确最小接续与文件分工，统一独立对照页重建，并补齐原生样板、对象组织、局部保护、公式结构验收和答辩证据密度规则。
+0.8.1 区分 ChatGPT + CCM 的 CPA 与 Codex 内置 ImgGen，统一独立输入及参考资格；保留最小接续、独立对照页和可编辑验收规则。
 
 安装后须在新的宿主会话读取已安装 skill，确认与仓库合同一致；仓库/打包验证不代表已完成安装后的行为验证。

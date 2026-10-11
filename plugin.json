@@ -1,8 +1,8 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "content-ppt-pipeline",
-  "version": "0.8.0",
-  "description": "内容与证据优先的 PowerPoint 工作流，支持 ChatGPT + CCM 和 Codex 原生运行时；模型自行完成生成审核闭环，CPA 提供独立逐页视觉生成。",
+  "version": "0.8.1",
+  "description": "内容与证据优先的 PowerPoint 工作流，支持 ChatGPT + CCM 使用 CPA、Codex 原生运行时使用内置 ImgGen；模型自行完成独立逐页生成审核闭环。",
   "keywords": [
     "powerpoint",
     "presentation",
@@ -18,7 +18,7 @@
       "interface": {
         "displayName": "Content PPT Pipeline",
         "shortDescription": "证据驱动的技术 PPT 工作流",
-        "longDescription": "在 ChatGPT + CCM 或 Codex 原生运行时接续 PowerPoint 项目，维护当前内容权威，通过独立 CPA 请求自行推进生成、检查与返工，无需逐页状态台账；以原生样板施工可编辑页面，完整原图置于下一张独立对照页，并验证公式结构、真实素材、PowerPoint 编辑性及整套交付。",
+        "longDescription": "在 ChatGPT + CCM 或 Codex 原生运行时接续 PowerPoint 项目，维护当前内容权威，分别通过 CPA 独立请求或 Codex 内置 ImgGen 独立调用推进生成、检查与返工，无需逐页状态台账；以原生样板施工可编辑页面，完整原图置于下一张独立对照页，并验证公式结构、真实素材、PowerPoint 编辑性及整套交付。",
         "category": "Productivity",
         "capabilities": [
           "Read",
