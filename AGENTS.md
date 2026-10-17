@@ -2,7 +2,8 @@
 
 ## 权威与产品边界
 
-- `plugin.json`：身份、安装元数据和版本。
+- `plugin.json`：身份、安装元数据、版本及图标资源路径。
+- `assets/icon.png`、`assets/logo.png`：与 `plugin.json` 中 `composerIcon`、`logo` 一一对应的插件图标；构建辅助脚本为 `scripts/build-plugin-icon.py`。
 - `skills/content-ppt/SKILL.md`：短核心合同、运行时/后端合同和动作路由。
 - `references/runtime.md`：宿主、文件职责、接续、产物和 Git。
 - `references/workflow.md`：任务/受众定位、版式选择、材料闭合、讲稿与模拟目标观众、整套生命周期。
@@ -75,9 +76,9 @@ README 管当前稿、任务、下一步、来源/专项入口和必要接续；
 6. 核对独立对照页、样板权威、对象组织、科研原件/比例保护和公式结构验收。
 7. 确认通用讲稿/模拟目标观众在 workflow，research-defense 只补科研答辩专项；整页/局部图参考和原生对照页的适用范围明确，核心合同保持短小。
 8. 用中断恢复、局部表格修订、独立对照页、公式保存重开场景审查条款一致性。
-9. 构建 ChatGPT ZIP，核对根目录只有 plugin.json 和 skills/，当前权威齐全且旧文件不存在。
+9. 构建 ChatGPT ZIP，核对根目录只有 plugin.json、skills/ 和 assets/，清单图标路径有效，当前权威齐全且旧文件不存在。
 10. 核对无秘密/provider 配置跟踪，检查最终 Git 状态，按项目要求提交并通过 gh 推送。
 
 安装后在新的宿主会话读取已安装 skill，核对仓库合同；未执行时明确报告未验证，不把仓库静态检查当作安装后行为验证。
 
-使用 semver。0.9.0 保持双宿主分别使用 CPA 与 Codex 内置 ImgGen，区分整页与局部图独立输入/参考资格，完善视觉审核、原生施工、讲稿与模拟观众。
+使用 semver。0.9.1 保持双宿主分别使用 CPA 与 Codex 内置 ImgGen，区分整页与局部图独立输入/参考资格，完善视觉审核、原生施工、讲稿与模拟观众。

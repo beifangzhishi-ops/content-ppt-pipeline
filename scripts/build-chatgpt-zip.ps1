@@ -9,6 +9,7 @@ Set-Location $repoRoot
 
 $manifestPath = Join-Path $repoRoot "plugin.json"
 $skillRoot = Join-Path $repoRoot "skills"
+$assetRoot = Join-Path $repoRoot "assets"
 
 if (!(Test-Path -LiteralPath $manifestPath)) {
     throw "Missing plugin.json at repository root."
@@ -16,6 +17,12 @@ if (!(Test-Path -LiteralPath $manifestPath)) {
 
 if (!(Test-Path -LiteralPath $skillRoot)) {
     throw "Missing skills/ directory."
+}
+
+foreach ($requiredAsset in @("icon.png", "logo.png")) {
+    if (!(Test-Path -LiteralPath (Join-Path $assetRoot $requiredAsset))) {
+        throw "Missing required plugin artwork: $requiredAsset"
+    }
 }
 
 $manifestPrefix = [System.IO.File]::ReadAllBytes($manifestPath)
@@ -50,7 +57,8 @@ if (Test-Path -LiteralPath $zipPath) {
 
 $packagePaths = @(
     (Join-Path $repoRoot "plugin.json"),
-    (Join-Path $repoRoot "skills")
+    (Join-Path $repoRoot "skills"),
+    $assetRoot
 )
 Compress-Archive -Path $packagePaths -DestinationPath $zipPath -CompressionLevel Optimal
 
@@ -65,6 +73,12 @@ if ($entries -notcontains "plugin.json") {
 
 if (-not ($entries | Where-Object { $_ -match '^skills/[^/]+/SKILL\.md$' })) {
     throw "Generated ZIP does not contain skills/<name>/SKILL.md."
+}
+
+foreach ($requiredAsset in @("assets/icon.png", "assets/logo.png")) {
+    if ($entries -notcontains $requiredAsset) {
+        throw "Generated ZIP does not contain $requiredAsset."
+    }
 }
 
 $forbidden = @(

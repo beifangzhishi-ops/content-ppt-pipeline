@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "content-ppt-pipeline",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "description": "内容与证据优先的 PowerPoint 工作流，支持 ChatGPT + CCM 使用 CPA、Codex 使用内置 ImgGen；整页和局部图按需生成、实际视觉审核、可编辑制作、讲稿及观众模拟。",
   "keywords": [
     "powerpoint",
@@ -17,6 +17,9 @@
     "com.openai": {
       "interface": {
         "displayName": "Content PPT Pipeline",
+        "brandColor": "#233E7C",
+        "composerIcon": "./assets/icon.png",
+        "logo": "./assets/logo.png",
         "shortDescription": "证据驱动的技术 PPT 工作流",
         "longDescription": "在 ChatGPT + CCM 或 Codex 原生运行时创建和接续 PowerPoint 项目，规划受众与版式，保护科学证据；新页面默认走独立 ImgGen 视觉设计，局部图可按需要引用原图去字或调整；按需使用原生 PowerPoint 对象和已认可样板，整页可编辑重建保留独立原图对照页；实际审核视觉与公式结构，并支持逐页讲稿、模拟目标观众和修订反馈。",
         "category": "Productivity",

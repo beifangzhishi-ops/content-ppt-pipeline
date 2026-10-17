@@ -1,6 +1,10 @@
 # Content PPT Pipeline
 
-面向 ChatGPT 和 Codex 的证据驱动、内容优先 PowerPoint 工作流 Skill，适用于科研答辩、工程报告、课程和技术评审。当前版本：**0.9.0**。
+## 插件图标
+
+插件提供两种尺寸的配套 PNG 图标：`assets/icon.png` 用于 `composerIcon`（256 × 256），`assets/logo.png` 用于 `logo`（1024 × 1024）。`plugin.json` 通过 `extensions.com.openai.interface` 引用这两个资源。安装 ZIP 包含 `plugin.json`、`skills/` 和 `assets/`；`scripts/build-plugin-icon.py` 用于按需重新生成图标资源，使用 Pillow，仅作为构建辅助，不随安装包分发。
+
+面向 ChatGPT 和 Codex 的证据驱动、内容优先 PowerPoint 工作流 Skill，适用于科研答辩、工程报告、课程和技术评审。当前版本：**0.9.1**。
 
 ## 正式运行入口
 
@@ -73,8 +77,8 @@ QA/validator 只读。局部修改尽可能对照非目标页和相关媒体/关
 .\scripts\build-chatgpt-zip.ps1
 ```
 
-生成 `dist/content-ppt-pipeline-chatgpt-upload-0.9.0.zip`，根目录仅有 `plugin.json` 与 `skills/`，不含源码仓库管理文件、缓存、密钥或供应商配置。
+生成 `dist/content-ppt-pipeline-chatgpt-upload-0.9.1.zip`，根目录仅有 `plugin.json`、`skills/` 与 `assets/`，不含源码仓库管理文件、缓存、密钥或供应商配置。
 
-0.9.0 保持 ChatGPT + CCM 的 CPA 与 Codex 内置 ImgGen 双宿主，区分整页和局部图输入/参考规则，明确版式与原生制作分流、局部去字/几何分工、实际视觉 QA，以及讲稿与模拟目标观众。
+0.9.1 保持 ChatGPT + CCM 的 CPA 与 Codex 内置 ImgGen 双宿主，区分整页和局部图输入/参考规则，明确版式与原生制作分流、局部去字/几何分工、实际视觉 QA，以及讲稿与模拟目标观众。
 
 安装后须在新的宿主会话读取已安装 skill，确认与仓库合同一致；仓库/打包验证不代表已完成安装后的行为验证。
