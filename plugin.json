@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "content-ppt-pipeline",
-  "version": "0.10.0",
+  "version": "1.0.0",
   "description": "内容与证据优先的 PowerPoint 工作流：用户设计口头信息、Agent 设计演讲引导，整套版式与可编辑母版先确认，原生制作优先、ImgGen 按需；支持 ChatGPT + CCM 与 Codex 双宿主。",
   "keywords": [
     "powerpoint",

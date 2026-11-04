@@ -4,7 +4,7 @@
 
 插件提供两种尺寸的配套 PNG 图标：`assets/icon.png` 用于 `composerIcon`（256 × 256），`assets/logo.png` 用于 `logo`（1024 × 1024）。`plugin.json` 通过 `extensions.com.openai.interface` 引用这两个资源。安装 ZIP 包含 `plugin.json`、`skills/` 和 `assets/`；`scripts/build-plugin-icon.py` 用于按需重新生成图标资源，使用 Pillow，仅作为构建辅助，不随安装包分发。
 
-面向 ChatGPT 和 Codex 的证据驱动、内容优先 PowerPoint 工作流 Skill，适用于科研答辩、工程报告、课程和技术评审。当前版本：**0.10.0**。
+面向 ChatGPT 和 Codex 的证据驱动、内容优先 PowerPoint 工作流 Skill，适用于科研答辩、工程报告、课程和技术评审。当前版本：**1.0.0**。
 
 ## 正式运行入口
 
@@ -94,8 +94,8 @@ QA/validator 只读。局部修改尽可能对照非目标页和相关媒体/关
 .\scripts\build-chatgpt-zip.ps1
 ```
 
-生成 `dist/content-ppt-pipeline-chatgpt-upload-0.10.0.zip`，根目录仅有 `plugin.json`、`skills/` 与 `assets/`，不含源码仓库管理文件、缓存、密钥或供应商配置。
+生成 `dist/content-ppt-pipeline-chatgpt-upload-1.0.0.zip`，根目录仅有 `plugin.json`、`skills/` 与 `assets/`，不含源码仓库管理文件、缓存、密钥或供应商配置。
 
-0.10.0 当前流程为：用户主导口头信息，Agent 规划演讲引导；整套版式、可编辑 PowerPoint 母版和全类型示例页先交用户确认；原生 PPT 制作优先，ImgGen 依实际视觉问题按需启用。双宿主独立输入、真实证据保护、整页对照页、可编辑 QA 及模拟观众规则保持有效。
+1.0.0 正式版流程为：用户主导口头信息，Agent 规划演讲引导；整套版式、可编辑 PowerPoint 母版和全类型示例页先交用户确认；原生 PPT 制作优先，ImgGen 依实际视觉问题按需启用。双宿主独立输入、真实证据保护、整页对照页、可编辑 QA 及模拟观众规则保持有效。
 
 安装后须在新的宿主会话读取已安装 skill，确认与仓库合同一致；仓库/打包验证不代表已完成安装后的行为验证。
